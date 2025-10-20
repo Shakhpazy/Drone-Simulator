@@ -17,12 +17,35 @@ public class Drone implements  DroneInterface {
     static int totalDrones = 0;
 
     /**
-     * This is the Constructor for the Drone Class, that
-     * sets the current DroneID
+     * This is the constructor for the Drone Class that
+     * sets custom values for the drones attributes.
+     *
+     * @param theAltitude float of the altitude
+     * @param theLongitude float of the longitude
+     * @param theLatitude float of the latitude
+     * @param theVelocity float of the velocity
+     * @param theBatterLevel int of the battery level 0-100
      */
-    public Drone() {
+    public Drone(float theAltitude, float theLongitude, float theLatitude, float theVelocity, int theBatterLevel) {
+        //implement error handling for  these values passed later
+        myAltitude = theAltitude;
+        myLongitude = theLongitude;
+        myLatitude = theLatitude;
+        myVelocity = theVelocity;
+        myBatterLevel = theBatterLevel;
+
         totalDrones += 1;
         myID = totalDrones;
+    }
+
+
+    /**
+     * This is the basic constructor for the Drone Class,
+     * that sets default values.
+     */
+    public Drone() {
+        //Thi
+        this(0,0,0,0,100);
     }
 
     //These are all the Getters
