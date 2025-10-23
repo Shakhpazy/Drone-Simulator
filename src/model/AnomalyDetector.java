@@ -38,6 +38,11 @@ public class AnomalyDetector {
     private final float VELOCITY_MAX;
 
     /**
+     * A float to represent the maximum orthogonal velocity of a drone.
+     */
+    private final float ORTHOGONAL_VELOCITY_MAX;
+
+    /**
      * A float to represent the maximum battery drain of a drone in a cycle.
      */
     private final int BATTERY_DRAIN_RATE_MAX;
@@ -90,7 +95,7 @@ public class AnomalyDetector {
             ret.append("Out of Bounds");
         }
 
-        // Possible Future Implementations both require "normal" flight data
+        // Possible Future Implementations both require "normal" flight data collection
 
         // Change over time and Z-score for pattern recognition
         // telemetryValueChange = curr - prev
@@ -109,21 +114,18 @@ public class AnomalyDetector {
         // Outlier detection with Weka DBSCAN or Isolation Forest
 
         // Check intended velocity
-        if (myCurrTelemetry.getVelocity() > VELOCITY_MAX){
-            if (Math.abs(myCurrTelemetry.getAltitude() - myPrevTelemetry.getAltitude()) > VELOCITY_MAX){
-                if (!ret.isEmpty()) ret.append(" Due to ");
-                ret.append("Dangerous Change in Altitude");
-                return ret.toString();
-            } else if (Math.abs(myCurrTelemetry.getLongitude() - myPrevTelemetry.getLongitude()) > VELOCITY_MAX){
-                if (!ret.isEmpty()) ret.append(" Due to ");
-                ret.append("GPS Spoofing");
-                return ret.toString();
-            } else if (Math.abs(myCurrTelemetry.getLatitude() - myPrevTelemetry.getLatitude()) > VELOCITY_MAX){
-                if (!ret.isEmpty()) ret.append(" Due to ");
-                ret.append("GPS Spoofing");
-                return ret.toString();
-            }
+        if (Math.abs(myCurrTelemetry.getAltitude() - myPrevTelemetry.getAltitude()) > ORTHOGONAL_VELOCITY_MAX){
+            if (!ret.isEmpty()) ret.append(" Due to ");
+            ret.append("Dangerous Change in Altitude");
+            return ret.toString();
+        } else if (Math.abs(myCurrTelemetry.getLongitude() - myPrevTelemetry.getLongitude()) >
+                ORTHOGONAL_VELOCITY_MAX ||
+                Math.abs(myCurrTelemetry.getLatitude() - myPrevTelemetry.getLatitude()) > ORTHOGONAL_VELOCITY_MAX){
+            if (!ret.isEmpty()) ret.append(" Due to ");
+            ret.append("GPS Spoofing");
+            return ret.toString();
         }
+
         if (ret.isEmpty()) ret.append("N/A");
 
         return ret.toString();
@@ -150,7 +152,7 @@ public class AnomalyDetector {
     private String CreateDescSimple(String theAnomalyType){
         StringBuilder sb = new StringBuilder();
         sb.append("Anomaly Detected! \n Drone ID: ");
-        sb.append(myCurrTelemetry.getDroneID);
+        sb.append(myCurrTelemetry.getMyDroneId());
         sb.append("\nAnomaly Type: ");
         sb.append(theAnomalyType);
         sb.append("\nTimestamp: ");
@@ -165,7 +167,7 @@ public class AnomalyDetector {
      */
     private String CreateDescDetailed(String theAnomalyType){
         StringBuilder sb = new StringBuilder();
-        sb.append("Drone Number: ").append(myCurrTelemetry.getDroneID);
+        sb.append("Drone Number: ").append(myCurrTelemetry.getMyDroneId());
         sb.append("has experienced an anomaly at time: ").append(myCurrTelemetry.getMyTimestamp());
         sb.append("\nDetails:\n");
         sb.append(theAnomalyType).append(" anomaly detected\n");
@@ -211,7 +213,7 @@ public class AnomalyDetector {
                 myAnomalyID,
                 myCurrTelemetry.getMyTimestamp(),
                 theAnomalyType,
-                myCurrTelemetry.getDroneID,
+                myCurrTelemetry.getMyDroneId(),
                 simpleReport,
                 detailedReport);
     }
