@@ -18,6 +18,31 @@ public class AnomalyDetector {
     private Telemetry myPrevTelemetry;
 
     /**
+     * A float to represent the x-axis size of the drone flight area.
+     */
+    private final float LATITUDE_MAX;
+
+    /**
+     * A float to represent the y-axis size of the drone flight area.
+     */
+    private final float LONGITUDE_MAX;
+
+    /**
+     * A float to represent the z-axis size of the drone flight area.
+     */
+    private final float ALTITUDE_MAX;
+
+    /**
+     * A float to represent the maximum velocity of a drone.
+     */
+    private final float VELOCITY_MAX;
+
+    /**
+     * A float to represent the maximum battery drain of a drone in a cycle.
+     */
+    private final int BATTERY_DRAIN_RATE_MAX;
+
+    /**
      * A PropertyChangeSupport object used for notifying GUI of an anomaly found
      */
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
@@ -33,16 +58,17 @@ public class AnomalyDetector {
         myPrevTelemetry = thePrevTelemetry;
 
         /* Check for spoofing or positional anomaly */
-        String positionalErr = PositionAnomaly();
-        if (positionalErr != null){
-            AnomalyReport ar = CreateAnomalyReport(positionalErr);
+        String errorMessage = PositionAnomaly();
+        if (!errorMessage.equals("N/A")){
+            AnomalyReport ar = CreateAnomalyReport(errorMessage);
             pcs.firePropertyChange("Anomaly Detected", null, ar);
             return ar;
         }
 
         /* Check for battery anomaly */
-        if (PowerAnomaly()){
-            AnomalyReport ar = CreateAnomalyReport("Battery Failure");
+        errorMessage = PowerAnomaly();
+        if (errorMessage != null){
+            AnomalyReport ar = CreateAnomalyReport(errorMessage);
             pcs.firePropertyChange("Anomaly Detected", null, ar);
             return ar;
         }
@@ -55,31 +81,65 @@ public class AnomalyDetector {
      * @return  Returns a String anomaly description.
      */
     private String PositionAnomaly(){
-        String ret = null;
+        StringBuilder ret = new StringBuilder();
+
+        // Check in bounds allows for velocity check to diagnose anomaly cause
+        if (myCurrTelemetry.getLatitude() < 0 || myCurrTelemetry.getLatitude() > LONGITUDE_MAX ||
+        myCurrTelemetry.getLongitude() < 0 || myCurrTelemetry.getLongitude() > LATITUDE_MAX ||
+        myCurrTelemetry.getAltitude() < 0 || myCurrTelemetry.getAltitude() > ALTITUDE_MAX){
+            ret.append("Out of Bounds");
+        }
+
+        // Possible Future Implementations both require "normal" flight data
+
+        // Change over time and Z-score for pattern recognition
+        // telemetryValueChange = curr - prev
+        // timeElapsed = curr - prev THIS SHOULD BE CONSTANT
+        // rateOfChange = telemetryValueChange / timeElapsed
+        // if (Math.abs(rateOfChange) > MAX
+
+        // Statistical Baselines mean and standard deviation
+        // BatteryDrainRate VelocityFluctuation
+        // zScore = (dataPoint - mean) / standard deviation
+        // if (Math.abs(z_score) > 3)
+
+        //----------------Or----------------
+
+        // Future implementations could also use machine learning
+        // Outlier detection with Weka DBSCAN or Isolation Forest
 
         // Check intended velocity
-        // int velIntended = math.pow((math.pow(myTelem.insX, 2) +
-        // math.pow(myTelem.insY, 2) + math.pow(myTelem.insZ, 2)), .5)
+        if (myCurrTelemetry.getVelocity() > VELOCITY_MAX){
+            if (Math.abs(myCurrTelemetry.getAltitude() - myPrevTelemetry.getAltitude()) > VELOCITY_MAX){
+                if (!ret.isEmpty()) ret.append(" Due to ");
+                ret.append("Dangerous Change in Altitude");
+                return ret.toString();
+            } else if (Math.abs(myCurrTelemetry.getLongitude() - myPrevTelemetry.getLongitude()) > VELOCITY_MAX){
+                if (!ret.isEmpty()) ret.append(" Due to ");
+                ret.append("GPS Spoofing");
+                return ret.toString();
+            } else if (Math.abs(myCurrTelemetry.getLatitude() - myPrevTelemetry.getLatitude()) > VELOCITY_MAX){
+                if (!ret.isEmpty()) ret.append(" Due to ");
+                ret.append("GPS Spoofing");
+                return ret.toString();
+            }
+        }
+        if (ret.isEmpty()) ret.append("N/A");
 
-        // Check actual velocity
-        // velIntended == myCurrTelem.vel
-        // verify against prev and curr telem
-        // If not equal than allowed go forward with testing to narrow the possible error
-
-        // Checks return early once error found
-        // Check altitude, most common case
-        // Check x
-        // Check y
-
-        return ret;
+        return ret.toString();
     }
 
     /**
      * A private method to hold the power anomaly detection logic.
      * @return  Returns a boolean representing whether the battery level is 0.
      */
-    private boolean PowerAnomaly(){
-        return myCurrTelemetry.getBatteryLevel() <= 0;
+    private String PowerAnomaly(){
+        if (myPrevTelemetry.getBatteryLevel() - myCurrTelemetry.getBatteryLevel() < BATTERY_DRAIN_RATE_MAX) {
+            return "Battery Drain Failure";
+        } else if (myCurrTelemetry.getBatteryLevel() <= 0){
+            return "Battery Failure";
+        }
+        return null;
     }
 
     /**
@@ -105,7 +165,7 @@ public class AnomalyDetector {
      */
     private String CreateDescDetailed(String theAnomalyType){
         StringBuilder sb = new StringBuilder();
-        sb.append("Drone Number: ").append(myCurrTelemetry.droneID);
+        sb.append("Drone Number: ").append(myCurrTelemetry.getDroneID);
         sb.append("has experienced an anomaly at time: ").append(myCurrTelemetry.getMyTimestamp());
         sb.append("\nDetails:\n");
         sb.append(theAnomalyType).append(" anomaly detected\n");
@@ -128,9 +188,10 @@ public class AnomalyDetector {
 
         //Attempted Telemetry instruction
         sb.append("\nAttempted Instructions: \n");
-        sb.append("x: ").append(myCurrTelemetry.insX);
-        sb.append(" y: ").append(myCurrTelemetry.insY);
-        sb.append(" z: ").append(myCurrTelemetry.insZ).append("\n");
+        sb.append("x: ").append(String.format("%+f", myCurrTelemetry.getLatitude() - myPrevTelemetry.getLatitude()));
+        sb.append(" y: ").append(String.format("%+f", myCurrTelemetry.getLongitude() - myPrevTelemetry.getLongitude()));
+        sb.append(" z: ").append(String.format("%+f", myCurrTelemetry.getAltitude() - myPrevTelemetry.getAltitude()));
+        sb.append("\n");
 
         return sb.toString();
     }
@@ -150,7 +211,7 @@ public class AnomalyDetector {
                 myAnomalyID,
                 myCurrTelemetry.getMyTimestamp(),
                 theAnomalyType,
-                myCurrTelemetry.droneID,
+                myCurrTelemetry.getDroneID,
                 simpleReport,
                 detailedReport);
     }
