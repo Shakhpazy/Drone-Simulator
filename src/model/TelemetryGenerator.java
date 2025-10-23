@@ -7,12 +7,13 @@ public class TelemetryGenerator {
 
     ArrayList<DroneInterface> myDrones;
 
-    Telemetry myPreviousTelemetry;
+    Telemetry myBeforeMoveTelemetry;
 
     private final Random myRandom = new Random();
 
     private final int RANDOM_PERCENT = 15; //Should be set from 0-100
 
+    private final AnomalyDetector myAnomlyDetector = new AnomalyDetector();
 
     public TelemetryGenerator(ArrayList<DroneInterface> theDrones) {
         myDrones = theDrones;
@@ -28,8 +29,7 @@ public class TelemetryGenerator {
      */
     public void processAllDrones() {
         for (DroneInterface drone : myDrones) {
-            myPreviousTelemetry = new Telemetry(drone.getId(), drone.getAltitude(), drone.getLongitude(),
-                    drone.getLatitude(), drone.getVelocity(), drone.getBatteryLevel(), drone.getOrientation());
+            myBeforeMoveTelemetry = createTelemetry(drone);
 
             if (!drone.isAlive()) {
                 continue;
@@ -50,9 +50,9 @@ public class TelemetryGenerator {
     }
 
     public void getMove(DroneInterface theDrone) {
-        float latitude = myPreviousTelemetry.getLatitude();
-        float longitude = myPreviousTelemetry.getLongitude();
-        float altitude = myPreviousTelemetry.getAltitude();
+        float latitude = myBeforeMoveTelemetry.getLatitude();
+        float longitude = myBeforeMoveTelemetry.getLongitude();
+        float altitude = myBeforeMoveTelemetry.getAltitude();
 
         RoutePoint nextPoint = theDrone.getNextPoint();
 
@@ -78,6 +78,12 @@ public class TelemetryGenerator {
         //now we need to update the drone state
         theDrone.updateDrone(longitude, latitude, altitude, 1);
         //after updating we can check if there is an anomaly
+        myAnomlyDetector.Detect(createTelemetry(theDrone), myBeforeMoveTelemetry);
+    }
+
+    private Telemetry createTelemetry(DroneInterface theDrone) {
+        return new Telemetry(theDrone.getId(), theDrone.getAltitude(), theDrone.getLongitude(), theDrone.getLatitude(),
+                theDrone.getVelocity(), theDrone.getBatteryLevel(), theDrone.getOrientation());
     }
 
 }

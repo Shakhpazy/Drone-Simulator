@@ -33,7 +33,7 @@ public class Telemetry {
      * @param theVelocity
      * @param theBatterLevel
      */
-    public Telemetry(int theDroneId, float theAltitude, float theLongitude, float theLatitude, float theVelocity, int theBatterLevel, Orientation theOrientation) {
+    public Telemetry(int theDroneId, float theLongitude, float theLatitude,  float theAltitude, float theVelocity, int theBatterLevel, Orientation theOrientation) {
         //need to implement error handling later
         myDroneId = theDroneId;
         myAltitude = theAltitude;
