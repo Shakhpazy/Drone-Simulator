@@ -22,6 +22,8 @@ public class Drone implements  DroneInterface {
 
     ArrayList<RoutePoint> myRoute;
 
+    private int nextPoint = 0;
+
     /**
      * This is the constructor for the Drone Class that
      * sets custom values for the drones attributes.
@@ -42,7 +44,7 @@ public class Drone implements  DroneInterface {
         myBatterLevel = theBatterLevel;
         myOrientation = theOrientation;
         myRoute = theRoute;
-
+        nextPoint += 1;
         totalDrones += 1;
         myID = totalDrones;
     }
@@ -76,11 +78,15 @@ public class Drone implements  DroneInterface {
         return myOrientation;
     }
 
+    public RoutePoint getNextPoint() {
+        return myRoute.get(nextPoint % myRoute.size());
+    }
+
     /**
      * Gets the total number of drones
      * @return Int representing the total number of drones.
      */
-    public int getTotalDrones() {
+    public static int getTotalDrones() {
         return totalDrones;
     }
 
@@ -107,6 +113,10 @@ public class Drone implements  DroneInterface {
 
     public void setOrientation(Orientation theOrientation) {
         myOrientation = theOrientation;
+    }
+
+    public void setNextRoute() {
+        nextPoint = (nextPoint + 1) % myRoute.size();
     }
 
 }
