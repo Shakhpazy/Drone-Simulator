@@ -1,5 +1,7 @@
 package model;
 
+import java.util.ArrayList;
+
 public class Drone implements  DroneInterface {
 
     private float myAltitude;
@@ -10,7 +12,7 @@ public class Drone implements  DroneInterface {
 
     private float myVelocity;
 
-    private int myBatterLevel;
+    private int myBatteryLevel;
 
     private Orientation myOrientation;
 
@@ -18,36 +20,33 @@ public class Drone implements  DroneInterface {
 
     static int totalDrones = 0;
 
+    ArrayList<RoutePoint> myRoute;
+
+    private int nextPoint = 0;
+
     /**
      * This is the constructor for the Drone Class that
      * sets custom values for the drones attributes.
      *
-     * @param theAltitude float of the altitude
-     * @param theLongitude float of the longitude
-     * @param theLatitude float of the latitude
      * @param theVelocity float of the velocity
      * @param theBatterLevel int of the battery level 0-100
      */
-    public Drone(float theAltitude, float theLongitude, float theLatitude, float theVelocity, int theBatterLevel, Orientation theOrientation) {
+    public Drone(float theVelocity, int theBatterLevel, Orientation theOrientation, ArrayList<RoutePoint> theRoute) {
         //implement error handling for  these values passed later
-        myAltitude = theAltitude;
-        myLongitude = theLongitude;
-        myLatitude = theLatitude;
+        if (theRoute.isEmpty()) {
+            throw new IllegalArgumentException("No route has been set for a drone");
+        }
+        RoutePoint start = theRoute.getFirst();
+        myLongitude = start.getLongitude();
+        myLatitude = start.getLatitude();
+        myAltitude = start.getAltitude();
         myVelocity = theVelocity;
-        myBatterLevel = theBatterLevel;
+        myBatteryLevel = theBatterLevel;
         myOrientation = theOrientation;
-
+        myRoute = theRoute;
+        nextPoint += 1;
         totalDrones += 1;
         myID = totalDrones;
-    }
-
-
-    /**
-     * This is the basic constructor for the Drone Class,
-     * that sets default values.
-     */
-    public Drone() {
-        this(0,0,0,0,100, Orientation.NORTH);
     }
 
     //These are all the Getters
@@ -68,7 +67,7 @@ public class Drone implements  DroneInterface {
     }
 
     public int getBatteryLevel() {
-        return myBatterLevel;
+        return myBatteryLevel;
     }
 
     public float getVelocity() {
@@ -79,11 +78,15 @@ public class Drone implements  DroneInterface {
         return myOrientation;
     }
 
+    public RoutePoint getNextPoint() {
+        return myRoute.get(nextPoint % myRoute.size());
+    }
+
     /**
      * Gets the total number of drones
      * @return Int representing the total number of drones.
      */
-    public int getTotalDrones() {
+    public static int getTotalDrones() {
         return totalDrones;
     }
 
@@ -101,7 +104,7 @@ public class Drone implements  DroneInterface {
     }
 
     public void setBatteryLevel(int theBatteryLevel) {
-        myBatterLevel = theBatteryLevel;
+        myBatteryLevel = theBatteryLevel;
     }
 
     public void setVelocity(float theVelocity) {
@@ -110,6 +113,21 @@ public class Drone implements  DroneInterface {
 
     public void setOrientation(Orientation theOrientation) {
         myOrientation = theOrientation;
+    }
+
+    public void setNextRoute() {
+        nextPoint = (nextPoint + 1) % myRoute.size();
+    }
+
+    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained) {
+        setLongitude(theLongitude);
+        setLatitude(theLatitude);
+        setAltitude(theAltitude);
+        setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, myBatteryLevel));
+    }
+
+    public boolean isAlive() {
+        return myBatteryLevel > 0;
     }
 
 }

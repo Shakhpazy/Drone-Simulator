@@ -64,6 +64,20 @@ public interface DroneInterface {
     Orientation getOrientation();
 
     /**
+     * Gets the nextPoint the Drone needs to go
+     *
+     * @return RoutePoint
+     */
+    RoutePoint getNextPoint();
+
+    /**
+     * checks if the drone isAlive
+     *
+     * @return true if Alive else False
+     */
+    boolean isAlive();
+
+    /**
      * Sets the altitude of the drone.
      *
      * @param theAltitude the altitude in meters
@@ -104,6 +118,16 @@ public interface DroneInterface {
      * @param theOrientation the Orientation ENUM
      */
     void setOrientation(Orientation theOrientation);
+
+    /**
+     * Sets the nextRoute the drone must go to
+     */
+    void setNextRoute();
+
+    /**
+     *
+     */
+    void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained);
 
     /**
      * Prints the current Drone in a neat fashion
