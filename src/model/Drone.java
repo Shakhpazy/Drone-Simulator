@@ -1,5 +1,7 @@
 package model;
 
+import java.util.ArrayList;
+
 public class Drone implements  DroneInterface {
 
     private float myAltitude;
@@ -18,36 +20,31 @@ public class Drone implements  DroneInterface {
 
     static int totalDrones = 0;
 
+    ArrayList<RoutePoint> myRoute;
+
     /**
      * This is the constructor for the Drone Class that
      * sets custom values for the drones attributes.
      *
-     * @param theAltitude float of the altitude
-     * @param theLongitude float of the longitude
-     * @param theLatitude float of the latitude
      * @param theVelocity float of the velocity
      * @param theBatterLevel int of the battery level 0-100
      */
-    public Drone(float theAltitude, float theLongitude, float theLatitude, float theVelocity, int theBatterLevel, Orientation theOrientation) {
+    public Drone(float theVelocity, int theBatterLevel, Orientation theOrientation, ArrayList<RoutePoint> theRoute) {
         //implement error handling for  these values passed later
-        myAltitude = theAltitude;
-        myLongitude = theLongitude;
-        myLatitude = theLatitude;
+        if (theRoute.isEmpty()) {
+            throw new IllegalArgumentException("No route has been set for a drone");
+        }
+        RoutePoint start = theRoute.getFirst();
+        myLongitude = start.getLongitude();
+        myLatitude = start.getLatitude();
+        myAltitude = start.getAltitude();
         myVelocity = theVelocity;
         myBatterLevel = theBatterLevel;
         myOrientation = theOrientation;
+        myRoute = theRoute;
 
         totalDrones += 1;
         myID = totalDrones;
-    }
-
-
-    /**
-     * This is the basic constructor for the Drone Class,
-     * that sets default values.
-     */
-    public Drone() {
-        this(0,0,0,0,100, Orientation.NORTH);
     }
 
     //These are all the Getters
