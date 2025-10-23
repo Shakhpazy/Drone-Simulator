@@ -12,6 +12,8 @@ public class Drone implements  DroneInterface {
 
     private int myBatterLevel;
 
+    private Orientation myOrientation;
+
     private final int myID;
 
     static int totalDrones = 0;
@@ -26,13 +28,14 @@ public class Drone implements  DroneInterface {
      * @param theVelocity float of the velocity
      * @param theBatterLevel int of the battery level 0-100
      */
-    public Drone(float theAltitude, float theLongitude, float theLatitude, float theVelocity, int theBatterLevel) {
+    public Drone(float theAltitude, float theLongitude, float theLatitude, float theVelocity, int theBatterLevel, Orientation theOrientation) {
         //implement error handling for  these values passed later
         myAltitude = theAltitude;
         myLongitude = theLongitude;
         myLatitude = theLatitude;
         myVelocity = theVelocity;
         myBatterLevel = theBatterLevel;
+        myOrientation = theOrientation;
 
         totalDrones += 1;
         myID = totalDrones;
@@ -44,8 +47,7 @@ public class Drone implements  DroneInterface {
      * that sets default values.
      */
     public Drone() {
-        //Thi
-        this(0,0,0,0,100);
+        this(0,0,0,0,100, Orientation.NORTH);
     }
 
     //These are all the Getters
@@ -71,6 +73,10 @@ public class Drone implements  DroneInterface {
 
     public float getVelocity() {
         return myVelocity;
+    }
+
+    public Orientation getOrientation() {
+        return myOrientation;
     }
 
     /**
@@ -100,6 +106,10 @@ public class Drone implements  DroneInterface {
 
     public void setVelocity(float theVelocity) {
         myVelocity = theVelocity;
+    }
+
+    public void setOrientation(Orientation theOrientation) {
+        myOrientation = theOrientation;
     }
 
 }

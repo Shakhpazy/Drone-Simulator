@@ -57,6 +57,13 @@ public interface DroneInterface {
     int getBatteryLevel();
 
     /**
+     * Gets the current orientation of the Drone
+     *
+     * @return Enum Type NORTH,EAST,SOUTH,WEST
+     */
+    Orientation getOrientation();
+
+    /**
      * Sets the altitude of the drone.
      *
      * @param theAltitude the altitude in meters
@@ -90,6 +97,13 @@ public interface DroneInterface {
      * @param theBatteryLevel the battery level as a percentage (0–100)
      */
     void setBatteryLevel(int theBatteryLevel);
+
+    /**
+     * Sets the orientation of the drone
+     *
+     * @param theOrientation the Orientation ENUM
+     */
+    void setOrientation(Orientation theOrientation);
 
     /**
      * Prints the current Drone in a neat fashion
