@@ -96,22 +96,37 @@ public class MonitorDashboard extends JFrame {
         bar.setVisible(true);
     }
 
+    /**
+     * Saves the anomaly reports from the database as a .csv file.
+     */
     private void saveAsCSV() {
         System.out.println("eventually, this will save as .csv");
     }
 
+    /**
+     * Saves the anomaly reports from the database as a .pdf file.
+     */
     private void saveAsPDF() {
         System.out.println("eventually, this will save as .pdf");
     }
 
+    /**
+     * Opens a window that instructs users on how to navigate this app.
+     */
     private void openInstructions() {
         System.out.println("eventually, this will open instructions");
     }
 
+    /**
+     * Opens a window to view and query the anomaly report database.
+     */
     private void openDatabase() {
         System.out.println("eventually, this will open database");
     }
 
+    /**
+     * Adds the organizational panels to the window.
+     */
     private void addPanels() {
         add(MAP_PANEL, BorderLayout.CENTER);
         add(LOG_PANEL, BorderLayout.EAST);

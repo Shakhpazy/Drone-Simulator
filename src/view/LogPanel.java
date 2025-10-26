@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.UUID; // temporary
+import java.util.UUID; // temporary for sample data
 
 /**
  * This class represents the right-hand-side of the GUI which
@@ -98,8 +98,15 @@ public class LogPanel extends JPanel {
          */
         private static final Dimension SIZE = new Dimension(165, 100);
 
+        /**
+         * This constant keeps track of all instances of LogEntry.
+         */
         private static final ArrayList<LogEntry> ENTRIES = new ArrayList<>();
 
+        /**
+         * This static field keeps track of which instance is currently
+         * selected (last clicked on).
+         */
         private static LogEntry selected = null;
 
         /**
@@ -112,6 +119,9 @@ public class LogPanel extends JPanel {
             init();
             ENTRIES.add(this);
             setText(theReport.simpleReport());
+
+            // Adds mouse listener for selecting a log
+            // in order to view the detailed description.
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(final MouseEvent theEvent) {
@@ -134,7 +144,7 @@ public class LogPanel extends JPanel {
             setBackground(Color.LIGHT_GRAY);
             setBorder(BorderFactory.createLineBorder(Color.BLACK));
             setAlignmentX(LEFT_ALIGNMENT);
-            setCaretColor(new Color(0, 0, 0, 0));
+            setCaretColor(new Color(0, 0, 0, 0)); // invisible
         }
     }
 }
