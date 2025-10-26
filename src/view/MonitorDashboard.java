@@ -15,25 +15,30 @@ public class MonitorDashboard extends JFrame {
     private static final Dimension SIZE = new Dimension(1100, 700);
 
     /** This constant contains a reference to the map panel. */
-    private final MapPanel MAP_PANEL;
+    private static final MapPanel MAP_PANEL = new MapPanel();
 
     /** This constant contains a reference to the map panel. */
-    private final LogPanel LOG_PANEL;
+    private static final LogPanel LOG_PANEL = new LogPanel();
 
     /** This constant contains a reference to the map panel. */
-    private final DetailsPanel DETAILS_PANEL;
+    private static final DetailsPanel DETAILS_PANEL = new DetailsPanel();
 
     /** This constant contains a reference to the map panel. */
-    private final TelemetryPanel TELEMETRY_PANEL;
+    private static final TelemetryPanel TELEMETRY_PANEL = new TelemetryPanel();
 
     /** Constructor to initialize the window. */
     public MonitorDashboard() {
         super();
-        MAP_PANEL = new MapPanel();
-        LOG_PANEL = new LogPanel();
-        DETAILS_PANEL = new DetailsPanel();
-        TELEMETRY_PANEL = new TelemetryPanel();
         initWindow();
+    }
+
+    /**
+     * This static method sets the anomaly report for the details panel.
+     *
+     * @param theReport the selected report.
+     */
+    public static void setDetailReport(final AnomalyReport theReport) {
+        DETAILS_PANEL.setReport(theReport);
     }
 
     /**
