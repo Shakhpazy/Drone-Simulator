@@ -233,16 +233,4 @@ public class AnomalyDetector {
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         this.pcs.removePropertyChangeListener(listener);
     }
-
-    /**
-     * A simple, immutable data carrier for a drone anomaly report.
-     */
-    public record AnomalyReport(
-            UUID id,
-            Long timestamp,
-            String anomalyType,
-            int droneId,
-            String simpleReport,
-            String detailedReport
-    ){}
 }
