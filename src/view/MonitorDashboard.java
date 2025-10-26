@@ -1,5 +1,7 @@
 package view;
 
+import model.AnomalyReport;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -32,6 +34,15 @@ public class MonitorDashboard extends JFrame {
         DETAILS_PANEL = new DetailsPanel();
         TELEMETRY_PANEL = new TelemetryPanel();
         initWindow();
+    }
+
+    /**
+     * Adds the anomaly report to the log panel.
+     *
+     * @param theReport the report to log.
+     */
+    public void addLogEntry(final AnomalyReport theReport) {
+        LOG_PANEL.addLogEntry(theReport);
     }
 
     /** Boilerplate JFrame setup. */
@@ -104,5 +115,4 @@ public class MonitorDashboard extends JFrame {
         bottomPanel.add(DETAILS_PANEL, BorderLayout.EAST);
         add(bottomPanel, BorderLayout.SOUTH);
     }
-
 }
