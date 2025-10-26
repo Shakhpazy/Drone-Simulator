@@ -5,6 +5,10 @@ import model.AnomalyReport;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * This class represents the detailed section underneath the log panel.
+ * When a simple log is clicked on, the detailed log is shown here.
+ */
 public class DetailsPanel extends JPanel {
 
     /** This constant determines the size of the panel. */
@@ -15,18 +19,27 @@ public class DetailsPanel extends JPanel {
      */
     private JTextArea myTextArea;
 
+    /**
+     * Constructor to initialize object.
+     */
     public DetailsPanel() {
         super();
         initPanel();
         initTextArea();
     }
 
+    /**
+     * Initializes the panel settings.
+     */
     private void initPanel() {
         setPreferredSize(SIZE);
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
         setLayout(new GridLayout(1, 1));
     }
 
+    /**
+     * Initializes the text area settings.
+     */
     private void initTextArea() {
         myTextArea = new JTextArea("...");
         myTextArea.setEditable(false);
@@ -36,6 +49,12 @@ public class DetailsPanel extends JPanel {
         add(myTextArea);
     }
 
+    /**
+     * Sets the report for which the detailed description shall
+     * be displayed.
+     *
+     * @param theReport the report to display the detailed description of.
+     */
     public void setReport(AnomalyReport theReport) {
         myTextArea.setText(theReport.detailedReport());
     }
