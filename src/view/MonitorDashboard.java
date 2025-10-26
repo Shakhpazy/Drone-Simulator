@@ -10,20 +10,39 @@ import java.awt.*;
 public class MonitorDashboard extends JFrame {
 
     /** This constant determines the size of the window. */
-    private static final Dimension mySize = new Dimension(1100, 700);
+    private static final Dimension SIZE = new Dimension(1100, 700);
+
+    /** This constant contains a reference to the map panel. */
+    private final MapPanel MAP_PANEL;
+
+    /** This constant contains a reference to the map panel. */
+    private final LogPanel LOG_PANEL;
+
+    /** This constant contains a reference to the map panel. */
+    private final DetailsPanel DETAILS_PANEL;
+
+    /** This constant contains a reference to the map panel. */
+    private final TelemetryPanel TELEMETRY_PANEL;
 
     /** Constructor to initialize the window. */
     public MonitorDashboard() {
         super();
+        MAP_PANEL = new MapPanel();
+        LOG_PANEL = new LogPanel();
+        DETAILS_PANEL = new DetailsPanel();
+        TELEMETRY_PANEL = new TelemetryPanel();
         initWindow();
-        initMenuBar();
     }
 
     /** Boilerplate JFrame setup. */
     private void initWindow() {
-        setSize(mySize);
+        setPreferredSize(SIZE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
         setVisible(true);
+        initMenuBar();
+        addPanels();
+        pack();
         setLocationRelativeTo(null);
     }
 
@@ -75,6 +94,15 @@ public class MonitorDashboard extends JFrame {
 
     private void openDatabase() {
         System.out.println("eventually, this will open database");
+    }
+
+    private void addPanels() {
+        add(MAP_PANEL, BorderLayout.CENTER);
+        add(LOG_PANEL, BorderLayout.EAST);
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(TELEMETRY_PANEL, BorderLayout.CENTER);
+        bottomPanel.add(DETAILS_PANEL, BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
 }
