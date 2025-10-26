@@ -4,6 +4,9 @@ import model.AnomalyReport;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
 import java.util.UUID; // temporary
 
 /**
@@ -36,8 +39,14 @@ public class LogPanel extends JPanel {
                 10L,
                 "Test",
                 1,
-                "Sample",
-                "Extra Sample");
+                """
+                        Sample Simple Report
+                        2nd Line of Sample Simple Report
+                        Even more Lines for Sample Simple Report""",
+                """
+                        Sample Detailed Report
+                        Very very detailed detaily report
+                        tons of important details here that operators need""");
         addLogEntry(rep);
         addLogEntry(rep);
         addLogEntry(rep);
@@ -65,7 +74,7 @@ public class LogPanel extends JPanel {
      * This method initializes the scroll pane.
      */
     private void initScroll() {
-        myScrollView.setLayout(new BoxLayout(myScrollView, BoxLayout.PAGE_AXIS));
+        myScrollView.setLayout(new BoxLayout(myScrollView, BoxLayout.Y_AXIS));
         add(new JScrollPane(myScrollView));
     }
 
@@ -89,6 +98,10 @@ public class LogPanel extends JPanel {
          */
         private static final Dimension SIZE = new Dimension(165, 100);
 
+        private static final ArrayList<LogEntry> ENTRIES = new ArrayList<>();
+
+        private static LogEntry selected = null;
+
         /**
          * Constructor to initialize the text area.
          *
@@ -97,9 +110,17 @@ public class LogPanel extends JPanel {
         public LogEntry(final AnomalyReport theReport) {
             super();
             init();
-            addLine(String.format("Drone ID:  %d", theReport.droneId()));
-            addLine(String.format("Timestamp: %d", theReport.timestamp()));
-            addLine(String.format("Type:      %s", theReport.anomalyType()));
+            ENTRIES.add(this);
+            setText(theReport.simpleReport());
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(final MouseEvent theEvent) {
+                    MonitorDashboard.setDetailReport(theReport);
+                    selected = (LogEntry) theEvent.getSource();
+                    ENTRIES.forEach(theE -> theE.setBackground(Color.LIGHT_GRAY));
+                    selected.setBackground(Color.GREEN);
+                }
+            });
         }
 
         /**
@@ -107,19 +128,13 @@ public class LogPanel extends JPanel {
          */
         private void init() {
             setMaximumSize(SIZE);
+            setLineWrap(true);
+            setWrapStyleWord(true);
             setEditable(false);
             setBackground(Color.LIGHT_GRAY);
             setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        }
-
-        /**
-         * This method takes a string and adds it as a new line
-         * to the log entry text area.
-         *
-         * @param theLine the new line to add.
-         */
-        private void addLine(final String theLine) {
-            setText(String.format("%s\n%s", getText(), theLine));
+            setAlignmentX(LEFT_ALIGNMENT);
+            setCaretColor(new Color(0, 0, 0, 0));
         }
     }
 }
