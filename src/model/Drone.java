@@ -119,10 +119,11 @@ public class Drone implements  DroneInterface {
         nextPoint = (nextPoint + 1) % myRoute.size();
     }
 
-    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained) {
+    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float theVelocity) {
         setLongitude(theLongitude);
         setLatitude(theLatitude);
         setAltitude(theAltitude);
+        setVelocity(theVelocity);
         setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, myBatteryLevel));
     }
 

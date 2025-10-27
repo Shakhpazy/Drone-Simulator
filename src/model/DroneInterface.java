@@ -127,7 +127,7 @@ public interface DroneInterface {
     /**
      *
      */
-    void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained);
+    void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float velocity);
 
     /**
      * Prints the current Drone in a neat fashion
