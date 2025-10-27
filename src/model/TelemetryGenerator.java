@@ -13,7 +13,7 @@ public class TelemetryGenerator {
 
     private final int RANDOM_PERCENT = 15; //Should be set from 0-100
 
-    private final AnomalyDetector myAnomlyDetector = new AnomalyDetector();
+    private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
 
     public TelemetryGenerator(ArrayList<DroneInterface> theDrones) {
         myDrones = theDrones;
@@ -44,8 +44,8 @@ public class TelemetryGenerator {
         }
     }
 
+    //cause an anomaly.
     public void getRandomMove(DroneInterface theDrone) {
-
 
     }
 
@@ -78,7 +78,7 @@ public class TelemetryGenerator {
         //now we need to update the drone state
         theDrone.updateDrone(longitude, latitude, altitude, 1);
         //after updating we can check if there is an anomaly
-        myAnomlyDetector.Detect(createTelemetry(theDrone), myBeforeMoveTelemetry);
+        myAnomalyDetector.Detect(createTelemetry(theDrone), myBeforeMoveTelemetry);
     }
 
     private Telemetry createTelemetry(DroneInterface theDrone) {
