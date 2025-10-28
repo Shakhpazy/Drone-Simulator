@@ -14,7 +14,9 @@ public class TelemetryGenerator {
 
     private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
 
-    private static final float MAX_VELOCITY = 10;
+    private static final float MAX_VELOCITY = 50;
+
+    private static final float MIN_VELOCITY = 1;
 
     private static final float ACCELERATION_STEP = 2;
 
@@ -51,7 +53,42 @@ public class TelemetryGenerator {
 
     //cause an anomaly.
     public void getRandomMove(DroneInterface theDrone) {
+        float latitude = theDrone.getLatitude();
+        float longitude = theDrone.getLongitude();
+        float altitude = theDrone.getAltitude();
+        float velocity = theDrone.getVelocity();
 
+        int anomalyType = myRandom.nextInt(3); // 0 = drop/climb, 1 = speed anomaly, 2 = drift
+
+        switch (anomalyType) {
+            case 0: // Sudden drop or climb of 30-40 units
+                float changeAlt = (myRandom.nextBoolean() ? 1 : -1) * (30 + myRandom.nextFloat() * 10);
+                altitude = Math.max(0, altitude + changeAlt);
+                break;
+
+            case 1: // Sudden speed anomaly by 30-40 units
+                if (myRandom.nextBoolean()) {
+                    velocity = Math.min(velocity + (30 + myRandom.nextFloat() * 10), MAX_VELOCITY);
+                } else {
+                    velocity = Math.max(velocity - (30 + myRandom.nextFloat() * 10), MIN_VELOCITY);
+                }
+                break;
+
+            case 2: // Random drift 30-40 units in long and latitude
+                float driftX = (myRandom.nextBoolean() ? 1 : -1) * (30 + myRandom.nextFloat() * 10);
+                float driftY = (myRandom.nextBoolean() ? 1 : -1) * (30 + myRandom.nextFloat() * 10);
+                longitude += driftX;
+                latitude += driftY;
+                break;
+        }
+
+        // Update drone state with anomaly (status=2 means anomaly)
+        theDrone.updateDrone(longitude, latitude, altitude, 2, velocity);
+
+        HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
+
+        // Compare against before state
+        // myAnomalyDetector.Detect(afterTelemetryMap, myBeforeTelemetryMap);
     }
 
     public void getMove(DroneInterface theDrone) {
@@ -85,16 +122,16 @@ public class TelemetryGenerator {
 
         // After movement
         if (distance < 10.0f) {
-            velocity = Math.max(theDrone.getVelocity() - 2, 1);
+            velocity = Math.max(theDrone.getVelocity() - ACCELERATION_STEP, MIN_VELOCITY);
         } else {
-            velocity = Math.min(theDrone.getVelocity() + 2, 10);
+            velocity = Math.min(theDrone.getVelocity() + ACCELERATION_STEP, MAX_VELOCITY);
         }
         //now we need to update the drone state
         theDrone.updateDrone(longitude, latitude, altitude, 1, velocity);
 
         HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
-
-        //after updating we can check if there is an anomaly
+        // Pass snapshots to anomaly detector
+        //myAnomalyDetector.Detect();
     }
 
     private HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
