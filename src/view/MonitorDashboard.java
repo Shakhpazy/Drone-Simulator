@@ -1,5 +1,7 @@
 package view;
 
+import model.AnomalyReport;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -10,20 +12,53 @@ import java.awt.*;
 public class MonitorDashboard extends JFrame {
 
     /** This constant determines the size of the window. */
-    private static final Dimension mySize = new Dimension(1100, 700);
+    private static final Dimension SIZE = new Dimension(1100, 700);
+
+    /** This constant contains a reference to the map panel. */
+    private static final MapPanel MAP_PANEL = new MapPanel();
+
+    /** This constant contains a reference to the map panel. */
+    private static final LogPanel LOG_PANEL = new LogPanel();
+
+    /** This constant contains a reference to the map panel. */
+    private static final DetailsPanel DETAILS_PANEL = new DetailsPanel();
+
+    /** This constant contains a reference to the map panel. */
+    private static final TelemetryPanel TELEMETRY_PANEL = new TelemetryPanel();
 
     /** Constructor to initialize the window. */
     public MonitorDashboard() {
         super();
         initWindow();
-        initMenuBar();
+    }
+
+    /**
+     * This static method sets the anomaly report for the details panel.
+     *
+     * @param theReport the selected report.
+     */
+    public static void setDetailReport(final AnomalyReport theReport) {
+        DETAILS_PANEL.setReport(theReport);
+    }
+
+    /**
+     * Adds the anomaly report to the log panel.
+     *
+     * @param theReport the report to log.
+     */
+    public void addLogEntry(final AnomalyReport theReport) {
+        LOG_PANEL.addLogEntry(theReport);
     }
 
     /** Boilerplate JFrame setup. */
     private void initWindow() {
-        setSize(mySize);
+        setPreferredSize(SIZE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
         setVisible(true);
+        initMenuBar();
+        addPanels();
+        pack();
         setLocationRelativeTo(null);
     }
 
@@ -61,20 +96,43 @@ public class MonitorDashboard extends JFrame {
         bar.setVisible(true);
     }
 
+    /**
+     * Saves the anomaly reports from the database as a .csv file.
+     */
     private void saveAsCSV() {
         System.out.println("eventually, this will save as .csv");
     }
 
+    /**
+     * Saves the anomaly reports from the database as a .pdf file.
+     */
     private void saveAsPDF() {
         System.out.println("eventually, this will save as .pdf");
     }
 
+    /**
+     * Opens a window that instructs users on how to navigate this app.
+     */
     private void openInstructions() {
         System.out.println("eventually, this will open instructions");
     }
 
+    /**
+     * Opens a window to view and query the anomaly report database.
+     */
     private void openDatabase() {
         System.out.println("eventually, this will open database");
     }
 
+    /**
+     * Adds the organizational panels to the window.
+     */
+    private void addPanels() {
+        add(MAP_PANEL, BorderLayout.CENTER);
+        add(LOG_PANEL, BorderLayout.EAST);
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(TELEMETRY_PANEL, BorderLayout.CENTER);
+        bottomPanel.add(DETAILS_PANEL, BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
 }
