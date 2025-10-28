@@ -12,7 +12,7 @@ public class TelemetryGenerator {
 
     private static final Random myRandom = new Random();
 
-    private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
+    //private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
 
     private static final float MAX_VELOCITY = 50;
 
@@ -28,6 +28,10 @@ public class TelemetryGenerator {
 
     public void addDrone(DroneInterface theDrone) {
         myDrones.add(theDrone);
+    }
+
+    public HashMap<String, Object> getMybefore() {
+        return myBeforeTelemetryMap;
     }
 
     /**
@@ -99,8 +103,8 @@ public class TelemetryGenerator {
 
         RoutePoint nextPoint = theDrone.getNextPoint();
 
-        float dx = nextPoint.getLatitude() - latitude;
-        float dy = nextPoint.getLongitude() - longitude;
+        float dx = nextPoint.getLongitude() - longitude;
+        float dy = nextPoint.getLatitude() - latitude;
         float dz = nextPoint.getAltitude() - altitude;
 
         // distance left until we get to the next point
@@ -109,14 +113,14 @@ public class TelemetryGenerator {
 
         if (distance <= theDrone.getVelocity()) {
             // reached waypoint
-            latitude = nextPoint.getLatitude();
             longitude = nextPoint.getLongitude();
+            latitude = nextPoint.getLatitude();
             altitude = nextPoint.getAltitude();
             theDrone.setNextRoute(); // advance to next waypoint
         } else {
             float ratio = theDrone.getVelocity() / distance;
-            latitude += dx * ratio;
-            longitude += dy * ratio;
+            longitude += dx * ratio;
+            latitude += dy * ratio;
             altitude += dz * ratio;
         }
 
