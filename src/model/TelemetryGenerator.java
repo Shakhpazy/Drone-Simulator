@@ -100,6 +100,7 @@ public class TelemetryGenerator {
      * @param theDrone the drone to update with an anomaly
      */
     public void getRandomMove(DroneInterface theDrone) {
+        System.out.println("Random move.");
         float latitude = theDrone.getLatitude();
         float longitude = theDrone.getLongitude();
         float altitude = theDrone.getAltitude();
@@ -263,4 +264,7 @@ public class TelemetryGenerator {
         return drain;
     }
 
+    public HashMap<String, Object> getMybefore() {
+        return myBeforeTelemetryMap;
+    }
 }
