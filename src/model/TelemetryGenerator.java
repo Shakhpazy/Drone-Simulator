@@ -1,9 +1,6 @@
 package model;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Random;
+import java.util.*;
 
 /**
  * TelemetryGenerator is responsible for simulating drone telemetry data.
@@ -87,8 +84,11 @@ public class TelemetryGenerator {
             } else {
                 getMove(drone);
             }
-
         }
+
+        //After all drones move to the next step we can check for collisions.
+        checkCollisions();
+
     }
 
     /**
@@ -96,8 +96,6 @@ public class TelemetryGenerator {
      * - Sudden altitude drop or climb
      * - Sudden velocity increase or decrease
      * - Sudden latitude/longitude drift
-     *
-     * Status code is set to 2 for anomaly updates.
      *
      * @param theDrone the drone to update with an anomaly
      */
@@ -188,6 +186,34 @@ public class TelemetryGenerator {
         }
 
         applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, distance);
+    }
+
+    /**
+     * Checks for collisions between drones in O(n) time using a HashMap.
+     * Each drone's size is accounted by casting its longitude, latitude,
+     * and altitude to Int, effectively giving the drone a "size" of 1 unit
+     * in each dimension. If two drones fall into the same integer cell, they are
+     * considered to have collided.
+     * On collision, both drones are marked as crashed by setting their altitude
+     * to 0. Dead drones (already not alive) are skipped.
+     */
+    private void checkCollisions() {
+        HashMap<String, DroneInterface> seen = new HashMap<>();
+
+        for (DroneInterface drone: myDrones) {
+            if (!drone.isAlive()) {
+                continue;
+            }
+            //cast to an Int to account for the drone having some kind of size associated to it.
+            String position = (int)drone.getLongitude() + "," + (int)drone.getLatitude() + "," + (int)drone.getAltitude();
+            if (seen.containsKey(position)) {
+                drone.setAltitude(0);
+                seen.get(position).setAltitude(0);
+            }
+            else {
+                seen.put(position, drone);
+            }
+        }
     }
 
     /**
