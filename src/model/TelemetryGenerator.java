@@ -29,19 +29,19 @@ public class TelemetryGenerator {
     //private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
 
     /** Maximum allowed velocity in normal moves. */
-    private static final float MAX_VELOCITY = 50;
+    private static final float MAX_VELOCITY = 10;
 
     /** Minimum allowed velocity in normal moves. */
     private static final float MIN_VELOCITY = 1;
 
     /** Maximum allowed altitude in normal moves. */
-    private static final float MAX_ALTITUDE = 1000;
+    private static final float MAX_ALTITUDE = 700;
 
     /** Minimum allowed altitude in normal moves. */
     private static final float MIN_ALTITUDE = 0;
 
     /** Step size for increasing or decreasing velocity during movement. */
-    private static final float ACCELERATION_STEP = 2;
+    private static final float ACCELERATION_STEP = 1;
 
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
     private static final int RANDOM_PERCENT = 15; //Should be set from 0-100
@@ -108,22 +108,23 @@ public class TelemetryGenerator {
         int anomalyType = myRandom.nextInt(3); // 0 = drop/climb, 1 = speed anomaly, 2 = drift
 
         switch (anomalyType) {
-            case 0: // Sudden drop or climb of 30-40 units
-                float changeAlt = (myRandom.nextBoolean() ? 1 : -1) * (30 + myRandom.nextFloat() * 10);
+            case 0: // Sudden drop or climb of 10-20 units
+                float changeAlt = (myRandom.nextBoolean() ? 1 : -1) * (10 + myRandom.nextFloat() * 10);
                 altitude = Math.max(MIN_ALTITUDE, altitude + changeAlt);
                 break;
 
-            case 1: // Sudden speed anomaly by 30-40 units
+            case 1: // Sudden speed anomaly by 7 unites
+                int change = 7;
                 if (myRandom.nextBoolean()) {
-                    velocity = Math.min(velocity + (30 + myRandom.nextFloat() * 10), MAX_VELOCITY);
+                    velocity = Math.min(velocity + change, MAX_VELOCITY);
                 } else {
-                    velocity = Math.max(velocity - (30 + myRandom.nextFloat() * 10), MIN_VELOCITY);
+                    velocity = Math.max(velocity - change, MIN_VELOCITY);
                 }
                 break;
 
-            case 2: // Random drift 30-40 units in long and latitude
-                float driftX = (myRandom.nextBoolean() ? 1 : -1) * (30 + myRandom.nextFloat() * 10);
-                float driftY = (myRandom.nextBoolean() ? 1 : -1) * (30 + myRandom.nextFloat() * 10);
+            case 2: // Random drift 15-25 units in long and latitude
+                float driftX = (myRandom.nextBoolean() ? 1 : -1) * (15 + myRandom.nextFloat() * 10);
+                float driftY = (myRandom.nextBoolean() ? 1 : -1) * (15 + myRandom.nextFloat() * 10);
                 longitude += driftX;
                 latitude += driftY;
                 break;
@@ -254,12 +255,9 @@ public class TelemetryGenerator {
      * @return the amount of battery drained (integer percent or units)
      */
     private int batteryDrained(DroneInterface theDrone, float distanceTraveled) {
-        // Example model: drain 1% battery for every 100 units of distance,
-        // plus extra if flying at high velocity
-        int drain = (int)(distanceTraveled / 100);
-
-        if (theDrone.getVelocity() > 40) {
-            drain += 2; // penalty for high speed
+        int drain = 1;
+        if (theDrone.getVelocity() > 7) {
+            drain += 1; // penalty for high speed
         }
 
         return drain;
