@@ -1,42 +1,78 @@
 package model;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 
+/**
+ * TelemetryGenerator is responsible for simulating drone telemetry data.
+ * It processes a list of drones, generating either normal movements
+ * (towards route waypoints) or anomaly movements (sudden altitude, velocity,
+ * or positional deviations).
+ *
+ * Normal moves respect waypoint routes and physical constraints such as
+ * min/max velocity and altitude. Random moves simulate anomalies which
+ * can deviate from expected behavior.
+ */
 public class TelemetryGenerator {
 
+    /** List of drones being simulated. */
     ArrayList<DroneInterface> myDrones;
 
+    /** Telemetry snapshot of the drone state before movement. */
     HashMap<String, Object> myBeforeTelemetryMap;
 
+    /** Random generator used for movement and anomaly decisions. */
     private static final Random myRandom = new Random();
+
+    /** Timestamp reference used for telemetry data. */
+    private static final Date myDate = new Date();
 
     //private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
 
+    /** Maximum allowed velocity in normal moves. */
     private static final float MAX_VELOCITY = 50;
 
+    /** Minimum allowed velocity in normal moves. */
     private static final float MIN_VELOCITY = 1;
 
+    /** Maximum allowed altitude in normal moves. */
+    private static final float MAX_ALTITUDE = 1000;
+
+    /** Minimum allowed altitude in normal moves. */
+    private static final float MIN_ALTITUDE = 0;
+
+    /** Step size for increasing or decreasing velocity during movement. */
     private static final float ACCELERATION_STEP = 2;
 
+    /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
     private static final int RANDOM_PERCENT = 15; //Should be set from 0-100
 
+
+    /**
+     * Constructs a TelemetryGenerator with a list of drones to simulate.
+     *
+     * @param theDrones list of drones implementing DroneInterface
+     */
     public TelemetryGenerator(ArrayList<DroneInterface> theDrones) {
         myDrones = theDrones;
     }
 
+    /**
+     * Adds a new drone to the simulation.
+     *
+     * @param theDrone drone to be added
+     */
     public void addDrone(DroneInterface theDrone) {
         myDrones.add(theDrone);
     }
 
-    public HashMap<String, Object> getMybefore() {
-        return myBeforeTelemetryMap;
-    }
-
     /**
-     * This will process all drones and decide if the specific
-     * drone will get a random move or a normal move.
+     * Iterates through all drones in the simulation. For each drone:
+     * - Skips processing if the drone is not alive.
+     * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
+     *   a random anomaly move or a normal route-following move.
      */
     public void processAllDrones() {
         for (DroneInterface drone : myDrones) {
@@ -55,7 +91,16 @@ public class TelemetryGenerator {
         }
     }
 
-    //cause an anomaly.
+    /**
+     * Generates an anomalous move for the given drone. Types of anomalies include:
+     * - Sudden altitude drop or climb
+     * - Sudden velocity increase or decrease
+     * - Sudden latitude/longitude drift
+     *
+     * Status code is set to 2 for anomaly updates.
+     *
+     * @param theDrone the drone to update with an anomaly
+     */
     public void getRandomMove(DroneInterface theDrone) {
         float latitude = theDrone.getLatitude();
         float longitude = theDrone.getLongitude();
@@ -67,7 +112,7 @@ public class TelemetryGenerator {
         switch (anomalyType) {
             case 0: // Sudden drop or climb of 30-40 units
                 float changeAlt = (myRandom.nextBoolean() ? 1 : -1) * (30 + myRandom.nextFloat() * 10);
-                altitude = Math.max(0, altitude + changeAlt);
+                altitude = Math.max(MIN_ALTITUDE, altitude + changeAlt);
                 break;
 
             case 1: // Sudden speed anomaly by 30-40 units
@@ -86,15 +131,26 @@ public class TelemetryGenerator {
                 break;
         }
 
-        // Update drone state with anomaly (status=2 means anomaly)
-        theDrone.updateDrone(longitude, latitude, altitude, 2, velocity);
+        // get the distance change.
+        float anomalyDistance = (float) Math.sqrt(
+                Math.pow(longitude - theDrone.getLongitude(), 2) +
+                        Math.pow(latitude - theDrone.getLatitude(), 2) +
+                        Math.pow(altitude - theDrone.getAltitude(), 2)
+        );
 
-        HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
-
-        // Compare against before state
-        // myAnomalyDetector.Detect(afterTelemetryMap, myBeforeTelemetryMap);
+        applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, anomalyDistance);
     }
 
+    /**
+     * Generates a normal move for the given drone.
+     * The drone moves toward its next waypoint, adjusting position and altitude
+     * proportionally to velocity. Velocity is increased or decreased depending
+     * on distance to the waypoint.
+     *
+     * Status code is set to 1 for normal updates.
+     *
+     * @param theDrone the drone to update with a normal move
+     */
     public void getMove(DroneInterface theDrone) {
         float latitude = theDrone.getLatitude();
         float longitude = theDrone.getLongitude();
@@ -130,14 +186,17 @@ public class TelemetryGenerator {
         } else {
             velocity = Math.min(theDrone.getVelocity() + ACCELERATION_STEP, MAX_VELOCITY);
         }
-        //now we need to update the drone state
-        theDrone.updateDrone(longitude, latitude, altitude, 1, velocity);
 
-        HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
-        // Pass snapshots to anomaly detector
-        //myAnomalyDetector.Detect();
+        applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, distance);
     }
 
+    /**
+     * Creates a snapshot of telemetry data from the given drone.
+     *
+     * @param theDrone the drone to read telemetry from
+     * @return a map containing drone id, altitude, longitude, latitude,
+     *         velocity, battery level, orientation, and timestamp
+     */
     private HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
         HashMap<String, Object> telemetryMap = new HashMap<>();
         telemetryMap.put("id", theDrone.getId());
@@ -147,7 +206,37 @@ public class TelemetryGenerator {
         telemetryMap.put("velocity", theDrone.getVelocity());
         telemetryMap.put("batteryLevel", theDrone.getBatteryLevel());
         telemetryMap.put("orientation", theDrone.getOrientation());
+        telemetryMap.put("timeStamp", myDate.getTime());
         return telemetryMap;
+    }
+
+    private void applyDroneUpdate(DroneInterface theDrone, float theLongitude, float theLatitude, float theAltitude, float theVelocity, float theDistance) {
+        //now we need to update the drone state
+        int batteryDrain = batteryDrained(theDrone, theDistance);
+        theDrone.updateDrone(theLongitude, theLatitude, theAltitude, batteryDrain, theVelocity);
+
+        HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
+
+        // Pass snapshots to anomaly detector
+        //myAnomalyDetector.Detect();
+    }
+
+    /**
+     * Calculates how much battery is drained during the last move.
+     * This can be adjusted to depend on velocity, altitude, or distance.
+     *
+     * @return the amount of battery drained (integer percent or units)
+     */
+    private int batteryDrained(DroneInterface theDrone, float distanceTraveled) {
+        // Example model: drain 1% battery for every 100 units of distance,
+        // plus extra if flying at high velocity
+        int drain = (int)(distanceTraveled / 100);
+
+        if (theDrone.getVelocity() > 40) {
+            drain += 2; // penalty for high speed
+        }
+
+        return drain;
     }
 
 }
