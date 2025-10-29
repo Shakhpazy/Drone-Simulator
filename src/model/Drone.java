@@ -92,7 +92,7 @@ public class Drone implements  DroneInterface {
 
     // These are all the Setters
     public void setAltitude(float theAltitude) {
-        myAltitude = theAltitude;
+        myAltitude = Math.max(0, theAltitude);
     }
 
     public void setLongitude(float theLongitude) {
@@ -119,15 +119,16 @@ public class Drone implements  DroneInterface {
         nextPoint = (nextPoint + 1) % myRoute.size();
     }
 
-    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained) {
+    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float theVelocity) {
         setLongitude(theLongitude);
         setLatitude(theLatitude);
         setAltitude(theAltitude);
+        setVelocity(theVelocity);
         setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, myBatteryLevel));
     }
 
     public boolean isAlive() {
-        return myBatteryLevel > 0;
+        return myBatteryLevel > 0  && myAltitude > 0;
     }
 
 }

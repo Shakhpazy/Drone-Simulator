@@ -8,10 +8,10 @@ public class RoutePoint {
 
     private final float myLatitude;
 
-    public RoutePoint(float theAltitude, float theLongitude, float theLatitude) {
-        myAltitude = theAltitude;
+    public RoutePoint(float theLongitude, float theLatitude, float theAltitude) {
         myLongitude = theLongitude;
         myLatitude = theLatitude;
+        myAltitude = theAltitude;
     }
 
     public float getAltitude() {

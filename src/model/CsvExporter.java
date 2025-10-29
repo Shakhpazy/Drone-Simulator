@@ -5,20 +5,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
-public class CsvExporter {
+public class CsvExporter implements ReportExporter {
     // May rename to fileExporter for future applications for various extra credit opportunities.
     // Anomaly export to pdf etc.
 
     // Perhaps a second method for later extra credit options requiring data gathering
     // such as pattern recognition and machine learning applications.
 
-    /**
-     * A method to export all current AnomalyReports as a CSV file.
-     * @param db            The database class of methods for interacting with the database.
-     * @param filePath      The string representing the user's filepath for the output file.
-     */
-    public void exportAllReports(AnomalyDatabase db, String filePath) {
-        List<AnomalyReport> reports = db.findAllReports();
+    @Override
+    public void export(List<AnomalyReport> reports, String filePath) {
 
         String header = "id, timestamp, anomalyType, droneID, simpleReport, detailedReport";
 
