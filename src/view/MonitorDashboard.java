@@ -1,7 +1,5 @@
 package view;
 
-import model.AnomalyReport;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -35,19 +33,20 @@ public class MonitorDashboard extends JFrame {
     /**
      * This static method sets the anomaly report for the details panel.
      *
-     * @param theReport the selected report.
+     * @param theDetailedReport the detailed report to display.
      */
-    public static void setDetailReport(final AnomalyReport theReport) {
-        DETAILS_PANEL.setReport(theReport);
+    public static void setDetailReport(final String theDetailedReport) {
+        DETAILS_PANEL.setReport(theDetailedReport);
     }
 
     /**
      * Adds the anomaly report to the log panel.
      *
-     * @param theReport the report to log.
+     * @param theSimpleReport the report to log.
+     * @param theDetailedReport the detailed report to display after clicked.
      */
-    public void addLogEntry(final AnomalyReport theReport) {
-        LOG_PANEL.addLogEntry(theReport);
+    public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
+        LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
     }
 
     /** Boilerplate JFrame setup. */

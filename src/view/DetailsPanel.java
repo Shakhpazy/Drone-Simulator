@@ -1,7 +1,5 @@
 package view;
 
-import model.AnomalyReport;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -53,9 +51,9 @@ public class DetailsPanel extends JPanel {
      * Sets the report for which the detailed description shall
      * be displayed.
      *
-     * @param theReport the report to display the detailed description of.
+     * @param theDetailedReport the detailed report to display.
      */
-    public void setReport(AnomalyReport theReport) {
-        myTextArea.setText(theReport.detailedReport());
+    public void setReport(final String theDetailedReport) {
+        myTextArea.setText(theDetailedReport);
     }
 }
