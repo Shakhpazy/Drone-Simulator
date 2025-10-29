@@ -31,17 +31,13 @@ public class AnomalyDetector {
     /**
      * A float to represent the z-axis size of the drone flight area.
      */
-    private final float ALTITUDE_MAX = 1000;
+    private final float ALTITUDE_MAX = 700;
 
-//    /**
-//     * A float to represent the maximum velocity of a drone.
-//     */
-//    private final float VELOCITY_MAX = 50;
 
     /**
      * A float to represent the maximum orthogonal velocity of a drone.
      */
-    private final float ORTHOGONAL_VELOCITY_MAX = 50;
+    private final float ORTHOGONAL_VELOCITY_MAX = 10;
 
     /**
      * A float to represent the maximum battery drain of a drone in a cycle.
@@ -165,8 +161,8 @@ public class AnomalyDetector {
         sb.append(myCurrTelemetry.get("id"));
         sb.append("\nAnomaly Type: ");
         sb.append(theAnomalyType);
-        sb.append("\nTimestamp: ");
-        sb.append(myCurrTelemetry.get("timestamp"));
+        sb.append("\nTime Stamp: ");
+        sb.append(myCurrTelemetry.get("timeStamp"));
         return sb.toString();
     }
 
@@ -178,7 +174,7 @@ public class AnomalyDetector {
     private String CreateDescDetailed(String theAnomalyType){
         StringBuilder sb = new StringBuilder();
         sb.append("Drone Number: ").append(myCurrTelemetry.get("id"));
-        sb.append("has experienced an anomaly at time: ").append(myCurrTelemetry.get("timestamp"));
+        sb.append("has experienced an anomaly at time: ").append(myCurrTelemetry.get("timeStamp"));
         sb.append("\nDetails:\n");
         sb.append(theAnomalyType).append(" anomaly detected\n");
 
@@ -223,7 +219,7 @@ public class AnomalyDetector {
 
         return new AnomalyReport(
                 myAnomalyID,
-                (Long) myCurrTelemetry.get("timestamp"),
+                (Long) myCurrTelemetry.get("timeStamp"),
                 theAnomalyType,
                 (Integer) myCurrTelemetry.get("id"),
                 simpleReport,
