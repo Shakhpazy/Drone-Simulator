@@ -28,6 +28,8 @@ public class MonitorDashboard extends JFrame {
     public MonitorDashboard() {
         super();
         initWindow();
+
+        drawDrone(1, new float[] {100, 200});
     }
 
     /**
@@ -47,6 +49,16 @@ public class MonitorDashboard extends JFrame {
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
         LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+    }
+
+    /**
+     * Draws a representation of the drone's location on the map panel.
+     *
+     * @param theID the drone's unique id value.
+     * @param theLoc the drones location as a float array containing {latitude, longitude}.
+     */
+    public void drawDrone(final int theID, final float[] theLoc) {
+        MAP_PANEL.setDroneMapping(theID, theLoc);
     }
 
     /** Boilerplate JFrame setup. */
