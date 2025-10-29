@@ -32,26 +32,6 @@ public class LogPanel extends JPanel {
         myScrollView = new JPanel();
         initPanel();
         initScroll();
-
-        // Meaningless sample data to show display behaviour
-        AnomalyReport rep = new AnomalyReport(
-                new UUID(10, 10),
-                10L,
-                "Test",
-                1,
-                """
-                        Sample Simple Report
-                        2nd Line of Sample Simple Report
-                        Even more Lines for Sample Simple Report""",
-                """
-                        Sample Detailed Report
-                        Very very detailed detaily report
-                        tons of important details here that operators need""");
-        addLogEntry(rep.simpleReport(), rep.detailedReport());
-        addLogEntry(rep.simpleReport(), rep.detailedReport());
-        addLogEntry(rep.simpleReport(), rep.detailedReport());
-        addLogEntry(rep.simpleReport(), rep.detailedReport());
-        addLogEntry(rep.simpleReport(), rep.detailedReport());
     }
 
     /**
