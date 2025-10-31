@@ -32,33 +32,6 @@ public class LogPanel extends JPanel {
         myScrollView = new JPanel();
         initPanel();
         initScroll();
-
-        // Meaningless sample data to show display behaviour
-        AnomalyReport rep = new AnomalyReport(
-                new UUID(10, 10),
-                10L,
-                "Test",
-                1,
-                """
-                        Sample Simple Report
-                        2nd Line of Sample Simple Report
-                        Even more Lines for Sample Simple Report""",
-                """
-                        Sample Detailed Report
-                        Very very detailed detaily report
-                        tons of important details here that operators need""");
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
-        addLogEntry(rep);
     }
 
     /**
@@ -81,10 +54,11 @@ public class LogPanel extends JPanel {
     /**
      * This method allows for adding entries to the anomaly log.
      *
-     * @param theReport the anomaly report record class to log.
+     * @param theSimpleReport the simple report to display.
+     * @param theDetailedReport the detailed report to display after clicking.
      */
-    public void addLogEntry(final AnomalyReport theReport) {
-        myScrollView.add(new LogEntry(theReport));
+    public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
+        myScrollView.add(new LogEntry(theSimpleReport, theDetailedReport));
     }
 
     /**
@@ -112,20 +86,21 @@ public class LogPanel extends JPanel {
         /**
          * Constructor to initialize the text area.
          *
-         * @param theReport the report to add to the log.
+         * @param theSimpleReport the simple report to add to the log.
+         * @param theDetailedReport the detailed report to display when clicked.
          */
-        public LogEntry(final AnomalyReport theReport) {
+        public LogEntry(final String theSimpleReport, final String theDetailedReport) {
             super();
             init();
             ENTRIES.add(this);
-            setText(theReport.simpleReport());
+            setText(theSimpleReport);
 
             // Adds mouse listener for selecting a log
             // in order to view the detailed description.
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(final MouseEvent theEvent) {
-                    MonitorDashboard.setDetailReport(theReport);
+                    MonitorDashboard.setDetailReport(theDetailedReport);
                     selected = (LogEntry) theEvent.getSource();
                     ENTRIES.forEach(theE -> theE.setBackground(Color.LIGHT_GRAY));
                     selected.setBackground(Color.GREEN);

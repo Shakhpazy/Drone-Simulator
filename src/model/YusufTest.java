@@ -1,81 +1,66 @@
 package model;
-import javax.swing.*;
+
 import java.util.ArrayList;
-import java.util.Objects;
-import java.util.Random;
 import java.util.HashMap;
 
 public class YusufTest {
 
     public static void main(String[] args) {
-        // Route 1 within 900 x 500 world
-        ArrayList<RoutePoint> route1 = new ArrayList<>();
-        route1.add(new RoutePoint(0,   0,   100));   // bottom-left
-        route1.add(new RoutePoint(900, 0,   120));   // bottom-right
-        route1.add(new RoutePoint(900, 500, 140));   // top-right
-        route1.add(new RoutePoint(0,   500, 160));   // top-left
+        // Route for a single drone (rectangle around the map)
+        ArrayList<RoutePoint> route = new ArrayList<>();
+        route.add(new RoutePoint(100, 100, 110)); // bottom-left
+        route.add(new RoutePoint(130, 100, 115)); // bottom-right (30 units)
+        route.add(new RoutePoint(130, 120, 120)); // top-right    (20 units)
+        route.add(new RoutePoint(100, 120, 125)); // top-left     (30 units)
+        route.add(new RoutePoint(100, 100, 130)); // back to start(20 units)
 
-        // Route 2 (diagonal across same space)
-        ArrayList<RoutePoint> route2 = new ArrayList<>();
-        route2.add(new RoutePoint(0,   0,   200));
-        route2.add(new RoutePoint(900, 500, 220));
-        route2.add(new RoutePoint(0,   500, 240));
-        route2.add(new RoutePoint(900, 0,   260));
+        // Create one drone with velocity=5, battery=100, facing NORTH
+        Drone drone = new Drone(5, 100, Orientation.NORTH, route);
 
-        // Create drones
-        Drone drone1 = new Drone(5, 100, Orientation.NORTH, route1);
-        Drone drone2 = new Drone(7, 100, Orientation.EAST, route2);
-
-        // Add them into the telemetry generator
+        // Add drone to simulation
         ArrayList<DroneInterface> drones = new ArrayList<>();
-        drones.add(drone1);
-        drones.add(drone2);
-
+        drones.add(drone);
         TelemetryGenerator generator = new TelemetryGenerator(drones);
-        //Start
-        System.out.println("---- Start ----");
-        for (DroneInterface d : drones) {
-            System.out.printf("Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%d%n",
-                    d.getId(),
-                    d.getLongitude(),
-                    d.getLatitude(),
-                    d.getAltitude(),
-                    d.getVelocity(),
-                    d.getBatteryLevel());
-        }
-        System.out.print("\n");
+
+        // Print starting state
+        System.out.println("---- START ----");
+        printDrone(drone);
+        System.out.println();
 
         // Run simulation for 20 ticks
         for (int tick = 0; tick < 20; tick++) {
             System.out.println("---- TICK " + tick + " ----");
             generator.processAllDrones();
 
-            // Print out state of each drone
-            for (DroneInterface d : drones) {
-                System.out.printf("Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%d%n",
-                        d.getId(),
-                        d.getLongitude(),
-                        d.getLatitude(),
-                        d.getAltitude(),
-                        d.getVelocity(),
-                        d.getBatteryLevel());
-            }
+            // Print state of the single drone
+            printDrone(drone);
             System.out.println();
         }
 
+        // Example: pull latest telemetry from HashMap
         Testmap(generator);
     }
 
-    /**
-     * When data is getting passed on the Hashmap from String to Object
-     * You must cast the object to its intended type when you want to use
-     * it.
-     *
-     * @param generator
-     */
+    private static void printDrone(DroneInterface d) {
+        RoutePoint target = d.getNextPoint(); // the waypoint it’s heading to
+        System.out.printf(
+                "Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%d | Heading to (%.0f, %.0f, %.0f)%n",
+                d.getId(),
+                d.getLongitude(),
+                d.getLatitude(),
+                d.getAltitude(),
+                d.getVelocity(),
+                d.getBatteryLevel(),
+                target.getLongitude(),
+                target.getLatitude(),
+                target.getAltitude()
+        );
+    }
+
     private static void Testmap(TelemetryGenerator generator) {
         HashMap<String, Object> dictionary = generator.getMybefore();
         float altitude = (float) dictionary.get("altitude");
-        System.out.println(dictionary.get("altitude") + " " + altitude);
+        System.out.println("Telemetry (cast example) -> altitude raw=" +
+                dictionary.get("altitude") + " casted=" + altitude);
     }
 }

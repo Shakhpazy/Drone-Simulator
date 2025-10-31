@@ -1,7 +1,5 @@
 package view;
 
-import model.AnomalyReport;
-
 import javax.swing.*;
 import java.awt.*;
 
@@ -30,24 +28,37 @@ public class MonitorDashboard extends JFrame {
     public MonitorDashboard() {
         super();
         initWindow();
+
+        drawDrone(1, new float[] {100, 200});
     }
 
     /**
      * This static method sets the anomaly report for the details panel.
      *
-     * @param theReport the selected report.
+     * @param theDetailedReport the detailed report to display.
      */
-    public static void setDetailReport(final AnomalyReport theReport) {
-        DETAILS_PANEL.setReport(theReport);
+    public static void setDetailReport(final String theDetailedReport) {
+        DETAILS_PANEL.setReport(theDetailedReport);
     }
 
     /**
      * Adds the anomaly report to the log panel.
      *
-     * @param theReport the report to log.
+     * @param theSimpleReport the report to log.
+     * @param theDetailedReport the detailed report to display after clicked.
      */
-    public void addLogEntry(final AnomalyReport theReport) {
-        LOG_PANEL.addLogEntry(theReport);
+    public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
+        LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+    }
+
+    /**
+     * Draws a representation of the drone's location on the map panel.
+     *
+     * @param theID the drone's unique id value.
+     * @param theLoc the drones location as a float array containing {latitude, longitude}.
+     */
+    public void drawDrone(final int theID, final float[] theLoc) {
+        MAP_PANEL.setDroneMapping(theID, theLoc);
     }
 
     /** Boilerplate JFrame setup. */
