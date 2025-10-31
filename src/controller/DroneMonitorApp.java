@@ -28,6 +28,7 @@ public class DroneMonitorApp {
     public static void main(String[] theArgs) {
         MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
 
+
         //Create Route (basic test)
         ArrayList<RoutePoint> route =  new ArrayList<>();
 
