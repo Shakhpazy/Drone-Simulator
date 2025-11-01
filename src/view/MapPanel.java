@@ -20,7 +20,7 @@ public class MapPanel extends JPanel {
 
     /**
      * This constant is an alias for 1 to reference the first
-     * element in an array of {latitude, longitude}.
+     * element in an array of {longitude, latitude}.
      */
     private static final int LAT = 1;
 
