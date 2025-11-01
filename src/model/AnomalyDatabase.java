@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class AnomalyDatabase {
-
     private final String connectionString = "jdbc:sqlite:drone_anomalies.db";
 
     /**
@@ -230,5 +229,17 @@ public class AnomalyDatabase {
             System.out.println(e.getMessage());
         }
         return reports;
+    }
+
+    public void clear() {
+        String sql = "DELETE FROM anomaly_reports";
+
+        try (Connection conn = DriverManager.getConnection(connectionString);
+             PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+            int rowsAffected = preparedStatement.executeUpdate();
+            System.out.println("Cleared anomaly reports table, " + rowsAffected + " rows deleted." );
+        } catch (SQLException e) {
+            System.err.println("Error clearing database: " + e.getMessage());
+        }
     }
 }
