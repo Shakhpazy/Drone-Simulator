@@ -28,8 +28,6 @@ public class MonitorDashboard extends JFrame {
     public MonitorDashboard() {
         super();
         initWindow();
-
-        drawDrone(1, new float[] {100, 200});
     }
 
     /**

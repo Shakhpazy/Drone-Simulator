@@ -17,4 +17,6 @@ public class TelemetryPanel extends JPanel {
         setPreferredSize(SIZE);
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
     }
+
+
 }
