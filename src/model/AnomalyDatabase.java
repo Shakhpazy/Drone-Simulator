@@ -73,7 +73,7 @@ public class AnomalyDatabase {
      * @param theAnomalyID  The ID number needed to find the AnomalyReport.
      * @return              Returns the necessary AnomalyReport.
      */
-    public AnomalyReport findReportsByAnomalyID(String theAnomalyID){
+    public AnomalyReport findReportByAnomalyID(String theAnomalyID){
         String sql = "SELECT * FROM anomaly_reports WHERE id = ?";
         AnomalyReport report = null;
 
