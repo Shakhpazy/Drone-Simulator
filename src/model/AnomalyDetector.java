@@ -55,22 +55,22 @@ public class AnomalyDetector {
      * @param thePrevTelemetry         A telemetry representing the previous drone state.
      * @return                         Returns the AnomalyReport object when created, null if not created.
      */
-    public AnomalyReport Detect(HashMap<String, Object> theCurrTelemetry, HashMap<String, Object> thePrevTelemetry){
+    public AnomalyReport detect(HashMap<String, Object> theCurrTelemetry, HashMap<String, Object> thePrevTelemetry){
         myCurrTelemetry = theCurrTelemetry;
         myPrevTelemetry = thePrevTelemetry;
 
         /* Check for spoofing or positional anomaly */
-        String errorMessage = PositionAnomaly();
+        String errorMessage = positionAnomaly();
         if (!errorMessage.equals("N/A")){
-            AnomalyReport ar = CreateAnomalyReport(errorMessage);
+            AnomalyReport ar = createAnomalyReport(errorMessage);
             pcs.firePropertyChange("Anomaly Detected", null, ar);
             return ar;
         }
 
         /* Check for battery anomaly */
-        errorMessage = PowerAnomaly();
+        errorMessage = powerAnomaly();
         if (errorMessage != null){
-            AnomalyReport ar = CreateAnomalyReport(errorMessage);
+            AnomalyReport ar = createAnomalyReport(errorMessage);
             pcs.firePropertyChange("Anomaly Detected", null, ar);
             return ar;
         }
@@ -82,7 +82,7 @@ public class AnomalyDetector {
      * A private method to hold positional anomaly detection logic.
      * @return  Returns a String anomaly description.
      */
-    private String PositionAnomaly(){
+    private String positionAnomaly(){
         StringBuilder ret = new StringBuilder();
 
         double currLatitude = (Double) myCurrTelemetry.get("latitude");
@@ -140,7 +140,7 @@ public class AnomalyDetector {
      * A private method to hold the power anomaly detection logic.
      * @return  Returns a boolean representing whether the battery level is 0.
      */
-    private String PowerAnomaly(){
+    private String powerAnomaly(){
         int currBatteryLevel = (int) myCurrTelemetry.get("batteryLevel");
         if ((int) myPrevTelemetry.get("batteryLevel") - currBatteryLevel < BATTERY_DRAIN_RATE_MAX) {
             return "Battery Drain Failure";
@@ -155,7 +155,7 @@ public class AnomalyDetector {
      * @param theAnomalyType    A string representing the type of anomaly being reported.
      * @return                  Returns a simplified string anomaly report.
      */
-    private String CreateDescSimple(String theAnomalyType){
+    private String createDescSimple(String theAnomalyType){
         StringBuilder sb = new StringBuilder();
         sb.append("Anomaly Detected! \n Drone ID: ");
         sb.append(myCurrTelemetry.get("id"));
@@ -171,7 +171,7 @@ public class AnomalyDetector {
      * @param theAnomalyType    A string representing the type of anomaly being reported.
      * @return                  Returns a detailed string anomaly report.
      */
-    private String CreateDescDetailed(String theAnomalyType){
+    private String createDescDetailed(String theAnomalyType){
         StringBuilder sb = new StringBuilder();
         sb.append("Drone Number: ").append(myCurrTelemetry.get("id"));
         sb.append("has experienced an anomaly at time: ").append(myCurrTelemetry.get("timeStamp"));
@@ -211,9 +211,9 @@ public class AnomalyDetector {
      * @param theAnomalyType    A string classification of the anomaly to be reported on.
      * @return                  Returns an anomaly report with the relevant information.
      */
-    private AnomalyReport CreateAnomalyReport(String theAnomalyType){
-        String simpleReport = CreateDescSimple(theAnomalyType);
-        String detailedReport = CreateDescDetailed(theAnomalyType);
+    private AnomalyReport createAnomalyReport(String theAnomalyType){
+        String simpleReport = createDescSimple(theAnomalyType);
+        String detailedReport = createDescDetailed(theAnomalyType);
 
         UUID myAnomalyID = UUID.randomUUID();
 
