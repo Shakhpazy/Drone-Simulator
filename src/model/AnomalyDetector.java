@@ -196,13 +196,6 @@ public class AnomalyDetector {
         sb.append("Orientation: ").append(myPrevTelemetry.get("orientation")).append("\n");
         sb.append("Battery (%): ").append(myPrevTelemetry.get("batteryLevel"));
 
-//        //Attempted Telemetry instruction
-//        sb.append("\nAttempted Instructions: \n");
-//        sb.append("x: ").append(String.format("%+f", myCurrTelemetry.getLatitude() - myPrevTelemetry.getLatitude()));
-//        sb.append(" y: ").append(String.format("%+f", myCurrTelemetry.getLongitude() - myPrevTelemetry.getLongitude()));
-//        sb.append(" z: ").append(String.format("%+f", myCurrTelemetry.getAltitude() - myPrevTelemetry.getAltitude()));
-//        sb.append("\n");
-
         return sb.toString();
     }
 

@@ -231,6 +231,10 @@ public class AnomalyDatabase {
         return reports;
     }
 
+    /**
+     * A method to clear the AnomalyDatabase.
+     * ONLY TO BE USED FOR TESTING.
+     */
     public void clear() {
         String sql = "DELETE FROM anomaly_reports";
 

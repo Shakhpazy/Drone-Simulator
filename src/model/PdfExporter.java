@@ -45,16 +45,14 @@ public class PdfExporter implements ReportExporter {
             contentStream.newLineAtOffset(0, -leading * 1.5f); // Move down
             currentY -= (leading * 1.5f);
 
-            // Set font for the main content
             contentStream.setFont(font, fontSize);
 
             // --- Loop Through Reports ---
             for (AnomalyReport report : reports) {
                 // Check if there is enough space for this report (~6 lines)
-                // If not, create a new page
                 if (currentY < (margin + (leading * 7))) {
                     contentStream.endText();
-                    contentStream.close(); // Close the current stream
+                    contentStream.close();
 
                     // Add a new blank page
                     page = new PDPage(PDRectangle.A4);
@@ -70,7 +68,7 @@ public class PdfExporter implements ReportExporter {
                     contentStream.newLineAtOffset(startX, currentY);
                 }
 
-                // Write the report data, field by field
+                // Write the report data
                 contentStream.showText("Anomaly ID: " + report.id().toString());
                 contentStream.newLineAtOffset(0, -leading);
                 currentY -= leading;
@@ -95,7 +93,6 @@ public class PdfExporter implements ReportExporter {
                 contentStream.newLineAtOffset(0, -leading);
                 currentY -= leading;
 
-                // Add a separator
                 contentStream.showText("-------------------------------------------------------------------");
                 contentStream.newLineAtOffset(0, -leading);
                 currentY -= leading;
@@ -103,11 +100,10 @@ public class PdfExporter implements ReportExporter {
 
             // Finish and Save
             contentStream.endText();
-            contentStream.close(); // Close the final content stream
+            contentStream.close();
 
-            document.save(filePath); // Save the document to the file
+            document.save(filePath);
             System.out.println("Successfully exported " + reports.size() + " reports to " + filePath);
-
         } catch (IOException e) {
             System.err.println("Error writing to PDF file: " +e.getMessage());
         }
