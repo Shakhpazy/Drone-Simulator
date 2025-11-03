@@ -221,7 +221,7 @@ public class MapPanel extends JPanel {
 
                 // label centered vertically on the line, in right buffer
                 int worldY = (-(myDelta.y) + y - BUFFER) / (CELL_SIZE * myScale);
-                String label = String.format("%d", worldY * CELL_SIZE);
+                String label = String.format("%d", -worldY * CELL_SIZE);
                 int labelWidth = fm.stringWidth(label);
                 int labelHeight = fm.getAscent();
                 theG2D.drawString(
@@ -239,7 +239,7 @@ public class MapPanel extends JPanel {
 
                 // label centered horizontally on the line, in bottom buffer
                 int worldX = (-(myDelta.x) + x - BUFFER) / (CELL_SIZE * myScale);
-                String label = String.format("%d", worldX * CELL_SIZE);
+                String label = String.format("%d", -worldX * CELL_SIZE);
                 int labelWidth = fm.stringWidth(label);
                 theG2D.drawString(
                         label,
@@ -264,9 +264,9 @@ public class MapPanel extends JPanel {
                 if (x >= -LON_MAX * myScale && x <= getWidth() - BUFFER &&
                         y >= -LAT_MAX * myScale && y <= getHeight() - BUFFER) {
                     theG2D.setColor(Color.RED);
-                    theG2D.fillOval(x, y, d, d);
+                    theG2D.fillOval(-x, -y, d, d);
                     theG2D.setColor(Color.BLACK);
-                    theG2D.drawOval(x, y, d, d);
+                    theG2D.drawOval(-x, -y, d, d);
                 }
             }
         }
