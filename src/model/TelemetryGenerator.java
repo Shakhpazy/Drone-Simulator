@@ -264,7 +264,7 @@ public class TelemetryGenerator {
         return drain;
     }
 
-    public HashMap<String, Object> getMybefore() {
+    public HashMap<String, Object> getMyBeforeTelemetryMap() {
         return myBeforeTelemetryMap;
     }
 }

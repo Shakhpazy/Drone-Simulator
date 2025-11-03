@@ -63,7 +63,7 @@ public class AnomalyDetector {
         String errorMessage = positionAnomaly();
         if (!errorMessage.equals("N/A")){
             AnomalyReport ar = createAnomalyReport(errorMessage);
-            pcs.firePropertyChange("Anomaly Detected", null, ar);
+//            pcs.firePropertyChange("Anomaly Detected", null, ar); FIXME: Delete if uneeded
             return ar;
         }
 
@@ -71,7 +71,7 @@ public class AnomalyDetector {
         errorMessage = powerAnomaly();
         if (errorMessage != null){
             AnomalyReport ar = createAnomalyReport(errorMessage);
-            pcs.firePropertyChange("Anomaly Detected", null, ar);
+//            pcs.firePropertyChange("Anomaly Detected", null, ar); FIXME: Delete if uneeded
             return ar;
         }
 
@@ -218,20 +218,21 @@ public class AnomalyDetector {
                 simpleReport,
                 detailedReport);
     }
-
-    /**
-     * A method to acquire listeners for anomaly notification.
-     * @param listener  A PropertyChangeListener to be added to the PropertyChangeSupport.
-     */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.pcs.addPropertyChangeListener(listener);
-    }
-
-    /**
-     * A method to remove listeners for anomaly notification.
-     * @param listener  A PropertyChangeListener to be removed from the PropertyChangeSupport.
-     */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.pcs.removePropertyChangeListener(listener);
-    }
+// FIXME: Delete if deemed unecessary
+//    /**
+//     * A method to acquire listeners for anomaly notification.
+//     * @param listener  A PropertyChangeListener to be added to the PropertyChangeSupport.
+//     */
+//    public void addPropertyChangeListener(PropertyChangeListener listener) {
+//        this.pcs.addPropertyChangeListener(listener);
+//    }
+//
+//    FIXME: Delete if deemed unecessary
+//    /**
+//     * A method to remove listeners for anomaly notification.
+//     * @param listener  A PropertyChangeListener to be removed from the PropertyChangeSupport.
+//     */
+//    public void removePropertyChangeListener(PropertyChangeListener listener) {
+//        this.pcs.removePropertyChangeListener(listener);
+//    }
 }
