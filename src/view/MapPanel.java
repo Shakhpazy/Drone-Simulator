@@ -45,13 +45,22 @@ public class MapPanel extends JPanel {
      */
     private static final Map<Integer, int[]> ID_LOC_MAP = new HashMap<>();
 
+    /**
+     * This constant is a reference to the GridPanel that draws the grid and drones.
+     */
     private static final GridPanel GRID = new GridPanel();
+
+    /**
+     * Currently selected drone id, -1 if no drone selected;
+     */
+    private static int mySelectedID;
 
     /**
      * Constructor to initialize panel.
      */
     public MapPanel() {
         super();
+        mySelectedID = -1;
         initPanel();
         add(GRID, BorderLayout.CENTER);
 
@@ -76,6 +85,18 @@ public class MapPanel extends JPanel {
      */
     public void setDroneMapping(final int theID, final float[] theLoc) {
         ID_LOC_MAP.put(theID, formatLocation(theLoc));
+        repaint();
+    }
+
+    /**
+     * Sets the selected drone id to reflect that in the gui.
+     *
+     * @param theID the drone to set as selected.
+     */
+    public void setSelectedID(final int theID) {
+        mySelectedID = theID;
+        GRID.focusOnSelected(theID);
+        repaint();
     }
 
     /**
@@ -255,7 +276,8 @@ public class MapPanel extends JPanel {
          * @param theG2D the graphics object to draw with.
          */
         private void drawDrones(final Graphics2D theG2D) {
-            for (int[] loc : ID_LOC_MAP.values()) {
+            for (int id : ID_LOC_MAP.keySet()) {
+                int[] loc = ID_LOC_MAP.get(id);
                 int d = DIAMETER * myScale;
                 int x = loc[LON] * myScale + myDelta.x - d / 2 + BUFFER;
                 int y = loc[LAT] * myScale + myDelta.y - d / 2 + BUFFER;
@@ -264,6 +286,9 @@ public class MapPanel extends JPanel {
                 if (x >= -LON_MAX * myScale && x <= getWidth() - BUFFER &&
                         y >= -LAT_MAX * myScale && y <= getHeight() - BUFFER) {
                     theG2D.setColor(Color.RED);
+                    if (id == mySelectedID) {
+                        theG2D.setColor(Color.GREEN);
+                    }
                     theG2D.fillOval(x, y, d, d);
                     theG2D.setColor(Color.BLACK);
                     theG2D.drawOval(x, y, d, d);
@@ -287,6 +312,17 @@ public class MapPanel extends JPanel {
 
             myDelta.x = Math.max(minDeltaX, Math.min(myDelta.x, maxDeltaX));
             myDelta.y = Math.max(minDeltaY, Math.min(myDelta.y, maxDeltaY));
+        }
+
+        /**
+         * Focuses (pans) the grid on the selected drone from the given id.
+         *
+         * @param theID the id of the drone to center on.
+         */
+        public void focusOnSelected(final int theID) {
+            myDelta.x = -ID_LOC_MAP.get(theID)[LON] * myScale;
+            myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * myScale;
+            clampPan();
         }
     }
 

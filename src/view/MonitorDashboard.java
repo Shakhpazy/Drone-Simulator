@@ -31,15 +31,6 @@ public class MonitorDashboard extends JFrame {
     }
 
     /**
-     * This static method sets the anomaly report for the details panel.
-     *
-     * @param theDetailedReport the detailed report to display.
-     */
-    public static void setDetailReport(final String theDetailedReport) {
-        DETAILS_PANEL.setReport(theDetailedReport);
-    }
-
-    /**
      * Adds the anomaly report to the log panel.
      *
      * @param theSimpleReport the report to log.
@@ -53,10 +44,30 @@ public class MonitorDashboard extends JFrame {
      * Draws a representation of the drone's location on the map panel.
      *
      * @param theID the drone's unique id value.
-     * @param theLoc the drones location as a float array containing {longitude, latitude}.
+     * @param theLoc the drone's location as a float array containing {longitude, latitude}.
+     * @param theTelData the drone's telemetry data as a string.
      */
-    public void drawDrone(final int theID, final float[] theLoc) {
+    public void drawDrone(final int theID, final float[] theLoc, final String theTelData) {
         MAP_PANEL.setDroneMapping(theID, theLoc);
+        TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
+    }
+
+    /**
+     * This static method sets the anomaly report for the details panel.
+     *
+     * @param theDetailedReport the detailed report to display.
+     */
+    protected static void setDetailReport(final String theDetailedReport) {
+        DETAILS_PANEL.setReport(theDetailedReport);
+    }
+
+    /**
+     * Sets the selected drone in the MapPanel and TelemetryPanel.
+     *
+     * @param theID the ID number for the drone.
+     */
+    protected static void setSelectedDrone(final int theID) {
+        MAP_PANEL.setSelectedID(theID);
     }
 
     /** Boilerplate JFrame setup. */
