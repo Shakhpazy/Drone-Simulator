@@ -68,6 +68,7 @@ public class MonitorDashboard extends JFrame {
         initMenuBar();
         addPanels();
         pack();
+        setResizable(false);
         setLocationRelativeTo(null);
         setTitle("Autonomous Drone Monitor Dashboard");
     }
