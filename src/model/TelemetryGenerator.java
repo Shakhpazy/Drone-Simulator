@@ -114,7 +114,7 @@ public class TelemetryGenerator {
                 altitude = Math.max(MIN_ALTITUDE, altitude + changeAlt);
                 break;
 
-            case 1: // Sudden speed anomaly by 7 unites
+            case 1: // Sudden speed anomaly by 7 units
                 int change = 7;
                 if (myRandom.nextBoolean()) {
                     velocity = Math.min(velocity + change, MAX_VELOCITY);
@@ -225,7 +225,7 @@ public class TelemetryGenerator {
      * @return a map containing drone id, altitude, longitude, latitude,
      *         velocity, battery level, orientation, and timestamp
      */
-    private HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
+    public HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
         HashMap<String, Object> telemetryMap = new HashMap<>();
         telemetryMap.put("id", theDrone.getId());
         telemetryMap.put("altitude", theDrone.getAltitude());

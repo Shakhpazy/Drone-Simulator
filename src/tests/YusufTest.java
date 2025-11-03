@@ -1,4 +1,6 @@
-package model;
+package tests;
+
+import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
