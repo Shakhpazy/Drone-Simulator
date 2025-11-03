@@ -1,13 +1,10 @@
 package view;
 
-import model.AnomalyReport;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.UUID; // temporary for sample data
 
 /**
  * This class represents the right-hand-side of the GUI which
@@ -19,17 +16,16 @@ public class LogPanel extends JPanel {
     private static final Dimension SIZE = new Dimension(170, 530);
 
     /**
-     * This field is the viewport for the scroll pane, i.e.
+     * This constant is the viewport for the scroll pane, i.e.
      * the viewable portion of the entire scrollable area.
      */
-    private final JPanel myScrollView;
+    private static final JPanel SCROLL_VIEW = new JPanel();
 
     /**
      * Constructor to initialize the panel.
      */
     public LogPanel() {
         super();
-        myScrollView = new JPanel();
         initPanel();
         initScroll();
     }
@@ -47,8 +43,8 @@ public class LogPanel extends JPanel {
      * This method initializes the scroll pane.
      */
     private void initScroll() {
-        myScrollView.setLayout(new BoxLayout(myScrollView, BoxLayout.Y_AXIS));
-        add(new JScrollPane(myScrollView));
+        SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
+        add(new JScrollPane(SCROLL_VIEW));
     }
 
     /**
@@ -58,7 +54,7 @@ public class LogPanel extends JPanel {
      * @param theDetailedReport the detailed report to display after clicking.
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
-        myScrollView.add(new LogEntry(theSimpleReport, theDetailedReport));
+        SCROLL_VIEW.add(new LogEntry(theSimpleReport, theDetailedReport));
     }
 
     /**
