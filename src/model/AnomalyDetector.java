@@ -3,6 +3,7 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AnomalyDetector {
 
@@ -10,13 +11,13 @@ public class AnomalyDetector {
      * A private telemetry field for use in the Anomaly Detector class.
      * Represents the most recent telemetry data.
      */
-    private HashMap<String, Object> myCurrTelemetry;
+    private ConcurrentHashMap<String, Object> myCurrTelemetry;
 
     /**
      * A private telemetry field for use in the Anomaly Detector class.
      * Represents the telemetry data of a drone prior to the current cycle.
      */
-    private HashMap<String, Object> myPrevTelemetry;
+    private ConcurrentHashMap<String, Object> myPrevTelemetry;
 
     /**
      * A float to represent the x-axis size of the drone flight area.
@@ -55,7 +56,7 @@ public class AnomalyDetector {
      * @param thePrevTelemetry         A telemetry representing the previous drone state.
      * @return                         Returns the AnomalyReport object when created, null if not created.
      */
-    public AnomalyReport detect(HashMap<String, Object> theCurrTelemetry, HashMap<String, Object> thePrevTelemetry){
+    public AnomalyReport detect(ConcurrentHashMap<String, Object> theCurrTelemetry, ConcurrentHashMap<String, Object> thePrevTelemetry){
         myCurrTelemetry = theCurrTelemetry;
         myPrevTelemetry = thePrevTelemetry;
 
@@ -85,9 +86,9 @@ public class AnomalyDetector {
     private String positionAnomaly(){
         StringBuilder ret = new StringBuilder();
 
-        double currLatitude = (Double) myCurrTelemetry.get("latitude");
-        double currLongitude = (Double) myCurrTelemetry.get("longitude");
-        double currAltitude = (Double) myCurrTelemetry.get("altitude");
+        float currLatitude = (float) myCurrTelemetry.get("latitude");
+        float currLongitude = (float) myCurrTelemetry.get("longitude");
+        float currAltitude = (float) myCurrTelemetry.get("altitude");
 
         // Check in bounds allows for velocity check to diagnose anomaly cause
         if (currLatitude < 0 || currLatitude > LATITUDE_MAX ||
@@ -114,9 +115,9 @@ public class AnomalyDetector {
         // Future implementations could also use machine learning
         // Outlier detection with Weka DBSCAN or Isolation Forest
 
-        double prevLatitude = (Double) myPrevTelemetry.get("latitude");
-        double prevLongitude = (Double) myPrevTelemetry.get("longitude");
-        double prevAltitude = (Double) myPrevTelemetry.get("altitude");
+        float prevLatitude = (float) myPrevTelemetry.get("latitude");
+        float prevLongitude = (float) myPrevTelemetry.get("longitude");
+        float prevAltitude = (float) myPrevTelemetry.get("altitude");
 
         // Check intended velocity
         if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX){

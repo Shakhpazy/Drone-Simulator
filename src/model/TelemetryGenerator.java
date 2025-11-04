@@ -1,6 +1,7 @@
 package model;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * TelemetryGenerator is responsible for simulating drone telemetry data.
@@ -18,7 +19,7 @@ public class TelemetryGenerator {
     ArrayList<DroneInterface> myDrones;
 
     /** Telemetry snapshot of the drone state before movement. */
-    HashMap<String, Object> myBeforeTelemetryMap;
+    ConcurrentHashMap<String, Object> myBeforeTelemetryMap;
 
     /** Random generator used for movement and anomaly decisions. */
     private static final Random myRandom = new Random();
@@ -225,8 +226,8 @@ public class TelemetryGenerator {
      * @return a map containing drone id, altitude, longitude, latitude,
      *         velocity, battery level, orientation, and timestamp
      */
-    public HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
-        HashMap<String, Object> telemetryMap = new HashMap<>();
+    public ConcurrentHashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
+        ConcurrentHashMap<String, Object> telemetryMap = new ConcurrentHashMap<>();
         telemetryMap.put("id", theDrone.getId());
         telemetryMap.put("altitude", theDrone.getAltitude());
         telemetryMap.put("longitude", theDrone.getLongitude());
@@ -243,7 +244,7 @@ public class TelemetryGenerator {
         int batteryDrain = batteryDrained(theDrone, theDistance);
         theDrone.updateDrone(theLongitude, theLatitude, theAltitude, batteryDrain, theVelocity);
 
-        HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
+        ConcurrentHashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
 
         // Pass snapshots to anomaly detector
         //myAnomalyDetector.Detect();
@@ -264,7 +265,7 @@ public class TelemetryGenerator {
         return drain;
     }
 
-    public HashMap<String, Object> getMyBeforeTelemetryMap() {
+    public ConcurrentHashMap<String, Object> getMyBeforeTelemetryMap() {
         return myBeforeTelemetryMap;
     }
 }

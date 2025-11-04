@@ -1,7 +1,7 @@
 package controller;
 
 import model.*;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -56,24 +56,47 @@ public class DroneMonitorApp {
         AnomalyDatabase anomalyDTBS = new AnomalyDatabase();
         anomalyDTBS.initialize();
 
+        //Output to console if developer mode is enabled
+        if(myDevMode) {
+            System.out.println("---- START ----");
+            for (DroneInterface drone : drones) {
+                printDrone(drone);
+                System.out.println();
+            }
+        }
+
         //Create a runnable task that will execute at every time interval
         Runnable simulateNextStep = () -> {
             gen.processAllDrones();
 
-            //For each drone, send to AnomalyDetector.
+            //For each drone
             for (DroneInterface drone : drones) {
+                //Get previous Telemetry
+                ConcurrentHashMap<String, Object> myBeforeTelemetryMap = gen.getMyBeforeTelemetryMap();
 
-                HashMap<String, Object> myBeforeTelemetryMap = gen.getMyBeforeTelemetryMap(); //Get previous Telemetry
-                HashMap<String, Object> myCurrentTelemetryMap = gen.createTelemetryMap(drone); //Get Current Telemetry
+                //Get Current Telemetry
+                ConcurrentHashMap<String, Object> myCurrentTelemetryMap = gen.createTelemetryMap(drone);
+
+                //Get drone location to pass to view
+                float[] location = {(float) myCurrentTelemetryMap.get("longitude"),
+                                    (float) myCurrentTelemetryMap.get("latitude")};
+                //Get telemetry as a String to pass to view
+                String theTelemetry = telemetryToString(myCurrentTelemetryMap);
+
+                //Draw the drone on the view.
+                view.drawDrone(drone.getId(), location, theTelemetry);
 
                 //Send previous and current telemetry to anomaly detector for analysis
                 AnomalyReport anomaly = detector.detect(myBeforeTelemetryMap, myCurrentTelemetryMap);
 
-                //If anomaly is null, continue. Else add anomaly to database and update view
+                //If anomaly is not null.
                 if (anomaly != null) {
+                    //Add anomaly to database.
                     anomalyDTBS.insertReport(anomaly);
+                    //Add a log entry to view.
+                    view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
                 }
-
+                //Print to console if developer mode is enabled
                 if(myDevMode) {
                     printDrone(drone);
                     System.out.println();
@@ -81,14 +104,8 @@ public class DroneMonitorApp {
             }
         };
 
-        System.out.println("---- START ----");
-        for (DroneInterface drone : drones) {
-            printDrone(drone);
-            System.out.println();
-        }
-
         //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
-        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 5, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 7, TimeUnit.SECONDS);
 
         //Create a runnable task that will shut down the scheduler on program exit
         Runnable shutdownScheduler = () -> {
@@ -104,6 +121,7 @@ public class DroneMonitorApp {
         };
         Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
 
+        //Clear database after each use if developer mode is enabled.
         if (myDevMode) {
             Runnable clearDatabase = () -> {
                 anomalyDTBS.clear();
@@ -136,5 +154,24 @@ public class DroneMonitorApp {
                 target.getLatitude(),
                 target.getAltitude()
         );
+    }
+
+    /**
+     * Return a string representation to pass to the view to draw drone.
+     *
+     * @param myTelemetryMap
+     * @return the String representation of the Telemetry
+     */
+    private static String telemetryToString(ConcurrentHashMap<String, Object> myTelemetryMap) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("id: ").append(myTelemetryMap.get("id")).append("\n");
+        sb.append("altitude: ").append(myTelemetryMap.get("altitude")).append("\n");
+        sb.append("longitude: ").append(myTelemetryMap.get("longitude")).append("\n");
+        sb.append("latitude: ").append(myTelemetryMap.get("latitude")).append("\n");
+        sb.append("velocity: ").append(myTelemetryMap.get("velocity")).append("\n");
+        sb.append("batteryLevel: ").append(myTelemetryMap.get("batteryLevel")).append("\n");
+        sb.append("orientation: ").append(myTelemetryMap.get("orientation")).append("\n");
+        sb.append("timeStamp: ").append(myTelemetryMap.get("timeStamp")).append("\n");
+        return sb.toString();
     }
 }
