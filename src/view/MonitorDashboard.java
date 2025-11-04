@@ -28,6 +28,7 @@ public class MonitorDashboard extends JFrame {
     public MonitorDashboard() {
         super();
         initWindow();
+        drawDrone(1, new float[] {-180, 90}, "DATA");
     }
 
     /**
@@ -66,8 +67,8 @@ public class MonitorDashboard extends JFrame {
      *
      * @param theID the ID number for the drone.
      */
-    protected static void setSelectedDrone(final int theID) {
-        MAP_PANEL.setSelectedID(theID);
+    protected static boolean setSelectedDrone(final int theID) {
+        return MAP_PANEL.setSelectedID(theID);
     }
 
     /** Boilerplate JFrame setup. */

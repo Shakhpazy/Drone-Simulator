@@ -110,9 +110,11 @@ public class TelemetryPanel extends JPanel {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent theE) {
-                    MonitorDashboard.setSelectedDrone(myID);
+                    boolean isSelected = MonitorDashboard.setSelectedDrone(myID);
                     ID_ENTRY_MAP.values().forEach(e -> e.setBackground(Color.LIGHT_GRAY));
-                    setBackground(Color.GREEN);
+                    if (!isSelected) {
+                        setBackground(Color.GREEN);
+                    }
                 }
             });
         }
@@ -122,6 +124,7 @@ public class TelemetryPanel extends JPanel {
          */
         private void init() {
             setPreferredSize(SIZE);
+            setMaximumSize(SIZE);
             setEditable(false);
             setBackground(Color.LIGHT_GRAY);
             setBorder(BorderFactory.createLineBorder(Color.BLACK));
