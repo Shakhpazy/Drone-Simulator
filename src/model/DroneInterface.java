@@ -115,9 +115,9 @@ public interface DroneInterface {
     /**
      * Sets the orientation of the drone
      *
-     * @param theOrientation the Orientation ENUM
+     * @param theDegree the Orientation ENUM
      */
-    void setOrientation(Orientation theOrientation);
+    void setOrientation(float theDegree);
 
     /**
      * Sets the nextRoute the drone must go to
@@ -127,7 +127,7 @@ public interface DroneInterface {
     /**
      *
      */
-    void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float velocity);
+    void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float velocity, float degree);
 
     /**
      * Prints the current Drone in a neat fashion
