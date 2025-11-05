@@ -37,14 +37,14 @@ public class DroneMonitorApp {
 
         //Create 3 Drones to pass to Telemetry Generator.
         Drone drone1 = new Drone(3.0f, 100, Orientation.NORTH, route);
-        Drone drone2 = new Drone(2.0f, 85, Orientation.EAST, route);
-        Drone drone3 = new Drone(1.5f, 75, Orientation.WEST, route);
+//        Drone drone2 = new Drone(2.0f, 85, Orientation.EAST, route);
+//        Drone drone3 = new Drone(1.5f, 75, Orientation.WEST, route);
 
         //Add drones to pass to telemetry generator.
         ArrayList<DroneInterface> drones = new ArrayList<>();
         drones.add(drone1);
-        drones.add(drone2);
-        drones.add(drone3);
+//        drones.add(drone2);
+//        drones.add(drone3);
 
         //Initialize telemetry generator and add drones
         TelemetryGenerator gen = new TelemetryGenerator(drones);
@@ -132,11 +132,11 @@ public class DroneMonitorApp {
 
     private static ArrayList<RoutePoint> createRoute() {
         ArrayList<RoutePoint> route = new ArrayList<>();
-        route.add(new RoutePoint(100, 100, 110)); // bottom-left
-        route.add(new RoutePoint(130, 100, 115)); // bottom-right (30 units)
-        route.add(new RoutePoint(130, 120, 120)); // top-right    (20 units)
-        route.add(new RoutePoint(100, 120, 125)); // top-left     (30 units)
-        route.add(new RoutePoint(100, 100, 130)); // back to start(20 units)
+        route.add(new RoutePoint(60, 60, 110)); // bottom-left
+        route.add(new RoutePoint(90, 60, 115)); // bottom-right (30 units)
+        route.add(new RoutePoint(90, 80, 120)); // top-right    (20 units)
+        route.add(new RoutePoint(60, 80, 125)); // top-left     (30 units)
+        route.add(new RoutePoint(60, 60, 130)); // back to start(20 units)
         return route;
     }
 
