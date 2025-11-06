@@ -27,8 +27,6 @@ public class TelemetryGenerator {
     /** Timestamp reference used for telemetry data. */
     private static final Date myDate = new Date();
 
-    //private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
-
     /** Maximum allowed velocity in normal moves. */
     private static final float MAX_VELOCITY = 10;
 
@@ -72,9 +70,11 @@ public class TelemetryGenerator {
      * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
      *   a random anomaly move or a normal route-following move.
      */
-    public void processAllDrones() {
+    public ArrayList<HashMap<String, Object>[]> processAllDrones() {
+        ArrayList<HashMap<String, Object>[]> telemetryList = new ArrayList<>();
+
         for (DroneInterface drone : myDrones) {
-            myBeforeTelemetryMap = createTelemetryMap(drone);
+            HashMap<String, Object> myBeforeTelemetryMap = createTelemetryMap(drone);
 
             if (!drone.isAlive()) {
                 continue;
@@ -85,11 +85,20 @@ public class TelemetryGenerator {
             } else {
                 getMove(drone);
             }
+
+            HashMap<String, Object> myAfterTelemetryMap = createTelemetryMap(drone);
+
+            @SuppressWarnings("unchecked")
+            HashMap<String, Object>[] pair = (HashMap<String, Object>[]) new HashMap[2];
+            pair[0] = myBeforeTelemetryMap;
+            pair[1] = myAfterTelemetryMap;
+
+            telemetryList.add(pair);
         }
 
         //After all drones move to the next step we can check for collisions.
         checkCollisions();
-
+        return telemetryList;
     }
 
     /**
@@ -138,7 +147,6 @@ public class TelemetryGenerator {
                         Math.pow(latitude - theDrone.getLatitude(), 2) +
                         Math.pow(altitude - theDrone.getAltitude(), 2)
         );
-
         applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, anomalyDistance);
     }
 
@@ -147,8 +155,6 @@ public class TelemetryGenerator {
      * The drone moves toward its next waypoint, adjusting position and altitude
      * proportionally to velocity. Velocity is increased or decreased depending
      * on distance to the waypoint.
-     *
-     * Status code is set to 1 for normal updates.
      *
      * @param theDrone the drone to update with a normal move
      */
@@ -234,15 +240,15 @@ public class TelemetryGenerator {
         telemetryMap.put("latitude", theDrone.getLatitude());
         telemetryMap.put("velocity", theDrone.getVelocity());
         telemetryMap.put("batteryLevel", theDrone.getBatteryLevel());
-        telemetryMap.put("orientation", theDrone.getOrientation());
+        telemetryMap.put("orientation", theDrone.getOrientation().getDegree());
         telemetryMap.put("timeStamp", myDate.getTime());
         return telemetryMap;
     }
 
     private void applyDroneUpdate(DroneInterface theDrone, float theLongitude, float theLatitude, float theAltitude, float theVelocity, float theDistance) {
-        //now we need to update the drone state
+        //before we update the drone state, we need to get the amount of battery drained and the orientation it should face
         int batteryDrain = batteryDrained(theDrone, theDistance);
-        theDrone.updateDrone(theLongitude, theLatitude, theAltitude, batteryDrain, theVelocity);
+        float degree = theDrone.getOrientation().findNextOrientation(theDrone.getLongitude(), theDrone.getLatitude(), theLongitude, theLatitude);
 
         ConcurrentHashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
 

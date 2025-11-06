@@ -31,7 +31,7 @@ public class Drone implements  DroneInterface {
      * @param theVelocity float of the velocity
      * @param theBatterLevel int of the battery level 0-100
      */
-    public Drone(float theVelocity, int theBatterLevel, Orientation theOrientation, ArrayList<RoutePoint> theRoute) {
+    public Drone(float theVelocity, int theBatterLevel, ArrayList<RoutePoint> theRoute) {
         //implement error handling for  these values passed later
         if (theRoute.isEmpty()) {
             throw new IllegalArgumentException("No route has been set for a drone");
@@ -42,7 +42,7 @@ public class Drone implements  DroneInterface {
         myAltitude = start.getAltitude();
         myVelocity = theVelocity;
         myBatteryLevel = theBatterLevel;
-        myOrientation = theOrientation;
+        myOrientation = new Orientation(0);
         myRoute = theRoute;
         nextPoint += 1;
         totalDrones += 1;
@@ -111,19 +111,20 @@ public class Drone implements  DroneInterface {
         myVelocity = theVelocity;
     }
 
-    public void setOrientation(Orientation theOrientation) {
-        myOrientation = theOrientation;
+    public void setOrientation(float theDegree) {
+        myOrientation.setDegrees(theDegree);
     }
 
     public void setNextRoute() {
         nextPoint = (nextPoint + 1) % myRoute.size();
     }
 
-    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float theVelocity) {
+    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float theVelocity, float theDegree) {
         setLongitude(theLongitude);
         setLatitude(theLatitude);
         setAltitude(theAltitude);
         setVelocity(theVelocity);
+        setOrientation(theDegree);
         setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, myBatteryLevel));
     }
 
