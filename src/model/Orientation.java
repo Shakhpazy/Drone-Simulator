@@ -24,7 +24,10 @@ public class Orientation {
         float dx = theNextLong - thePrevLong;
         float dy = theNextLat - thePrevLat;
 
-        float angleDegrees = (float) Math.toDegrees(Math.atan2(dy, dx));
+        // Default atan2 gives 0° = East, so rotate 90° counterclockwise to make 0° = North
+        float angleDegrees = (float) Math.toDegrees(Math.atan2(dx, dy));
+
+        // Normalize to 0–360 range
         return ((angleDegrees % 360) + 360) % 360;
     }
 
