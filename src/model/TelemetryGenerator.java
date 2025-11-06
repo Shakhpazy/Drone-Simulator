@@ -235,7 +235,7 @@ public class TelemetryGenerator {
         telemetryMap.put("latitude", theDrone.getLatitude());
         telemetryMap.put("velocity", theDrone.getVelocity());
         telemetryMap.put("batteryLevel", theDrone.getBatteryLevel());
-        telemetryMap.put("orientation", theDrone.getOrientation());
+        telemetryMap.put("orientation", theDrone.getOrientation().getDegree());
         telemetryMap.put("timeStamp", System.currentTimeMillis());
         return telemetryMap;
     }
