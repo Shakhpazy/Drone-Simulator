@@ -10,7 +10,7 @@ public class ReportFormatter {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
             .withZone(ZoneId.systemDefault());
 
-    private static String getFormattedTime(ConcurrentHashMap<String, Object> telemetry) {
+    public static String getFormattedTime(ConcurrentHashMap<String, Object> telemetry) {
         long timestamp = (Long) telemetry.get("timestamp");
         Instant instant = Instant.ofEpochMilli(timestamp);
         return FORMATTER.format(instant);

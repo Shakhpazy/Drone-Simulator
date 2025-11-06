@@ -6,6 +6,7 @@
 //import java.util.concurrent.ScheduledExecutorService;
 //import java.util.concurrent.TimeUnit;
 //import java.util.ArrayList;
+//import model.ReportFormatter;
 //import view.MonitorDashboard;
 //
 ///**
@@ -156,7 +157,10 @@
 //        );
 //    }
 //
-//    /**
+//
+//
+//
+///**
 //     * Return a string representation to pass to the view to draw drone.
 //     *
 //     * @param myTelemetryMap
@@ -171,7 +175,7 @@
 //        sb.append("velocity: ").append(myTelemetryMap.get("velocity")).append("\n");
 //        sb.append("batteryLevel: ").append(myTelemetryMap.get("batteryLevel")).append("\n");
 //        sb.append("orientation: ").append(myTelemetryMap.get("orientation")).append("\n");
-//        sb.append("timeStamp: ").append(myTelemetryMap.get("timeStamp")).append("\n");
+//        sb.append("timeStamp: ").append(ReportFormatter.getFormattedTime(myTelemetryMap.get("timestamp"))).append("\n");
 //        return sb.toString();
 //    }
 //}
