@@ -10,7 +10,7 @@ import java.util.Map;
 /**
  * This class displays the telemetry data for the mapped drones under the map.
  */
-public class TelemetryPanel extends JPanel {
+class TelemetryPanel extends JPanel {
 
     /**
      * This constant determines the size of the panel.
@@ -30,10 +30,30 @@ public class TelemetryPanel extends JPanel {
     /**
      * Constructor to initialize the panel and its components.
      */
-    public TelemetryPanel() {
+    TelemetryPanel() {
         super();
         initPanel();
         initScroll();
+    }
+
+    /**
+     * If the given ID already has an entry, that entry is removed
+     * and a new one with updated data is added. Otherwise, a new
+     * entry is added.
+     *
+     * @param theID the drone's id number.
+     * @param theData the drone's telemetry data.
+     */
+    public void addTelemetryEntry(final int theID, final String theData) {
+        if (ID_ENTRY_MAP.get(theID) == null) {
+            // add new entry
+            TelemetryEntry e = new TelemetryEntry(theID, theData);
+            ID_ENTRY_MAP.put(theID, e);
+            SCROLL_VIEW.add(e);
+        } else {
+            // update existing entry
+            ID_ENTRY_MAP.get(theID).setText(theData);
+        }
     }
 
     /**
@@ -60,27 +80,7 @@ public class TelemetryPanel extends JPanel {
     }
 
     /**
-     * If the given ID already has an entry, that entry is removed
-     * and a new one with updated data is added. Otherwise, a new
-     * entry is added.
-     *
-     * @param theID the drone's id number.
-     * @param theData the drone's telemetry data.
-     */
-    public void addTelemetryEntry(final int theID, final String theData) {
-        if (ID_ENTRY_MAP.get(theID) == null) {
-            // add new entry
-            TelemetryEntry e = new TelemetryEntry(theID, theData);
-            ID_ENTRY_MAP.put(theID, e);
-            SCROLL_VIEW.add(e);
-        } else {
-            // update existing entry
-            ID_ENTRY_MAP.get(theID).setText(theData);
-        }
-    }
-
-    /**
-     * This inner class represents one telemetry data entry for a single drone.
+     * This inner class represents a telemetry data entry for tracking a single drone.
      */
     private static class TelemetryEntry extends JTextArea {
 
@@ -101,7 +101,7 @@ public class TelemetryPanel extends JPanel {
          * @param theID the drone's id number.
          * @param theData the telemetry data to display.
          */
-        public TelemetryEntry(final int theID, final String theData) {
+        private TelemetryEntry(final int theID, final String theData) {
             myID = theID;
             init();
             setText(theData);

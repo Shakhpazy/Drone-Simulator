@@ -2,7 +2,6 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
-import java.beans.PropertyChangeSupport;
 
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
@@ -62,7 +61,7 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
      *
      * @param theDetailedReport the detailed report to display.
      */
-    protected static void setDetailReport(final String theDetailedReport) {
+    static void setDetailReport(final String theDetailedReport) {
         DETAILS_PANEL.setReport(theDetailedReport);
     }
 
@@ -71,7 +70,7 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
      *
      * @param theID the ID number for the drone.
      */
-    protected static boolean setSelectedDrone(final int theID) {
+    static boolean setSelectedDrone(final int theID) {
         return MAP_PANEL.setSelectedID(theID);
     }
 
@@ -98,12 +97,10 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
         // File
         JMenu fileMenu = new JMenu("File");
         JMenuItem saveCSV = new JMenuItem("Save as .csv");
-        saveCSV.addActionListener(
-                theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, theEvent));
+        saveCSV.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
         fileMenu.add(saveCSV);
         JMenuItem savePDF = new JMenuItem("Save as .pdf");
-        savePDF.addActionListener(
-                theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, theEvent));
+        savePDF.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
         fileMenu.add(savePDF);
         bar.add(fileMenu);
 

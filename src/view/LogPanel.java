@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * This class represents the right-hand-side of the GUI which
  * displays quick descriptions of recent anomaly logs.
  */
-public class LogPanel extends JPanel {
+class LogPanel extends JPanel {
 
     /** This constant determines the size of the panel. */
     private static final Dimension SIZE = new Dimension(170, 530);
@@ -24,10 +24,20 @@ public class LogPanel extends JPanel {
     /**
      * Constructor to initialize the panel.
      */
-    public LogPanel() {
+    LogPanel() {
         super();
         initPanel();
         initScroll();
+    }
+
+    /**
+     * This method allows for adding entries to the anomaly log.
+     *
+     * @param theSimpleReport the simple report to display.
+     * @param theDetailedReport the detailed report to display after clicking.
+     */
+    public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
+        SCROLL_VIEW.add(new LogEntry(theSimpleReport, theDetailedReport));
     }
 
     /**
@@ -48,16 +58,6 @@ public class LogPanel extends JPanel {
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll);
-    }
-
-    /**
-     * This method allows for adding entries to the anomaly log.
-     *
-     * @param theSimpleReport the simple report to display.
-     * @param theDetailedReport the detailed report to display after clicking.
-     */
-    public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
-        SCROLL_VIEW.add(new LogEntry(theSimpleReport, theDetailedReport));
     }
 
     /**
@@ -88,7 +88,7 @@ public class LogPanel extends JPanel {
          * @param theSimpleReport the simple report to add to the log.
          * @param theDetailedReport the detailed report to display when clicked.
          */
-        public LogEntry(final String theSimpleReport, final String theDetailedReport) {
+        private LogEntry(final String theSimpleReport, final String theDetailedReport) {
             super();
             init();
             ENTRIES.add(this);
@@ -101,7 +101,7 @@ public class LogPanel extends JPanel {
                 public void mouseClicked(final MouseEvent theEvent) {
                     MonitorDashboard.setDetailReport(theDetailedReport);
                     selected = (LogEntry) theEvent.getSource();
-                    ENTRIES.forEach(theE -> theE.setBackground(Color.LIGHT_GRAY));
+                    ENTRIES.forEach(theEntry -> theEntry.setBackground(Color.LIGHT_GRAY));
                     selected.setBackground(Color.GREEN);
                 }
             });
