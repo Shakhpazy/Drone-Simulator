@@ -1,8 +1,6 @@
 package model;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * TelemetryGenerator is responsible for simulating drone telemetry data.
  * It processes a list of drones, generating either normal movements
@@ -17,9 +15,6 @@ public class TelemetryGenerator {
 
     /** List of drones being simulated. */
     ArrayList<DroneInterface> myDrones;
-
-    /** Telemetry snapshot of the drone state before movement. */
-    ConcurrentHashMap<String, Object> myBeforeTelemetryMap;
 
     /** Random generator used for movement and anomaly decisions. */
     private static final Random myRandom = new Random();
@@ -232,8 +227,8 @@ public class TelemetryGenerator {
      * @return a map containing drone id, altitude, longitude, latitude,
      *         velocity, battery level, orientation, and timestamp
      */
-    public ConcurrentHashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
-        ConcurrentHashMap<String, Object> telemetryMap = new ConcurrentHashMap<>();
+    public HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
+        HashMap<String, Object> telemetryMap = new HashMap<>();
         telemetryMap.put("id", theDrone.getId());
         telemetryMap.put("altitude", theDrone.getAltitude());
         telemetryMap.put("longitude", theDrone.getLongitude());
@@ -250,8 +245,9 @@ public class TelemetryGenerator {
         int batteryDrain = batteryDrained(theDrone, theDistance);
         float degree = theDrone.getOrientation().findNextOrientation(theDrone.getLongitude(), theDrone.getLatitude(), theLongitude, theLatitude);
 
-        ConcurrentHashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
+        HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
 
+        theDrone.updateDrone(theLongitude, theLatitude, theAltitude, batteryDrain, theVelocity, degree);
         // Pass snapshots to anomaly detector
         //myAnomalyDetector.Detect();
     }
@@ -269,9 +265,5 @@ public class TelemetryGenerator {
         }
 
         return drain;
-    }
-
-    public ConcurrentHashMap<String, Object> getMyBeforeTelemetryMap() {
-        return myBeforeTelemetryMap;
     }
 }
