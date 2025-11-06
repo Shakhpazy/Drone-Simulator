@@ -45,34 +45,31 @@ public class AnomalyDetector {
      */
     private final int BATTERY_DRAIN_RATE_MAX = 100;
 
-    /**
-     * A PropertyChangeSupport object used for notifying GUI of an anomaly found
-     */
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     /**
      * A method to detect anomalies between two telemetry objects.
-     * @param theCurrTelemetry         A telemetry representing the current drone state.
-     * @param thePrevTelemetry         A telemetry representing the previous drone state.
-     * @return                         Returns the AnomalyReport object when created, null if not created.
+     *
+     * @param theCurrTelemetry A telemetry representing the current drone state.
+     * @param thePrevTelemetry A telemetry representing the previous drone state.
+     * @return Returns the AnomalyReport object when created, null if not created.
      */
-    public AnomalyReport detect(ConcurrentHashMap<String, Object> theCurrTelemetry, ConcurrentHashMap<String, Object> thePrevTelemetry){
+    public AnomalyReport detect(ConcurrentHashMap<String, Object> theCurrTelemetry, ConcurrentHashMap<String, Object> thePrevTelemetry) {
         myCurrTelemetry = theCurrTelemetry;
         myPrevTelemetry = thePrevTelemetry;
 
         /* Check for spoofing or positional anomaly */
         String errorMessage = positionAnomaly();
-        if (!errorMessage.equals("N/A")){
+        if (!errorMessage.equals("N/A")) {
             AnomalyReport ar = createAnomalyReport(errorMessage);
-//            pcs.firePropertyChange("Anomaly Detected", null, ar); FIXME: Delete if uneeded
+
             return ar;
         }
 
         /* Check for battery anomaly */
         errorMessage = powerAnomaly();
-        if (errorMessage != null){
+        if (errorMessage != null) {
             AnomalyReport ar = createAnomalyReport(errorMessage);
-//            pcs.firePropertyChange("Anomaly Detected", null, ar); FIXME: Delete if uneeded
+
             return ar;
         }
 
@@ -81,9 +78,10 @@ public class AnomalyDetector {
 
     /**
      * A private method to hold positional anomaly detection logic.
-     * @return  Returns a String anomaly description.
+     *
+     * @return Returns a String anomaly description.
      */
-    private String positionAnomaly(){
+    private String positionAnomaly() {
         StringBuilder ret = new StringBuilder();
 
         float currLatitude = (float) myCurrTelemetry.get("latitude");
@@ -92,8 +90,8 @@ public class AnomalyDetector {
 
         // Check in bounds allows for velocity check to diagnose anomaly cause
         if (currLatitude < 0 || currLatitude > LATITUDE_MAX ||
-        currLongitude < 0 || currLongitude > LONGITUDE_MAX ||
-        currAltitude < 0 || currAltitude > ALTITUDE_MAX){
+                currLongitude < 0 || currLongitude > LONGITUDE_MAX ||
+                currAltitude < 0 || currAltitude > ALTITUDE_MAX) {
             ret.append("Out of Bounds");
         }
 
@@ -120,13 +118,13 @@ public class AnomalyDetector {
         float prevAltitude = (float) myPrevTelemetry.get("altitude");
 
         // Check intended velocity
-        if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX){
+        if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX) {
             if (!ret.isEmpty()) ret.append(" Due to ");
             ret.append("Dangerous Change in Altitude");
             return ret.toString();
         } else if (Math.abs(currLongitude - prevLongitude) >
                 ORTHOGONAL_VELOCITY_MAX ||
-                Math.abs(currLatitude - prevLatitude) > ORTHOGONAL_VELOCITY_MAX){
+                Math.abs(currLatitude - prevLatitude) > ORTHOGONAL_VELOCITY_MAX) {
             if (!ret.isEmpty()) ret.append(" Due to ");
             ret.append("GPS Spoofing");
             return ret.toString();
@@ -139,13 +137,14 @@ public class AnomalyDetector {
 
     /**
      * A private method to hold the power anomaly detection logic.
-     * @return  Returns a boolean representing whether the battery level is 0.
+     *
+     * @return Returns a boolean representing whether the battery level is 0.
      */
-    private String powerAnomaly(){
+    private String powerAnomaly() {
         int currBatteryLevel = (int) myCurrTelemetry.get("batteryLevel");
-        if ((int) myPrevTelemetry.get("batteryLevel") - currBatteryLevel < BATTERY_DRAIN_RATE_MAX) {
+        if ((int) myPrevTelemetry.get("batteryLevel") - currBatteryLevel > BATTERY_DRAIN_RATE_MAX) {
             return "Battery Drain Failure";
-        } else if (currBatteryLevel <= 0){
+        } else if (currBatteryLevel <= 0) {
             return "Battery Failure";
         }
         return null;
@@ -153,10 +152,11 @@ public class AnomalyDetector {
 
     /**
      * A private method to create a simplified anomaly report string.
-     * @param theAnomalyType    A string representing the type of anomaly being reported.
-     * @return                  Returns a simplified string anomaly report.
+     *
+     * @param theAnomalyType A string representing the type of anomaly being reported.
+     * @return Returns a simplified string anomaly report.
      */
-    private String createDescSimple(String theAnomalyType){
+    private String createDescSimple(String theAnomalyType) {
         StringBuilder sb = new StringBuilder();
         sb.append("Anomaly Detected! \n Drone ID: ");
         sb.append(myCurrTelemetry.get("id"));
@@ -169,10 +169,11 @@ public class AnomalyDetector {
 
     /**
      * A private method to create a detailed anomaly report string.
-     * @param theAnomalyType    A string representing the type of anomaly being reported.
-     * @return                  Returns a detailed string anomaly report.
+     *
+     * @param theAnomalyType A string representing the type of anomaly being reported.
+     * @return Returns a detailed string anomaly report.
      */
-    private String createDescDetailed(String theAnomalyType){
+    private String createDescDetailed(String theAnomalyType) {
         StringBuilder sb = new StringBuilder();
         sb.append("Drone Number: ").append(myCurrTelemetry.get("id"));
         sb.append("has experienced an anomaly at time: ").append(myCurrTelemetry.get("timeStamp"));
@@ -202,10 +203,11 @@ public class AnomalyDetector {
 
     /**
      * A private method to create an AnomalyReport object
-     * @param theAnomalyType    A string classification of the anomaly to be reported on.
-     * @return                  Returns an anomaly report with the relevant information.
+     *
+     * @param theAnomalyType A string classification of the anomaly to be reported on.
+     * @return Returns an anomaly report with the relevant information.
      */
-    private AnomalyReport createAnomalyReport(String theAnomalyType){
+    private AnomalyReport createAnomalyReport(String theAnomalyType) {
         String simpleReport = createDescSimple(theAnomalyType);
         String detailedReport = createDescDetailed(theAnomalyType);
 
@@ -219,21 +221,4 @@ public class AnomalyDetector {
                 simpleReport,
                 detailedReport);
     }
-// FIXME: Delete if deemed unecessary
-//    /**
-//     * A method to acquire listeners for anomaly notification.
-//     * @param listener  A PropertyChangeListener to be added to the PropertyChangeSupport.
-//     */
-//    public void addPropertyChangeListener(PropertyChangeListener listener) {
-//        this.pcs.addPropertyChangeListener(listener);
-//    }
-//
-//    FIXME: Delete if deemed unecessary
-//    /**
-//     * A method to remove listeners for anomaly notification.
-//     * @param listener  A PropertyChangeListener to be removed from the PropertyChangeSupport.
-//     */
-//    public void removePropertyChangeListener(PropertyChangeListener listener) {
-//        this.pcs.removePropertyChangeListener(listener);
-//    }
 }
