@@ -16,7 +16,7 @@ public class TestView {
         route.add(new RoutePoint(100, 100, 110)); // bottom-left
         route.add(new RoutePoint(130, 100, 115)); // bottom-right (30 units)
 
-        Drone drone1 = new Drone(3.0f, 100, Orientation.NORTH, route);
+        Drone drone1 = new Drone(3.0f, 100, route);
 
         view.drawDrone(drone1.getId(), new float[]{12, 12}, "");
     }

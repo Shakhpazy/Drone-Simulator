@@ -7,7 +7,7 @@ import java.awt.*;
  * This class is the main window / dashboard for the autonomous drone monitoring
  * system.
  */
-public class MonitorDashboard extends JFrame {
+public class MonitorDashboard extends PropertyEnabledDashboard {
 
     /** This constant determines the size of the window. */
     private static final Dimension SIZE = new Dimension(1100, 700);
@@ -61,7 +61,7 @@ public class MonitorDashboard extends JFrame {
      *
      * @param theDetailedReport the detailed report to display.
      */
-    protected static void setDetailReport(final String theDetailedReport) {
+    static void setDetailReport(final String theDetailedReport) {
         DETAILS_PANEL.setReport(theDetailedReport);
     }
 
@@ -70,7 +70,7 @@ public class MonitorDashboard extends JFrame {
      *
      * @param theID the ID number for the drone.
      */
-    protected static boolean setSelectedDrone(final int theID) {
+    static boolean setSelectedDrone(final int theID) {
         return MAP_PANEL.setSelectedID(theID);
     }
 
@@ -97,10 +97,10 @@ public class MonitorDashboard extends JFrame {
         // File
         JMenu fileMenu = new JMenu("File");
         JMenuItem saveCSV = new JMenuItem("Save as .csv");
-        saveCSV.addActionListener(theEvent -> saveAsCSV());
+        saveCSV.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
         fileMenu.add(saveCSV);
         JMenuItem savePDF = new JMenuItem("Save as .pdf");
-        savePDF.addActionListener(theEvent -> saveAsPDF());
+        savePDF.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
         fileMenu.add(savePDF);
         bar.add(fileMenu);
 
@@ -120,20 +120,6 @@ public class MonitorDashboard extends JFrame {
 
         setJMenuBar(bar);
         bar.setVisible(true);
-    }
-
-    /**
-     * Saves the anomaly reports from the database as a .csv file.
-     */
-    private void saveAsCSV() {
-        System.out.println("eventually, this will save as .csv");
-    }
-
-    /**
-     * Saves the anomaly reports from the database as a .pdf file.
-     */
-    private void saveAsPDF() {
-        System.out.println("eventually, this will save as .pdf");
     }
 
     /**

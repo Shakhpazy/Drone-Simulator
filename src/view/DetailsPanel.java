@@ -7,7 +7,7 @@ import java.awt.*;
  * This class represents the detailed section underneath the log panel.
  * When a simple log is clicked on, the detailed log is shown here.
  */
-public class DetailsPanel extends JPanel {
+class DetailsPanel extends JPanel {
 
     /** This constant determines the size of the panel. */
     private static final Dimension SIZE = new Dimension(170, 170);
@@ -20,7 +20,7 @@ public class DetailsPanel extends JPanel {
     /**
      * Constructor to initialize object.
      */
-    public DetailsPanel() {
+    DetailsPanel() {
         super();
         initPanel();
         initTextArea();

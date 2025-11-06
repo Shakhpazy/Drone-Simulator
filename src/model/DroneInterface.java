@@ -54,7 +54,7 @@ public interface DroneInterface {
      *
      * @return the battery level as a percentage (0–100)
      */
-    int getBatteryLevel();
+    float getBatteryLevel();
 
     /**
      * Gets the current orientation of the Drone
@@ -110,14 +110,14 @@ public interface DroneInterface {
      *
      * @param theBatteryLevel the battery level as a percentage (0–100)
      */
-    void setBatteryLevel(int theBatteryLevel);
+    void setBatteryLevel(float theBatteryLevel);
 
     /**
      * Sets the orientation of the drone
      *
-     * @param theOrientation the Orientation ENUM
+     * @param theDegree the Orientation ENUM
      */
-    void setOrientation(Orientation theOrientation);
+    void setOrientation(float theDegree);
 
     /**
      * Sets the nextRoute the drone must go to
@@ -127,7 +127,7 @@ public interface DroneInterface {
     /**
      *
      */
-    void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float velocity);
+    void updateDrone(float theLongitude, float theLatitude, float theAltitude, float theBatteryDrained, float velocity, float degree);
 
     /**
      * Prints the current Drone in a neat fashion
