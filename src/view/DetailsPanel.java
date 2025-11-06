@@ -44,8 +44,7 @@ public class DetailsPanel extends JPanel {
         myTextArea.setLineWrap(true);
         myTextArea.setWrapStyleWord(true);
         myTextArea.setCaretColor(new Color(0, 0, 0, 0));
-        myTextArea.setBackground(new Color(0, 0, 0, 0));
-        add(myTextArea);
+        add(new JScrollPane(myTextArea));
     }
 
     /**

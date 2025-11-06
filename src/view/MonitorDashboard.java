@@ -28,7 +28,6 @@ public class MonitorDashboard extends JFrame {
     public MonitorDashboard() {
         super();
         initWindow();
-        drawDrone(1, new float[] {-180, 90}, "DATA");
     }
 
     /**
@@ -39,6 +38,8 @@ public class MonitorDashboard extends JFrame {
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
         LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -51,6 +52,8 @@ public class MonitorDashboard extends JFrame {
     public void drawDrone(final int theID, final float[] theLoc, final String theTelData) {
         MAP_PANEL.setDroneMapping(theID, theLoc);
         TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
+        revalidate();
+        repaint();
     }
 
     /**
