@@ -1,13 +1,10 @@
 package view;
 
-import model.AnomalyReport;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.UUID; // temporary for sample data
 
 /**
  * This class represents the right-hand-side of the GUI which
@@ -19,17 +16,16 @@ public class LogPanel extends JPanel {
     private static final Dimension SIZE = new Dimension(170, 530);
 
     /**
-     * This field is the viewport for the scroll pane, i.e.
+     * This constant is the viewport for the scroll pane, i.e.
      * the viewable portion of the entire scrollable area.
      */
-    private final JPanel myScrollView;
+    private static final JPanel SCROLL_VIEW = new JPanel();
 
     /**
      * Constructor to initialize the panel.
      */
     public LogPanel() {
         super();
-        myScrollView = new JPanel();
         initPanel();
         initScroll();
     }
@@ -47,8 +43,11 @@ public class LogPanel extends JPanel {
      * This method initializes the scroll pane.
      */
     private void initScroll() {
-        myScrollView.setLayout(new BoxLayout(myScrollView, BoxLayout.Y_AXIS));
-        add(new JScrollPane(myScrollView));
+        SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
+        JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        add(scroll);
     }
 
     /**
@@ -58,7 +57,7 @@ public class LogPanel extends JPanel {
      * @param theDetailedReport the detailed report to display after clicking.
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
-        myScrollView.add(new LogEntry(theSimpleReport, theDetailedReport));
+        SCROLL_VIEW.add(new LogEntry(theSimpleReport, theDetailedReport));
     }
 
     /**
@@ -70,7 +69,7 @@ public class LogPanel extends JPanel {
          * This constant defines the size of the entry within the
          * viewed portion of the scrollable area.
          */
-        private static final Dimension SIZE = new Dimension(165, 100);
+        private static final Dimension SIZE = new Dimension(150, 100);
 
         /**
          * This constant keeps track of all instances of LogEntry.

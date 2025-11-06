@@ -2,12 +2,13 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.beans.PropertyChangeSupport;
 
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
  * system.
  */
-public class MonitorDashboard extends JFrame {
+public class MonitorDashboard extends PropertyEnabledDashboard {
 
     /** This constant determines the size of the window. */
     private static final Dimension SIZE = new Dimension(1100, 700);
@@ -28,17 +29,6 @@ public class MonitorDashboard extends JFrame {
     public MonitorDashboard() {
         super();
         initWindow();
-
-        drawDrone(1, new float[] {100, 200});
-    }
-
-    /**
-     * This static method sets the anomaly report for the details panel.
-     *
-     * @param theDetailedReport the detailed report to display.
-     */
-    public static void setDetailReport(final String theDetailedReport) {
-        DETAILS_PANEL.setReport(theDetailedReport);
     }
 
     /**
@@ -49,16 +39,40 @@ public class MonitorDashboard extends JFrame {
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
         LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+        revalidate();
+        repaint();
     }
 
     /**
      * Draws a representation of the drone's location on the map panel.
      *
      * @param theID the drone's unique id value.
-     * @param theLoc the drones location as a float array containing {latitude, longitude}.
+     * @param theLoc the drone's location as a float array containing {longitude, latitude}.
+     * @param theTelData the drone's telemetry data as a string.
      */
-    public void drawDrone(final int theID, final float[] theLoc) {
+    public void drawDrone(final int theID, final float[] theLoc, final String theTelData) {
         MAP_PANEL.setDroneMapping(theID, theLoc);
+        TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
+        revalidate();
+        repaint();
+    }
+
+    /**
+     * This static method sets the anomaly report for the details panel.
+     *
+     * @param theDetailedReport the detailed report to display.
+     */
+    protected static void setDetailReport(final String theDetailedReport) {
+        DETAILS_PANEL.setReport(theDetailedReport);
+    }
+
+    /**
+     * Sets the selected drone in the MapPanel and TelemetryPanel.
+     *
+     * @param theID the ID number for the drone.
+     */
+    protected static boolean setSelectedDrone(final int theID) {
+        return MAP_PANEL.setSelectedID(theID);
     }
 
     /** Boilerplate JFrame setup. */
@@ -70,7 +84,9 @@ public class MonitorDashboard extends JFrame {
         initMenuBar();
         addPanels();
         pack();
+        setResizable(false);
         setLocationRelativeTo(null);
+        setTitle("Autonomous Drone Monitor Dashboard");
     }
 
     /**
@@ -82,10 +98,12 @@ public class MonitorDashboard extends JFrame {
         // File
         JMenu fileMenu = new JMenu("File");
         JMenuItem saveCSV = new JMenuItem("Save as .csv");
-        saveCSV.addActionListener(theEvent -> saveAsCSV());
+        saveCSV.addActionListener(
+                theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, theEvent));
         fileMenu.add(saveCSV);
         JMenuItem savePDF = new JMenuItem("Save as .pdf");
-        savePDF.addActionListener(theEvent -> saveAsPDF());
+        savePDF.addActionListener(
+                theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, theEvent));
         fileMenu.add(savePDF);
         bar.add(fileMenu);
 
@@ -105,20 +123,6 @@ public class MonitorDashboard extends JFrame {
 
         setJMenuBar(bar);
         bar.setVisible(true);
-    }
-
-    /**
-     * Saves the anomaly reports from the database as a .csv file.
-     */
-    private void saveAsCSV() {
-        System.out.println("eventually, this will save as .csv");
-    }
-
-    /**
-     * Saves the anomaly reports from the database as a .pdf file.
-     */
-    private void saveAsPDF() {
-        System.out.println("eventually, this will save as .pdf");
     }
 
     /**

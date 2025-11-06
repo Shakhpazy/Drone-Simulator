@@ -2,19 +2,137 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * This class displays the telemetry data for the mapped drones under the map.
+ */
 public class TelemetryPanel extends JPanel {
 
-    /** This constant determines the size of the panel. */
+    /**
+     * This constant determines the size of the panel.
+     */
     private static final Dimension SIZE = new Dimension(930, 170);
 
+    /**
+     * This constant is the viewport of the scroll pane.
+     */
+    private static final JPanel SCROLL_VIEW = new JPanel();
+
+    /**
+     * This constant is a mapping between drone IDs and their associated entries.
+     */
+    private static final Map<Integer, TelemetryEntry> ID_ENTRY_MAP = new HashMap<>();
+
+    /**
+     * Constructor to initialize the panel and its components.
+     */
     public TelemetryPanel() {
         super();
         initPanel();
+        initScroll();
     }
 
+    /**
+     * Initializes the JPanel.
+     */
     private void initPanel() {
         setPreferredSize(SIZE);
         setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setLayout(new GridLayout());
+        setAlignmentX(LEFT_ALIGNMENT);
     }
+
+    /**
+     * Initializes the scroll pane.
+     */
+    private void initScroll() {
+        SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.X_AXIS));
+        SCROLL_VIEW.setAlignmentX(LEFT_ALIGNMENT);
+        JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scroll.setAlignmentX(LEFT_ALIGNMENT);
+        add(scroll);
+    }
+
+    /**
+     * If the given ID already has an entry, that entry is removed
+     * and a new one with updated data is added. Otherwise, a new
+     * entry is added.
+     *
+     * @param theID the drone's id number.
+     * @param theData the drone's telemetry data.
+     */
+    public void addTelemetryEntry(final int theID, final String theData) {
+        if (ID_ENTRY_MAP.get(theID) == null) {
+            // add new entry
+            TelemetryEntry e = new TelemetryEntry(theID, theData);
+            ID_ENTRY_MAP.put(theID, e);
+            SCROLL_VIEW.add(e);
+        } else {
+            // update existing entry
+            ID_ENTRY_MAP.get(theID).setText(theData);
+        }
+    }
+
+    /**
+     * This inner class represents one telemetry data entry for a single drone.
+     */
+    private static class TelemetryEntry extends JTextArea {
+
+        /**
+         * This constant determines the size of the panel.
+         */
+        private static final Dimension SIZE = new Dimension(150, 150);
+
+        /**
+         * This field will hold the ID value of the drone that this
+         * entry is about.
+         */
+        private final int myID;
+
+        /**
+         * Constructor to initialize entry text area.
+         *
+         * @param theID the drone's id number.
+         * @param theData the telemetry data to display.
+         */
+        public TelemetryEntry(final int theID, final String theData) {
+            myID = theID;
+            init();
+            setText(theData);
+
+            // Mouse listener to select specific drones in the GUI.
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent theE) {
+                    boolean isSelected = MonitorDashboard.setSelectedDrone(myID);
+                    ID_ENTRY_MAP.values().forEach(e -> e.setBackground(Color.LIGHT_GRAY));
+                    if (!isSelected) {
+                        setBackground(Color.GREEN);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Initializes the text area.
+         */
+        private void init() {
+            setPreferredSize(SIZE);
+            setMaximumSize(SIZE);
+            setEditable(false);
+            setBackground(Color.LIGHT_GRAY);
+            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            setAlignmentX(LEFT_ALIGNMENT);
+            setCaretColor(new Color(0, 0, 0, 0)); // invisible
+        }
+
+    }
+
+
 }
