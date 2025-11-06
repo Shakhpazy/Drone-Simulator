@@ -24,8 +24,8 @@ public class TelemetryGenerator {
     /** Random generator used for movement and anomaly decisions. */
     private static final Random myRandom = new Random();
 
-    /** Timestamp reference used for telemetry data. */
-    private static final Date myDate = new Date();
+//    /** Timestamp reference used for telemetry data. */
+//    private static final Date myDate = new Date();
 
     //private final AnomalyDetector myAnomalyDetector = new AnomalyDetector();
 
@@ -235,7 +235,7 @@ public class TelemetryGenerator {
         telemetryMap.put("velocity", theDrone.getVelocity());
         telemetryMap.put("batteryLevel", theDrone.getBatteryLevel());
         telemetryMap.put("orientation", theDrone.getOrientation());
-        telemetryMap.put("timeStamp", myDate.getTime());
+        telemetryMap.put("timeStamp", System.currentTimeMillis());
         return telemetryMap;
     }
 

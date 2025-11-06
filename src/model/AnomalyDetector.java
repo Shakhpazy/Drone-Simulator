@@ -1,8 +1,5 @@
 package model;
-import java.util.HashMap;
 import java.util.UUID;
-import java.beans.PropertyChangeSupport;
-import java.beans.PropertyChangeListener;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class AnomalyDetector {
@@ -22,29 +19,27 @@ public class AnomalyDetector {
     /**
      * A float to represent the x-axis size of the drone flight area.
      */
-    private final float LATITUDE_MAX = 930;
+    private static final float LATITUDE_MAX = 930;
 
     /**
      * A float to represent the y-axis size of the drone flight area.
      */
-    private final float LONGITUDE_MAX = 530;
+    private static final float LONGITUDE_MAX = 530;
 
     /**
      * A float to represent the z-axis size of the drone flight area.
      */
-    private final float ALTITUDE_MAX = 700;
-
+    private static final float ALTITUDE_MAX = 700;
 
     /**
      * A float to represent the maximum orthogonal velocity of a drone.
      */
-    private final float ORTHOGONAL_VELOCITY_MAX = 10;
+    private static final float ORTHOGONAL_VELOCITY_MAX = 10;
 
     /**
      * A float to represent the maximum battery drain of a drone in a cycle.
      */
-    private final int BATTERY_DRAIN_RATE_MAX = 100;
-
+    private static final int BATTERY_DRAIN_RATE_MAX = 100;
 
     /**
      * A method to detect anomalies between two telemetry objects.
@@ -60,19 +55,14 @@ public class AnomalyDetector {
         /* Check for spoofing or positional anomaly */
         String errorMessage = positionAnomaly();
         if (!errorMessage.equals("N/A")) {
-            AnomalyReport ar = createAnomalyReport(errorMessage);
-
-            return ar;
+            return createAnomalyReport(errorMessage);
         }
 
         /* Check for battery anomaly */
         errorMessage = powerAnomaly();
         if (errorMessage != null) {
-            AnomalyReport ar = createAnomalyReport(errorMessage);
-
-            return ar;
+            return createAnomalyReport(errorMessage);
         }
-
         return null;
     }
 
@@ -92,7 +82,7 @@ public class AnomalyDetector {
         if (currLatitude < 0 || currLatitude > LATITUDE_MAX ||
                 currLongitude < 0 || currLongitude > LONGITUDE_MAX ||
                 currAltitude < 0 || currAltitude > ALTITUDE_MAX) {
-            ret.append("Out of Bounds");
+            ret.append(AnomalyEnum.OUT_OF_BOUNDS);
         }
 
         // Possible Future Implementations both require "normal" flight data collection
@@ -120,13 +110,13 @@ public class AnomalyDetector {
         // Check intended velocity
         if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX) {
             if (!ret.isEmpty()) ret.append(" Due to ");
-            ret.append("Dangerous Change in Altitude");
+            ret.append(AnomalyEnum.ALTITUDE);
             return ret.toString();
         } else if (Math.abs(currLongitude - prevLongitude) >
                 ORTHOGONAL_VELOCITY_MAX ||
                 Math.abs(currLatitude - prevLatitude) > ORTHOGONAL_VELOCITY_MAX) {
             if (!ret.isEmpty()) ret.append(" Due to ");
-            ret.append("GPS Spoofing");
+            ret.append(AnomalyEnum.SPOOFING);
             return ret.toString();
         }
 
@@ -143,62 +133,11 @@ public class AnomalyDetector {
     private String powerAnomaly() {
         int currBatteryLevel = (int) myCurrTelemetry.get("batteryLevel");
         if ((int) myPrevTelemetry.get("batteryLevel") - currBatteryLevel > BATTERY_DRAIN_RATE_MAX) {
-            return "Battery Drain Failure";
+            return AnomalyEnum.BATTERY_DRAIN.toString();
         } else if (currBatteryLevel <= 0) {
-            return "Battery Failure";
+            return AnomalyEnum.BATTERY_FAIL.toString();
         }
         return null;
-    }
-
-    /**
-     * A private method to create a simplified anomaly report string.
-     *
-     * @param theAnomalyType A string representing the type of anomaly being reported.
-     * @return Returns a simplified string anomaly report.
-     */
-    private String createDescSimple(String theAnomalyType) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Anomaly Detected! \n Drone ID: ");
-        sb.append(myCurrTelemetry.get("id"));
-        sb.append("\nAnomaly Type: ");
-        sb.append(theAnomalyType);
-        sb.append("\nTime Stamp: ");
-        sb.append(myCurrTelemetry.get("timeStamp"));
-        return sb.toString();
-    }
-
-    /**
-     * A private method to create a detailed anomaly report string.
-     *
-     * @param theAnomalyType A string representing the type of anomaly being reported.
-     * @return Returns a detailed string anomaly report.
-     */
-    private String createDescDetailed(String theAnomalyType) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Drone Number: ").append(myCurrTelemetry.get("id"));
-        sb.append("has experienced an anomaly at time: ").append(myCurrTelemetry.get("timeStamp"));
-        sb.append("\nDetails:\n");
-        sb.append(theAnomalyType).append(" anomaly detected\n");
-
-        //Current State
-        sb.append("Current State: \n");
-        sb.append("x: ").append(myCurrTelemetry.get("latitude"));
-        sb.append(" y: ").append(myCurrTelemetry.get("longitude"));
-        sb.append(" z: ").append(myCurrTelemetry.get("altitude")).append("\n");
-        sb.append("Velocity: ").append(myCurrTelemetry.get("velocity")).append(" units/second(cycle)\n");
-        sb.append("Orientation: ").append(myCurrTelemetry.get("orientation")).append("\n");
-        sb.append("Battery (%): ").append(myCurrTelemetry.get("batteryLevel"));
-
-        //Previous state
-        sb.append("\nPrevious State: \n");
-        sb.append("x: ").append(myPrevTelemetry.get("latitude"));
-        sb.append(" y: ").append(myPrevTelemetry.get("longitude"));
-        sb.append(" z: ").append(myPrevTelemetry.get("altitude")).append("\n");
-        sb.append("Velocity: ").append(myPrevTelemetry.get("velocity")).append(" units/second(cycle)\n");
-        sb.append("Orientation: ").append(myPrevTelemetry.get("orientation")).append("\n");
-        sb.append("Battery (%): ").append(myPrevTelemetry.get("batteryLevel"));
-
-        return sb.toString();
     }
 
     /**
@@ -208,8 +147,8 @@ public class AnomalyDetector {
      * @return Returns an anomaly report with the relevant information.
      */
     private AnomalyReport createAnomalyReport(String theAnomalyType) {
-        String simpleReport = createDescSimple(theAnomalyType);
-        String detailedReport = createDescDetailed(theAnomalyType);
+        String simpleReport = ReportFormatter.createDescSimple(theAnomalyType, myCurrTelemetry);
+        String detailedReport = ReportFormatter.createDescDetailed(theAnomalyType, myCurrTelemetry, myPrevTelemetry);
 
         UUID myAnomalyID = UUID.randomUUID();
 

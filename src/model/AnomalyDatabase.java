@@ -84,15 +84,7 @@ public class AnomalyDatabase {
             ResultSet rs = preparedStatement.executeQuery();
 
             if (rs.next()) {
-                // Re-Build record from database
-                report = new AnomalyReport(
-                        UUID.fromString(rs.getString("id")),
-                        rs.getLong("timestamp"),
-                        rs.getString("anomaly_type"),
-                        rs.getInt("drone_id"),
-                        rs.getString("simple_report"),
-                        rs.getString("detailed_report")
-                );
+                report = buildFromSet(rs);
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -118,16 +110,7 @@ public class AnomalyDatabase {
             ResultSet rs = preparedStatement.executeQuery();
 
             while(rs.next()) {
-                // Re-Build record from database
-                AnomalyReport report = new AnomalyReport(
-                        UUID.fromString(rs.getString("id")),
-                        rs.getLong("timestamp"),
-                        rs.getString("anomaly_type"),
-                        rs.getInt("drone_id"),
-                        rs.getString("simple_report"),
-                        rs.getString("detailed_report")
-                );
-                reports.add(report);
+                reports.add(buildFromSet(rs));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -151,16 +134,7 @@ public class AnomalyDatabase {
             ResultSet rs = preparedStatement.executeQuery();
 
             while(rs.next()) {
-                // Re-Build record from database
-                AnomalyReport report = new AnomalyReport(
-                        UUID.fromString(rs.getString("id")),
-                        rs.getLong("timestamp"),
-                        rs.getString("anomaly_type"),
-                        rs.getInt("drone_id"),
-                        rs.getString("simple_report"),
-                        rs.getString("detailed_report")
-                );
-                reports.add(report);
+                reports.add(buildFromSet(rs));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -184,16 +158,7 @@ public class AnomalyDatabase {
             ResultSet rs = preparedStatement.executeQuery();
 
             while(rs.next()) {
-                // Re-Build record from database
-                AnomalyReport report = new AnomalyReport(
-                        UUID.fromString(rs.getString("id")),
-                        rs.getLong("timestamp"),
-                        rs.getString("anomaly_type"),
-                        rs.getInt("drone_id"),
-                        rs.getString("simple_report"),
-                        rs.getString("detailed_report")
-                );
-                reports.add(report);
+                reports.add(buildFromSet(rs));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -214,16 +179,7 @@ public class AnomalyDatabase {
              ResultSet rs = preparedStatement.executeQuery()){
 
             while(rs.next()) {
-                // Re-Build record from database
-                AnomalyReport report = new AnomalyReport(
-                        UUID.fromString(rs.getString("id")),
-                        rs.getLong("timestamp"),
-                        rs.getString("anomaly_type"),
-                        rs.getInt("drone_id"),
-                        rs.getString("simple_report"),
-                        rs.getString("detailed_report")
-                );
-                reports.add(report);
+                reports.add(buildFromSet(rs));
             }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -244,6 +200,21 @@ public class AnomalyDatabase {
             System.out.println("Cleared anomaly reports table, " + rowsAffected + " rows deleted." );
         } catch (SQLException e) {
             System.err.println("Error clearing database: " + e.getMessage());
+        }
+    }
+
+    private AnomalyReport buildFromSet(ResultSet rs) {
+        try {
+            return new AnomalyReport(
+                    UUID.fromString(rs.getString("id")),
+                    rs.getLong("timestamp"),
+                    rs.getString("anomaly_type"),
+                    rs.getInt("drone_id"),
+                    rs.getString("simple_report"),
+                    rs.getString("detailed_report")
+            );
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }
