@@ -242,14 +242,10 @@ public class TelemetryGenerator {
 
     private void applyDroneUpdate(DroneInterface theDrone, float theLongitude, float theLatitude, float theAltitude, float theVelocity, float theDistance) {
         //before we update the drone state, we need to get the amount of battery drained and the orientation it should face
-        int batteryDrain = batteryDrained(theDrone, theDistance);
+        float batteryDrained = batteryDrained(theDrone, theDistance);
         float degree = theDrone.getOrientation().findNextOrientation(theDrone.getLongitude(), theDrone.getLatitude(), theLongitude, theLatitude);
 
-        HashMap<String, Object> afterTelemetryMap = createTelemetryMap(theDrone);
-
-        theDrone.updateDrone(theLongitude, theLatitude, theAltitude, batteryDrain, theVelocity, degree);
-        // Pass snapshots to anomaly detector
-        //myAnomalyDetector.Detect();
+        theDrone.updateDrone(theLongitude, theLatitude, theAltitude, batteryDrained, theVelocity, degree);
     }
 
     /**
@@ -258,12 +254,19 @@ public class TelemetryGenerator {
      *
      * @return the amount of battery drained (integer percent or units)
      */
-    private int batteryDrained(DroneInterface theDrone, float distanceTraveled) {
-        int drain = 1;
+    private float batteryDrained(DroneInterface theDrone, float distanceTraveled) {
+        // Base drain per tick
+        float drain = 0.07f;
+
+        // Add small penalty for speed (faster = more battery usage)
         if (theDrone.getVelocity() > 7) {
-            drain += 1; // penalty for high speed
+            drain += 0.05f;
         }
+
+        // Add distance factor (so long flights cost more)
+        drain += distanceTraveled * 0.001f; // e.g., 1 per 1000 units of distance
 
         return drain;
     }
+
 }
