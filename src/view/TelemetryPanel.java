@@ -68,15 +68,15 @@ public class TelemetryPanel extends JPanel {
      * @param theData the drone's telemetry data.
      */
     public void addTelemetryEntry(final int theID, final String theData) {
-        for(int id : ID_ENTRY_MAP.keySet()) {
-            if (id == theID) {
-                remove(ID_ENTRY_MAP.get(theID));
-                break;
-            }
+        if (ID_ENTRY_MAP.get(theID) == null) {
+            // add new entry
+            TelemetryEntry e = new TelemetryEntry(theID, theData);
+            ID_ENTRY_MAP.put(theID, e);
+            SCROLL_VIEW.add(e);
+        } else {
+            // update existing entry
+            ID_ENTRY_MAP.get(theID).setText(theData);
         }
-        TelemetryEntry e = new TelemetryEntry(theID, theData);
-        ID_ENTRY_MAP.put(theID, e);
-        SCROLL_VIEW.add(e);
     }
 
     /**
@@ -110,9 +110,11 @@ public class TelemetryPanel extends JPanel {
             addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent theE) {
-                    MonitorDashboard.setSelectedDrone(myID);
+                    boolean isSelected = MonitorDashboard.setSelectedDrone(myID);
                     ID_ENTRY_MAP.values().forEach(e -> e.setBackground(Color.LIGHT_GRAY));
-                    setBackground(Color.GREEN);
+                    if (!isSelected) {
+                        setBackground(Color.GREEN);
+                    }
                 }
             });
         }
@@ -122,6 +124,7 @@ public class TelemetryPanel extends JPanel {
          */
         private void init() {
             setPreferredSize(SIZE);
+            setMaximumSize(SIZE);
             setEditable(false);
             setBackground(Color.LIGHT_GRAY);
             setBorder(BorderFactory.createLineBorder(Color.BLACK));

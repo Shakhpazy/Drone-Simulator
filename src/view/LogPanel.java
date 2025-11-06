@@ -44,7 +44,10 @@ public class LogPanel extends JPanel {
      */
     private void initScroll() {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
-        add(new JScrollPane(SCROLL_VIEW));
+        JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
+        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        add(scroll);
     }
 
     /**
@@ -66,7 +69,7 @@ public class LogPanel extends JPanel {
          * This constant defines the size of the entry within the
          * viewed portion of the scrollable area.
          */
-        private static final Dimension SIZE = new Dimension(165, 100);
+        private static final Dimension SIZE = new Dimension(150, 100);
 
         /**
          * This constant keeps track of all instances of LogEntry.

@@ -38,6 +38,8 @@ public class MonitorDashboard extends JFrame {
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
         LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -50,6 +52,8 @@ public class MonitorDashboard extends JFrame {
     public void drawDrone(final int theID, final float[] theLoc, final String theTelData) {
         MAP_PANEL.setDroneMapping(theID, theLoc);
         TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -66,8 +70,8 @@ public class MonitorDashboard extends JFrame {
      *
      * @param theID the ID number for the drone.
      */
-    protected static void setSelectedDrone(final int theID) {
-        MAP_PANEL.setSelectedID(theID);
+    protected static boolean setSelectedDrone(final int theID) {
+        return MAP_PANEL.setSelectedID(theID);
     }
 
     /** Boilerplate JFrame setup. */

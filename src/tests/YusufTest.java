@@ -4,6 +4,7 @@ import model.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class YusufTest {
 
@@ -60,7 +61,7 @@ public class YusufTest {
     }
 
     private static void Testmap(TelemetryGenerator generator) {
-        HashMap<String, Object> dictionary = generator.getMybefore();
+        ConcurrentHashMap<String, Object> dictionary = generator.getMyBeforeTelemetryMap();
         float altitude = (float) dictionary.get("altitude");
         System.out.println("Telemetry (cast example) -> altitude raw=" +
                 dictionary.get("altitude") + " casted=" + altitude);

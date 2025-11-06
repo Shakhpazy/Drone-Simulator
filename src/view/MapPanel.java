@@ -92,11 +92,18 @@ public class MapPanel extends JPanel {
      * Sets the selected drone id to reflect that in the gui.
      *
      * @param theID the drone to set as selected.
+     * @return true if already selected, false otherwise.
      */
-    public void setSelectedID(final int theID) {
-        mySelectedID = theID;
-        GRID.focusOnSelected(theID);
+    public boolean setSelectedID(final int theID) {
+        boolean isSelected = mySelectedID == theID;
+        if (isSelected) {
+            mySelectedID = -1;
+        } else {
+            mySelectedID = theID;
+            GRID.focusOnSelected(theID);
+        }
         repaint();
+        return isSelected;
     }
 
     /**
@@ -320,8 +327,8 @@ public class MapPanel extends JPanel {
          * @param theID the id of the drone to center on.
          */
         public void focusOnSelected(final int theID) {
-            myDelta.x = -ID_LOC_MAP.get(theID)[LON] * myScale;
-            myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * myScale;
+            myDelta.x = -ID_LOC_MAP.get(theID)[LON] * myScale + getWidth() / 2;
+            myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * myScale + getHeight() / 2;
             clampPan();
         }
     }
