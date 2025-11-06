@@ -10,7 +10,7 @@ import java.beans.PropertyChangeSupport;
  * The purpose of having this second class is to prevent bloating the
  * main functionality of the MonitorDashboard class.
  */
-public class PropertyEnabledDashboard extends JFrame {
+class PropertyEnabledDashboard extends JFrame {
 
     /**
      * Property change event name for saving as CSV.
@@ -30,7 +30,7 @@ public class PropertyEnabledDashboard extends JFrame {
     /**
      * Constructor to initialize instance.
      */
-    public PropertyEnabledDashboard() {
+    PropertyEnabledDashboard() {
         super();
         myPCS = new PropertyChangeSupport(this);
     }

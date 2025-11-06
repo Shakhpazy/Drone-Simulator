@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * This class represents the drone's locations on a map.
  */
-public class MapPanel extends JPanel {
+class MapPanel extends JPanel {
 
     /**
      * This constant is an alias for 0 to reference the second
@@ -58,21 +58,10 @@ public class MapPanel extends JPanel {
     /**
      * Constructor to initialize panel.
      */
-    public MapPanel() {
+    MapPanel() {
         super();
         mySelectedID = -1;
         initPanel();
-        add(GRID, BorderLayout.CENTER);
-
-    }
-
-    /**
-     * Sets up the size and border for the panel.
-     */
-    private void initPanel() {
-        setPreferredSize(SIZE);
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        setLayout(new BorderLayout());
     }
 
     /**
@@ -104,6 +93,16 @@ public class MapPanel extends JPanel {
         }
         repaint();
         return isSelected;
+    }
+
+    /**
+     * Sets up the size and border for the panel.
+     */
+    private void initPanel() {
+        setPreferredSize(SIZE);
+        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setLayout(new BorderLayout());
+        add(GRID, BorderLayout.CENTER);
     }
 
     /**
@@ -175,11 +174,11 @@ public class MapPanel extends JPanel {
         /**
          * Constructor to initialize the object.
          */
-        public GridPanel() {
+        private GridPanel() {
             super();
+            myScale = 6;
             myDelta = new Point(0, 0);
             myDragPoint = new Point(0, 0);
-            myScale = 6;
             initPanel();
         }
 
@@ -188,6 +187,12 @@ public class MapPanel extends JPanel {
          */
         private void initPanel() {
             setPreferredSize(SIZE);
+
+            // Center the grid initially
+            myDelta = new Point(
+                    SIZE.width / 2 - BUFFER,
+                    SIZE.height / 2 - BUFFER
+            );
 
             // Mouse listener to detect the start of a mouse drag
             addMouseListener(new MouseAdapter() {
@@ -319,6 +324,7 @@ public class MapPanel extends JPanel {
 
             myDelta.x = Math.max(minDeltaX, Math.min(myDelta.x, maxDeltaX));
             myDelta.y = Math.max(minDeltaY, Math.min(myDelta.y, maxDeltaY));
+            System.out.printf("X: %d Y: %d\n", myDelta.x, myDelta.y);
         }
 
         /**
