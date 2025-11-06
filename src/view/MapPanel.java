@@ -327,8 +327,8 @@ public class MapPanel extends JPanel {
          * @param theID the id of the drone to center on.
          */
         public void focusOnSelected(final int theID) {
-            myDelta.x = -ID_LOC_MAP.get(theID)[LON] * myScale;
-            myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * myScale;
+            myDelta.x = -ID_LOC_MAP.get(theID)[LON] * myScale + getWidth() / 2;
+            myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * myScale + getHeight() / 2;
             clampPan();
         }
     }
