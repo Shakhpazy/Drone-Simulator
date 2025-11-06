@@ -18,7 +18,7 @@ public class YusufTest {
         route.add(new RoutePoint(100, 100, 130)); // back to start(20 units)
 
         // Create one drone with velocity=5, battery=100, facing NORTH
-        Drone drone = new Drone(5, 100, Orientation.NORTH, route);
+        Drone drone = new Drone(5, 100, route);
 
         // Add drone to simulation
         ArrayList<DroneInterface> drones = new ArrayList<>();
@@ -40,30 +40,23 @@ public class YusufTest {
             System.out.println();
         }
 
-        // Example: pull latest telemetry from HashMap
-        Testmap(generator);
     }
 
     private static void printDrone(DroneInterface d) {
         RoutePoint target = d.getNextPoint(); // the waypoint it’s heading to
         System.out.printf(
-                "Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%d | Heading to (%.0f, %.0f, %.0f)%n",
+                "Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%.0f Orientation=%.2f | Heading to (%.0f, %.0f, %.0f)%n",
                 d.getId(),
                 d.getLongitude(),
                 d.getLatitude(),
                 d.getAltitude(),
                 d.getVelocity(),
                 d.getBatteryLevel(),
+                d.getOrientation().getDegree(),
                 target.getLongitude(),
                 target.getLatitude(),
                 target.getAltitude()
         );
     }
 
-    private static void Testmap(TelemetryGenerator generator) {
-        ConcurrentHashMap<String, Object> dictionary = generator.getMyBeforeTelemetryMap();
-        float altitude = (float) dictionary.get("altitude");
-        System.out.println("Telemetry (cast example) -> altitude raw=" +
-                dictionary.get("altitude") + " casted=" + altitude);
-    }
 }

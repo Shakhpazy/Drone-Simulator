@@ -12,7 +12,7 @@ public class Drone implements  DroneInterface {
 
     private float myVelocity;
 
-    private int myBatteryLevel;
+    private float myBatteryLevel;
 
     private Orientation myOrientation;
 
@@ -66,7 +66,7 @@ public class Drone implements  DroneInterface {
         return myLatitude;
     }
 
-    public int getBatteryLevel() {
+    public float getBatteryLevel() {
         return myBatteryLevel;
     }
 
@@ -103,7 +103,7 @@ public class Drone implements  DroneInterface {
         myLatitude = theLatitude;
     }
 
-    public void setBatteryLevel(int theBatteryLevel) {
+    public void setBatteryLevel(float theBatteryLevel) {
         myBatteryLevel = theBatteryLevel;
     }
 
@@ -119,13 +119,13 @@ public class Drone implements  DroneInterface {
         nextPoint = (nextPoint + 1) % myRoute.size();
     }
 
-    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, int theBatteryDrained, float theVelocity, float theDegree) {
+    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, float theBatteryDrained, float theVelocity, float theDegree) {
         setLongitude(theLongitude);
         setLatitude(theLatitude);
         setAltitude(theAltitude);
         setVelocity(theVelocity);
         setOrientation(theDegree);
-        setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, myBatteryLevel));
+        setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, 0));
     }
 
     public boolean isAlive() {
