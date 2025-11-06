@@ -44,10 +44,6 @@ public class AnomalyDetector {
      */
     private final int BATTERY_DRAIN_RATE_MAX = 100;
 
-    /**
-     * A PropertyChangeSupport object used for notifying GUI of an anomaly found
-     */
-    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
     /**
      * A method to detect anomalies between two telemetry objects.
@@ -63,7 +59,6 @@ public class AnomalyDetector {
         String errorMessage = positionAnomaly();
         if (!errorMessage.equals("N/A")){
             AnomalyReport ar = createAnomalyReport(errorMessage);
-            pcs.firePropertyChange("Anomaly Detected", null, ar);
             return ar;
         }
 
@@ -71,7 +66,6 @@ public class AnomalyDetector {
         errorMessage = powerAnomaly();
         if (errorMessage != null){
             AnomalyReport ar = createAnomalyReport(errorMessage);
-            pcs.firePropertyChange("Anomaly Detected", null, ar);
             return ar;
         }
 
@@ -142,7 +136,7 @@ public class AnomalyDetector {
      */
     private String powerAnomaly(){
         int currBatteryLevel = (int) myCurrTelemetry.get("batteryLevel");
-        if ((int) myPrevTelemetry.get("batteryLevel") - currBatteryLevel < BATTERY_DRAIN_RATE_MAX) {
+        if ((int) myPrevTelemetry.get("batteryLevel") - currBatteryLevel > BATTERY_DRAIN_RATE_MAX) {
             return "Battery Drain Failure";
         } else if (currBatteryLevel <= 0){
             return "Battery Failure";
@@ -217,21 +211,5 @@ public class AnomalyDetector {
                 (Integer) myCurrTelemetry.get("id"),
                 simpleReport,
                 detailedReport);
-    }
-
-    /**
-     * A method to acquire listeners for anomaly notification.
-     * @param listener  A PropertyChangeListener to be added to the PropertyChangeSupport.
-     */
-    public void addPropertyChangeListener(PropertyChangeListener listener) {
-        this.pcs.addPropertyChangeListener(listener);
-    }
-
-    /**
-     * A method to remove listeners for anomaly notification.
-     * @param listener  A PropertyChangeListener to be removed from the PropertyChangeSupport.
-     */
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
-        this.pcs.removePropertyChangeListener(listener);
     }
 }
