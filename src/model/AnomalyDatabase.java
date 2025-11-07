@@ -5,6 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * A class to hold all methods for interacting with the drone_anomalies database.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class AnomalyDatabase {
     private final String connectionString = "jdbc:sqlite:drone_anomalies.db";
 

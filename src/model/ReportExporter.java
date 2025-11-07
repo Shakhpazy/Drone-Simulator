@@ -2,6 +2,11 @@ package model;
 
 import java.util.List;
 
+/**
+ * An interface for file compilation of anomalous drone data.
+ * @author nlevin11
+ * @version 11-6
+ */
 public interface ReportExporter {
     /**
      * A method to export a list of reports to the given file path.

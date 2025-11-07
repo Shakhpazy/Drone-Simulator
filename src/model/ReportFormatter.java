@@ -5,8 +5,16 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A class to aid the AnomalyDetector class in AnomalyReport composition.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class ReportFormatter {
 
+    /**
+     * A time format to format time output.
+     */
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
             .withZone(ZoneId.systemDefault());
 
@@ -15,8 +23,9 @@ public class ReportFormatter {
         Instant instant = Instant.ofEpochMilli(timestamp);
         return FORMATTER.format(instant);
     }
+
     /**
-     * A private method to create a simplified anomaly report string.
+     * A method to create a simplified anomaly report string.
      *
      * @param theAnomalyType A string representing the type of anomaly being reported.
      * @return Returns a simplified string anomaly report.
@@ -32,7 +41,7 @@ public class ReportFormatter {
     }
 
     /**
-     * A private method to create a detailed anomaly report string.
+     * A method to create a detailed anomaly report string.
      *
      * @param theAnomalyType A string representing the type of anomaly being reported.
      * @return Returns a detailed string anomaly report.

@@ -2,6 +2,11 @@ package model;
 
 import java.util.List;
 
+/**
+ * A class to compile all AnomalyReports from drone_anomalies.db into a file.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class FileExporter {
 
     /**

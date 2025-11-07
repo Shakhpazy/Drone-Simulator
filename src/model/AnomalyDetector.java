@@ -2,6 +2,11 @@ package model;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A class to detect anomalies with drone behavior.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class AnomalyDetector {
 
     /**
