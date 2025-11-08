@@ -3,14 +3,14 @@ package model;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashMap;
 
 public class ReportFormatter {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
             .withZone(ZoneId.systemDefault());
 
-    private static String getFormattedTime(ConcurrentHashMap<String, Object> telemetry) {
+    private static String getFormattedTime(HashMap<String, Object> telemetry) {
         long timestamp = (Long) telemetry.get("timestamp");
         Instant instant = Instant.ofEpochMilli(timestamp);
         return FORMATTER.format(instant);
@@ -21,7 +21,7 @@ public class ReportFormatter {
      * @param theAnomalyType A string representing the type of anomaly being reported.
      * @return Returns a simplified string anomaly report.
      */
-    public static String createDescSimple(String theAnomalyType, ConcurrentHashMap<String, Object> theCurrTelemetry) {
+    public static String createDescSimple(String theAnomalyType, HashMap<String, Object> theCurrTelemetry) {
 
         return "Anomaly Detected! \nDrone ID: " +
                 theCurrTelemetry.get("id") +
@@ -37,7 +37,7 @@ public class ReportFormatter {
      * @param theAnomalyType A string representing the type of anomaly being reported.
      * @return Returns a detailed string anomaly report.
      */
-    public static String createDescDetailed(String theAnomalyType, ConcurrentHashMap<String, Object> theCurrTelemetry, ConcurrentHashMap<String, Object> thePrevTelemetry) {
+    public static String createDescDetailed(String theAnomalyType, HashMap<String, Object> theCurrTelemetry, HashMap<String, Object> thePrevTelemetry) {
 
         return "Drone Number: " + theCurrTelemetry.get("id") +
                 "has experienced an anomaly at time: " + getFormattedTime(theCurrTelemetry) +
