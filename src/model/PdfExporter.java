@@ -11,6 +11,11 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * A class to compile AnomalyReports into a PDF file.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class PdfExporter implements ReportExporter {
     @Override
     public void export(List<AnomalyReport> reports, String filePath) {

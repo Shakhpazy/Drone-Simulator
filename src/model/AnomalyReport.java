@@ -3,7 +3,7 @@ package model;
 import java.util.UUID;
 
 /**
- * A simple, immutable data carrier for a drone anomaly report.
+ * A simple, immutable data carrier for drone anomaly report information.
  *
  * @author nlevin11
  * @version 10/26

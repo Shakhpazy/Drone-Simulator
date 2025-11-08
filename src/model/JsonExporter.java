@@ -6,6 +6,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * A class to compile AnomalyReports into a JSON file.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class JsonExporter implements ReportExporter{
     @Override
     public void export(List<AnomalyReport> reports, String filepath) {

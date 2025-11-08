@@ -3,6 +3,11 @@ import java.util.HashMap;
 import java.util.UUID;
 //import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A class to detect anomalies with drone behavior.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class AnomalyDetector {
 
     /**
@@ -132,8 +137,8 @@ public class AnomalyDetector {
      * @return Returns a boolean representing whether the battery level is 0.
      */
     private String powerAnomaly() {
-        int currBatteryLevel = (int) myCurrTelemetry.get("batteryLevel");
-        if ((int) myPrevTelemetry.get("batteryLevel") - currBatteryLevel > BATTERY_DRAIN_RATE_MAX) {
+        float currBatteryLevel = (float) myCurrTelemetry.get("batteryLevel");
+        if ((float) myPrevTelemetry.get("batteryLevel") - currBatteryLevel > BATTERY_DRAIN_RATE_MAX) {
             return AnomalyEnum.BATTERY_DRAIN.toString();
         } else if (currBatteryLevel <= 0) {
             return AnomalyEnum.BATTERY_FAIL.toString();

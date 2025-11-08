@@ -5,8 +5,21 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * A class to hold all methods for interacting with the drone_anomalies database.
+ * @author nlevin11
+ * @version 11-6
+ */
 public class AnomalyDatabase {
-    private final String connectionString = "jdbc:sqlite:drone_anomalies.db";
+    /**
+     * A string to hold the connection string required to connect to the database.
+     */
+    private static final String CONNECTION_STRING = "jdbc:sqlite:drone_anomalies.db";
+
+    /**
+     * A Connection object to allow persistent database connection while running the program.
+     */
+    private Connection myConnection;
 
     /**
      * Initializes the database.
@@ -28,8 +41,10 @@ public class AnomalyDatabase {
         String indexTypeSql = "CREATE INDEX IF NOT EXISTS idx_anomaly_type ON anomaly_reports (anomaly_type);";
         String indexDroneIdSql = "CREATE INDEX IF NOT EXISTS idx_drone_id ON anomaly_reports (drone_id);";
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-             Statement stmt = conn.createStatement()) {
+        try {
+            myConnection = DriverManager.getConnection(CONNECTION_STRING);
+            Statement stmt = myConnection.createStatement();
+
 
             stmt.execute(createTableSql);
             stmt.execute(indexTimestampSql);
@@ -51,8 +66,8 @@ public class AnomalyDatabase {
         String sql = "INSERT INTO anomaly_reports(id, timestamp, anomaly_type, drone_id, simple_report, detailed_report) " +
                 "VALUES(?,?,?,?,?,?)";
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-            PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+        try {
+            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
 
             preparedStatement.setString(1, report.id().toString());
             preparedStatement.setLong(2, report.timestamp());
@@ -77,8 +92,8 @@ public class AnomalyDatabase {
         String sql = "SELECT * FROM anomaly_reports WHERE id = ?";
         AnomalyReport report = null;
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-             PreparedStatement preparedStatement = conn.prepareStatement(sql)) {
+        try {
+            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
 
             preparedStatement.setString(1, theAnomalyID);
             ResultSet rs = preparedStatement.executeQuery();
@@ -102,8 +117,8 @@ public class AnomalyDatabase {
         List<AnomalyReport> reports = new ArrayList<>();
         String sql = "SELECT * FROM anomaly_reports WHERE timestamp BETWEEN ? AND ? ";
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-             PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+        try {
+            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
 
             preparedStatement.setLong(1, theBeginTime);
             preparedStatement.setLong(2, theEndTime);
@@ -127,8 +142,8 @@ public class AnomalyDatabase {
         List<AnomalyReport> reports = new ArrayList<>();
         String sql = "SELECT * FROM anomaly_reports WHERE anomaly_type = ?";
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-             PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+        try {
+            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
 
             preparedStatement.setString(1, theAnomalyType);
             ResultSet rs = preparedStatement.executeQuery();
@@ -151,8 +166,8 @@ public class AnomalyDatabase {
         List<AnomalyReport> reports = new ArrayList<>();
         String sql = "SELECT * FROM anomaly_reports WHERE drone_id = ?";
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-             PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+        try {
+            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
 
             preparedStatement.setInt(1, theDroneID);
             ResultSet rs = preparedStatement.executeQuery();
@@ -174,9 +189,9 @@ public class AnomalyDatabase {
         List<AnomalyReport> reports = new ArrayList<>();
         String sql = "SELECT * FROM anomaly_reports";
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-             PreparedStatement preparedStatement = conn.prepareStatement(sql);
-             ResultSet rs = preparedStatement.executeQuery()){
+        try {
+            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
+            ResultSet rs = preparedStatement.executeQuery();
 
             while(rs.next()) {
                 reports.add(buildFromSet(rs));
@@ -194,8 +209,9 @@ public class AnomalyDatabase {
     public void clear() {
         String sql = "DELETE FROM anomaly_reports";
 
-        try (Connection conn = DriverManager.getConnection(connectionString);
-             PreparedStatement preparedStatement = conn.prepareStatement(sql)){
+        try {
+            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
+
             int rowsAffected = preparedStatement.executeUpdate();
             System.out.println("Cleared anomaly reports table, " + rowsAffected + " rows deleted." );
         } catch (SQLException e) {
@@ -203,6 +219,25 @@ public class AnomalyDatabase {
         }
     }
 
+    /**
+     * A method to close the connection between the program and the database.
+     */
+    public void close() {
+        try {
+            if (myConnection != null && !myConnection.isClosed()) {
+                myConnection.close();
+                System.out.println("Database connection closed.");
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    /**
+     * A method to recompile an anomaly report from existing anomaly report data.
+     * @param rs        A result set to build the recompiled anomaly report from.
+     * @return          Returns an AnomalyReport object.
+     */
     private AnomalyReport buildFromSet(ResultSet rs) {
         try {
             return new AnomalyReport(

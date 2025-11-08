@@ -10,6 +10,9 @@ public enum AnomalyEnum {
     SPOOFING("GPS Spoofing"),
     OUT_OF_BOUNDS("Out of Bounds");
 
+    /**
+     * A String to hold the String representation of an AnomalyEnum.
+     */
     private final String myDisplayString;
 
     AnomalyEnum(String theDisplayString){
