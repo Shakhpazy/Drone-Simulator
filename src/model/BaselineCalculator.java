@@ -20,14 +20,27 @@ public class BaselineCalculator {
     private final List<Double> batteryDrainReadings;
 
     /**
+     * A list to hold all battery drain data.
+     */
+    private final List<Double> orientationDeltaReadings;
+
+    /**
      * A map to hold all previous battery values;
      */
-    private final Map<Integer, Integer> prevBatteryLife;
+    private final Map<Integer, Float> prevBatteryLife;
+
+    /**
+     * A map to hold all previous orientation values;
+     */
+    private final Map<Integer, Float> prevOrientationReadings;
+
 
     public BaselineCalculator() {
         this.velocityReadings = new ArrayList<>();
         this.batteryDrainReadings = new ArrayList<>();
+        this.orientationDeltaReadings = new ArrayList<>();
         this.prevBatteryLife = new HashMap<>();
+        this.prevOrientationReadings = new HashMap<>();
     }
 
     /**
@@ -50,8 +63,11 @@ public class BaselineCalculator {
             double batteryDrainMean = calculateMean(batteryDrainReadings);
             double batteryDrainStandardDev = calculateStandardDev(batteryDrainReadings, velocityMean);
 
+            double orientationDeltaMean = calculateMean(orientationDeltaReadings);
+            double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, velocityMean);
+
             saveStatsToProperties(outputProperties, velocityMean, velocityStandardDev, batteryDrainMean,
-                    batteryDrainStandardDev);
+                    batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev);
 
         } catch (IOException e) {
             System.err.println("Error during baseline calculation: " + e.getMessage());
@@ -79,13 +95,14 @@ public class BaselineCalculator {
             }
 
             if (!headerMap.containsKey("id") || !headerMap.containsKey("velocity") ||
-                    !headerMap.containsKey("batteryLevel")) {
+                    !headerMap.containsKey("batteryLevel") || !headerMap.containsKey("orientation")) {
                 throw new IOException("Log file is missing required headers.");
             }
 
             int idIndex = headerMap.get("id");
             int velocityIndex = headerMap.get("velocity");
             int batteryIndex = headerMap.get("batteryLevel");
+            int orientationIndex = headerMap.get("orientation");
 
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
@@ -97,17 +114,29 @@ public class BaselineCalculator {
                 try {
                     int droneID = Integer.parseInt(values[idIndex].trim());
                     double currVelocity = Double.parseDouble(values[velocityIndex].trim());
-                    int currBattery = Integer.parseInt(values[batteryIndex].trim());
+                    float currBattery = Float.parseFloat(values[batteryIndex].trim());
+                    float currOrientation = Float.parseFloat(values[orientationIndex].trim());
 
                     velocityReadings.add(currVelocity);
 
                     if (prevBatteryLife.containsKey(droneID)) {
-                        int prevBattery = prevBatteryLife.get(droneID);
-                        int drain = prevBattery - currBattery;
+                        float prevBattery = prevBatteryLife.get(droneID);
+                        float drain = prevBattery - currBattery;
                         batteryDrainReadings.add((double) drain);
                     }
 
+                    if (prevOrientationReadings.containsKey(droneID)) {
+                        double prevOrientation = prevOrientationReadings.get(droneID);
+
+                        double diff = Math.abs(currOrientation - prevOrientation);
+                        if (diff > 180) {
+                            diff = 360 - diff;
+                        }
+                        orientationDeltaReadings.add(diff);
+                    }
+
                     prevBatteryLife.put(droneID, currBattery);
+                    prevOrientationReadings.put(droneID, currOrientation);
                 } catch (NumberFormatException e) {
                     System.err.println("Skipping line with unparseable number: " + line);
                 }
@@ -125,7 +154,7 @@ public class BaselineCalculator {
      * @throws IOException      Throws an exception when data cannot be written to the file.
      */
     private void saveStatsToProperties(String filepath, double vMean, double vStandardDev, double bMean,
-                                       double bStandardDev) throws IOException {
+                                       double bStandardDev, double oMean, double oStandardDev) throws IOException {
         Properties props = new Properties();
 
         props.setProperty("velocity.mean", String.valueOf(vMean));
