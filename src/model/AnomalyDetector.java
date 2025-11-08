@@ -1,6 +1,7 @@
 package model;
+import java.util.HashMap;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+//import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A class to detect anomalies with drone behavior.
@@ -13,13 +14,13 @@ public class AnomalyDetector {
      * A private telemetry field for use in the Anomaly Detector class.
      * Represents the most recent telemetry data.
      */
-    private ConcurrentHashMap<String, Object> myCurrTelemetry;
+    private HashMap<String, Object> myCurrTelemetry;
 
     /**
      * A private telemetry field for use in the Anomaly Detector class.
      * Represents the telemetry data of a drone prior to the current cycle.
      */
-    private ConcurrentHashMap<String, Object> myPrevTelemetry;
+    private HashMap<String, Object> myPrevTelemetry;
 
     /**
      * A float to represent the x-axis size of the drone flight area.
@@ -53,7 +54,7 @@ public class AnomalyDetector {
      * @param thePrevTelemetry A telemetry representing the previous drone state.
      * @return Returns the AnomalyReport object when created, null if not created.
      */
-    public AnomalyReport detect(ConcurrentHashMap<String, Object> theCurrTelemetry, ConcurrentHashMap<String, Object> thePrevTelemetry) {
+    public AnomalyReport detect(HashMap<String, Object> theCurrTelemetry, HashMap<String, Object> thePrevTelemetry) {
         myCurrTelemetry = theCurrTelemetry;
         myPrevTelemetry = thePrevTelemetry;
 
