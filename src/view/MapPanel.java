@@ -324,7 +324,6 @@ class MapPanel extends JPanel {
 
             myDelta.x = Math.max(minDeltaX, Math.min(myDelta.x, maxDeltaX));
             myDelta.y = Math.max(minDeltaY, Math.min(myDelta.y, maxDeltaY));
-            System.out.printf("X: %d Y: %d\n", myDelta.x, myDelta.y);
         }
 
         /**
