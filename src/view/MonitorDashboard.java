@@ -1,6 +1,7 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.plaf.SliderUI;
 import java.awt.*;
 
 /**
@@ -111,6 +112,20 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
         openDB.addActionListener(theEvent -> openDatabase());
         dataMenu.add(openDB);
         bar.add(dataMenu);
+
+        // Debug
+        JMenu debugMenu = new JMenu("Debug");
+        JSlider tickSpdSlider = new JSlider(1, 5, 1);
+        tickSpdSlider.addChangeListener(
+                theEvent -> myPCS.firePropertyChange(
+                        PROPERTY_TICK_SPEED,
+                        null,
+                        tickSpdSlider.getValue()));
+        tickSpdSlider.setLabelTable(tickSpdSlider.createStandardLabels(1));
+        tickSpdSlider.setPaintLabels(true);
+        debugMenu.add(new JLabel("Tick Speed"));
+        debugMenu.add(tickSpdSlider);
+        bar.add(debugMenu);
 
         setJMenuBar(bar);
         bar.setVisible(true);

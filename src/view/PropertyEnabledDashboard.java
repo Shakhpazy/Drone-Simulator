@@ -28,6 +28,11 @@ class PropertyEnabledDashboard extends JFrame {
     public static final String PROPERTY_SAVE_JSON = "save as json";
 
     /**
+     * Property change event for debug tick speed change.
+     */
+    public static final String PROPERTY_TICK_SPEED = "tick speed change";
+
+    /**
      * Property change supper object to fire change events.
      */
     protected final PropertyChangeSupport myPCS;
