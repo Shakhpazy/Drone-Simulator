@@ -95,13 +95,7 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
         JMenuBar bar = new JMenuBar();
 
         // File
-        JMenu fileMenu = new JMenu("File");
-        JMenuItem saveCSV = new JMenuItem("Save as .csv");
-        saveCSV.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
-        fileMenu.add(saveCSV);
-        JMenuItem savePDF = new JMenuItem("Save as .pdf");
-        savePDF.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
-        fileMenu.add(savePDF);
+        JMenu fileMenu = initFileMenu();
         bar.add(fileMenu);
 
         // Help
@@ -120,6 +114,20 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
 
         setJMenuBar(bar);
         bar.setVisible(true);
+    }
+
+    private JMenu initFileMenu() {
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem saveCSV = new JMenuItem("Save as .csv");
+        saveCSV.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
+        fileMenu.add(saveCSV);
+        JMenuItem savePDF = new JMenuItem("Save as .pdf");
+        savePDF.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
+        fileMenu.add(savePDF);
+        JMenuItem saveJSON = new JMenuItem("Save as .json");
+        saveJSON.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_JSON, null, null));
+        fileMenu.add(saveJSON);
+        return fileMenu;
     }
 
     /**

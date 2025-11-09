@@ -23,6 +23,11 @@ class PropertyEnabledDashboard extends JFrame {
     public static final String PROPERTY_SAVE_PDF = "save as pdf";
 
     /**
+     * Property change event for saving as JSON.
+     */
+    public static final String PROPERTY_SAVE_JSON = "save as json";
+
+    /**
      * Property change supper object to fire change events.
      */
     protected final PropertyChangeSupport myPCS;
