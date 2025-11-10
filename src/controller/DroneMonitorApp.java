@@ -8,7 +8,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
-import javax.print.attribute.standard.Media;
+
+
 import javax.sound.sampled.*;
 
 import view.MonitorDashboard;
@@ -30,7 +31,7 @@ public class DroneMonitorApp {
      */
     private static boolean myDevMode = true;
 
-    //private static String myBatteryAlert = "C:\\Users\\njart\\UWT\\TCSS360\\Drone-Simulator\\src\\FX\\BatteryAlert.mp3";
+    //private static String myBatteryAlert = "C:\\Users\\njart\\UWT\\TCSS360\\Drone-Simulator\\src\\FX\\BatteryAlert.wav";
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -214,7 +215,6 @@ public class DroneMonitorApp {
         sb.append("velocity: ").append(myTelemetryMap.get("velocity")).append("\n");
         sb.append("batteryLevel: ").append(myTelemetryMap.get("batteryLevel")).append("\n");
         sb.append("orientation: ").append(myTelemetryMap.get("orientation")).append("\n");
-        sb.append("timeStamp: ").append(myTelemetryMap.get("timeStamp")).append("\n");
         return sb.toString();
     }
 }
