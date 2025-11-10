@@ -31,7 +31,6 @@ public class DroneMonitorApp {
      */
     private static boolean myDevMode = true;
 
-    //private static String myBatteryAlert = "C:\\Users\\njart\\UWT\\TCSS360\\Drone-Simulator\\src\\FX\\BatteryAlert.wav";
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -127,7 +126,7 @@ public class DroneMonitorApp {
         };
 
         //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
-        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 5, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
 
         //Create a runnable task that will shut down the scheduler on program exit
         Runnable shutdownScheduler = () -> {
