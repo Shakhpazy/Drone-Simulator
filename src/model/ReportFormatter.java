@@ -24,7 +24,7 @@ public class ReportFormatter {
      * @param telemetry         The telemetry snapshot to derive the time.
      * @return                  Returns a user readable timestamp string.
      */
-    private static String getFormattedTime(HashMap<String, Object> telemetry) {
+    public static String getFormattedTime(HashMap<String, Object> telemetry) {
         long timestamp = (Long) telemetry.get("timeStamp");
         Instant instant = Instant.ofEpochMilli(timestamp);
         return FORMATTER.format(instant);
