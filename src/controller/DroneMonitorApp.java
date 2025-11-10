@@ -24,7 +24,12 @@ import view.MonitorDashboard;
  */
 public class DroneMonitorApp {
 
+    /**
+     * Flag to enable or disable developer mode, which prints telemetry to the console
+     * and clears the database on exit.
+     */
     private static boolean myDevMode = true;
+
     //private static String myBatteryAlert = "C:\\Users\\njart\\UWT\\TCSS360\\Drone-Simulator\\src\\FX\\BatteryAlert.mp3";
 
     /**
@@ -72,7 +77,11 @@ public class DroneMonitorApp {
             }
         }
 
-        //Create a runnable task that will execute at every time interval
+        /**
+         * A runnable task that simulates the next step of the drone monitoring system.
+         * It processes telemetry for all drones, updates the view, checks for anomalies,
+         * and logs reports to the database and view.
+         */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
             ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones();
@@ -81,18 +90,10 @@ public class DroneMonitorApp {
             for (DroneInterface drone : drones) {
                 //Get previous Telemetry
                 HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(0)[0];
+//                myBeforeTelemetryMap.put("")
 
                 //Get Current Telemetry
                 HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(0)[1];
-
-                //Get drone location to pass to view
-                float[] location = {(float) myCurrentTelemetryMap.get("longitude"),
-                                    (float) myCurrentTelemetryMap.get("latitude")};
-                //Get telemetry as a String to pass to view
-                String theTelemetry = telemetryToString(myCurrentTelemetryMap);
-
-                //Draw the drone on the view.
-                view.drawDrone(drone.getId(), location, theTelemetry);
 
                 //Send previous and current telemetry to anomaly detector for analysis
                 AnomalyReport anomaly = detector.detect(myBeforeTelemetryMap, myCurrentTelemetryMap);
@@ -105,6 +106,17 @@ public class DroneMonitorApp {
                     //Add a log entry to view.
                     view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
                 }
+
+                //Get drone location to pass to view
+                float[] location = {(float) myCurrentTelemetryMap.get("longitude"),
+                        (float) myCurrentTelemetryMap.get("latitude")};
+
+                //Get telemetry as a String to pass to view
+                String theTelemetry = telemetryToString(myCurrentTelemetryMap);
+
+                //Draw the drone on the view.
+                view.drawDrone(drone.getId(), location, theTelemetry);
+
                 //Print to console if developer mode is enabled
                 if(myDevMode) {
                     printDrone(drone);
@@ -139,6 +151,11 @@ public class DroneMonitorApp {
         }
     }
 
+    /**
+     * Creates a predefined simple rectangular route with specific waypoints.
+     *
+     * @return An {@link ArrayList} of {@link RoutePoint} objects defining the route.
+     */
     private static ArrayList<RoutePoint> createRoute() {
         ArrayList<RoutePoint> route = new ArrayList<>();
         route.add(new RoutePoint(60, 60, 110)); // bottom-left
@@ -159,10 +176,16 @@ public class DroneMonitorApp {
 //        }
 //    }
 
+    /**
+     * Prints the current telemetry data of a specific drone to the console for debugging purposes.
+     * Enabled only in developer mode.
+     *
+     * @param theDrone The {@link DroneInterface} object representing the drone.
+     */
     private static void printDrone(DroneInterface theDrone) {
         RoutePoint target = theDrone.getNextPoint(); // the waypoint it’s heading to
         System.out.printf(
-                "Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%d | Heading to (%.0f, %.0f, %.0f)%n",
+                "Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%f | Heading to (%.0f, %.0f, %.0f)%n",
                 theDrone.getId(),
                 theDrone.getLongitude(),
                 theDrone.getLatitude(),
@@ -176,10 +199,11 @@ public class DroneMonitorApp {
     }
 
     /**
-     * Return a string representation to pass to the view to draw drone.
+     * Converts a telemetry data map into a formatted string representation
+     * suitable for display in the view.
      *
-     * @param myTelemetryMap
-     * @return the String representation of the Telemetry
+     * @param myTelemetryMap A {@link HashMap} containing the drone's telemetry data.
+     * @return The String representation of the Telemetry data.
      */
     private static String telemetryToString(HashMap<String, Object> myTelemetryMap) {
         StringBuilder sb = new StringBuilder();
