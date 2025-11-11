@@ -54,6 +54,10 @@ public class TelemetryGenerator {
         return instance;
     }
 
+    public ArrayList<DroneInterface> getMyDrones() {
+        return myDrones;
+    }
+
     /**
      * Adds a new drone to the simulation.
      *

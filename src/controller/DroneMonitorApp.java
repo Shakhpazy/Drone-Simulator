@@ -46,7 +46,7 @@ public class DroneMonitorApp {
         // ======================
         final int FPS = 60;
         final double DELTA_TIME = .01; // is how much simulated time passes each update
-        final long FRAME_DELAY_MS = 30;                   // is how long the program waits between updates in real time
+        final long FRAME_DELAY_MS = 5; // is how long the program waits between updates in real time (maybe for slider)
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
@@ -59,14 +59,14 @@ public class DroneMonitorApp {
 //        Drone drone2 = new Drone(2.0f, 85, Orientation.EAST, route);
 //        Drone drone3 = new Drone(1.5f, 75, Orientation.WEST, route);
 
-        //Add drones to pass to telemetry generator.
-        ArrayList<DroneInterface> drones = new ArrayList<>();
-        drones.add(drone1);
-//        drones.add(drone2);
-//        drones.add(drone3);
 
         //Initialize telemetry generator and add drones
-        TelemetryGenerator gen = new TelemetryGenerator(drones);
+        TelemetryGenerator gen = TelemetryGenerator.getInstance();
+
+        //add the drones into singleton generator
+        gen.addDrone(drone1);
+//      gen.addDrone(drone2);
+//      gen.addDrone(drone3);
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();
@@ -74,6 +74,9 @@ public class DroneMonitorApp {
         //Initialize AnomalyDatabase
         AnomalyDatabase anomalyDTBS = new AnomalyDatabase();
         anomalyDTBS.initialize();
+
+        //getting the drones in out telemetry Generator
+        ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         //Output to console if developer mode is enabled
         if(myDevMode) {
@@ -95,6 +98,9 @@ public class DroneMonitorApp {
 
             //For each drone
             for (DroneInterface drone : drones) {
+                //TODO there is a problem here where we are looping through drones but only
+                // getting the before and current telemetry for the first drone.
+
                 //Get previous Telemetry
                 HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(0)[0];
 //                myBeforeTelemetryMap.put("")
