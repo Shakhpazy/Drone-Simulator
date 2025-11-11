@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 
 import javax.sound.sampled.*;
+import javax.swing.*;
 
 import view.MonitorDashboard;
 
@@ -40,6 +41,13 @@ public class DroneMonitorApp {
      */
     public static void main(String[] theArgs) {
 
+        // ======================
+        // CONFIGURATION
+        // ======================
+        final int FPS = 60;                  // frames per second the higher, the smoother 60 optimal
+        final double SPEED_MULTIPLIER = 2;   // controls the speed of the simulation where 2x is double and .5 is half etc..
+        final double DELTA_TIME = (1.0 / FPS) * SPEED_MULTIPLIER; // how much simulation time actually passes per framer
+        final long FRAME_DELAY_MS = 1000 / FPS; // ≈ 16 ms per update: time between updates
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
@@ -84,7 +92,7 @@ public class DroneMonitorApp {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones();
+            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(DELTA_TIME);
 
             //For each drone
             for (DroneInterface drone : drones) {
@@ -126,7 +134,9 @@ public class DroneMonitorApp {
         };
 
         //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
-        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
+        // old : scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
+        scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
+
 
         //Create a runnable task that will shut down the scheduler on program exit
         Runnable shutdownScheduler = () -> {
