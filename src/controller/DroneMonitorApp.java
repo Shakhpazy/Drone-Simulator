@@ -44,10 +44,9 @@ public class DroneMonitorApp {
         // ======================
         // CONFIGURATION
         // ======================
-        final int FPS = 60;                  // frames per second the higher, the smoother 60 optimal
-        final double SPEED_MULTIPLIER = 2;   // controls the speed of the simulation where 2x is double and .5 is half etc..
-        final double DELTA_TIME = (1.0 / FPS) * SPEED_MULTIPLIER; // how much simulation time actually passes per framer
-        final long FRAME_DELAY_MS = 1000 / FPS; // ≈ 16 ms per update: time between updates
+        final int FPS = 60;
+        final double DELTA_TIME = .01; // is how much simulated time passes each update
+        final long FRAME_DELAY_MS = 1000 / FPS;                   // is how long the program waits between updates in real time
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
@@ -168,11 +167,11 @@ public class DroneMonitorApp {
      */
     private static ArrayList<RoutePoint> createRoute() {
         ArrayList<RoutePoint> route = new ArrayList<>();
-        route.add(new RoutePoint(60, 60, 110)); // bottom-left
-        route.add(new RoutePoint(90, 60, 115)); // bottom-right (30 units)
-        route.add(new RoutePoint(90, 80, 120)); // top-right    (20 units)
-        route.add(new RoutePoint(60, 80, 125)); // top-left     (30 units)
-        route.add(new RoutePoint(60, 60, 130)); // back to start(20 units)
+        route.add(new RoutePoint(0, 0, 110)); // bottom-left
+        route.add(new RoutePoint(120, 40, 115)); // bottom-right (30 units)
+        route.add(new RoutePoint(120, -40, 120)); // top-right    (20 units)
+        route.add(new RoutePoint(-120, -40, 125)); // top-left     (30 units)
+        route.add(new RoutePoint(-120, 40, 130)); // back to start(20 units)
         return route;
     }
 
