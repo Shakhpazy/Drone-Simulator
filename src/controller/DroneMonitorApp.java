@@ -11,6 +11,7 @@ import java.util.ArrayList;
 
 
 import javax.sound.sampled.*;
+import javax.swing.*;
 
 import view.MonitorDashboard;
 
@@ -31,7 +32,6 @@ public class DroneMonitorApp {
      */
     private static boolean myDevMode = true;
 
-    //private static String myBatteryAlert = "C:\\Users\\njart\\UWT\\TCSS360\\Drone-Simulator\\src\\FX\\BatteryAlert.wav";
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -41,6 +41,12 @@ public class DroneMonitorApp {
      */
     public static void main(String[] theArgs) {
 
+        // ======================
+        // CONFIGURATION
+        // ======================
+        final int FPS = 60;
+        final double DELTA_TIME = .01; // is how much simulated time passes each update
+        final long FRAME_DELAY_MS = 1000 / FPS;                   // is how long the program waits between updates in real time
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
@@ -85,7 +91,7 @@ public class DroneMonitorApp {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones();
+            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(DELTA_TIME);
 
             //For each drone
             for (DroneInterface drone : drones) {
@@ -127,7 +133,9 @@ public class DroneMonitorApp {
         };
 
         //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
-        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 5, TimeUnit.SECONDS);
+        // old : scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
+        scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
+
 
         //Create a runnable task that will shut down the scheduler on program exit
         Runnable shutdownScheduler = () -> {
@@ -159,11 +167,11 @@ public class DroneMonitorApp {
      */
     private static ArrayList<RoutePoint> createRoute() {
         ArrayList<RoutePoint> route = new ArrayList<>();
-        route.add(new RoutePoint(60, 60, 110)); // bottom-left
-        route.add(new RoutePoint(90, 60, 115)); // bottom-right (30 units)
-        route.add(new RoutePoint(90, 80, 120)); // top-right    (20 units)
-        route.add(new RoutePoint(60, 80, 125)); // top-left     (30 units)
-        route.add(new RoutePoint(60, 60, 130)); // back to start(20 units)
+        route.add(new RoutePoint(0, 0, 110)); // bottom-left
+        route.add(new RoutePoint(120, 40, 115)); // bottom-right (30 units)
+        route.add(new RoutePoint(120, -40, 120)); // top-right    (20 units)
+        route.add(new RoutePoint(-120, -40, 125)); // top-left     (30 units)
+        route.add(new RoutePoint(-120, 40, 130)); // back to start(20 units)
         return route;
     }
 

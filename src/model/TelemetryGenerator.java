@@ -1,5 +1,6 @@
 package model;
 
+/**imports **/
 import java.util.*;
 /**
  * TelemetryGenerator is responsible for simulating drone telemetry data.
@@ -64,8 +65,10 @@ public class TelemetryGenerator {
      * - Skips processing if the drone is not alive.
      * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
      *   a random anomaly move or a normal route-following move.
+     *
+     *   gen.processAllDrones(1.0 / FPS);
      */
-    public ArrayList<HashMap<String, Object>[]> processAllDrones() {
+    public ArrayList<HashMap<String, Object>[]> processAllDrones(double deltaTime) {
         ArrayList<HashMap<String, Object>[]> telemetryList = new ArrayList<>();
 
         for (DroneInterface drone : myDrones) {
@@ -76,9 +79,9 @@ public class TelemetryGenerator {
             }
 
             if (myRandom.nextInt(100) < RANDOM_PERCENT) {
-                getRandomMove(drone);
+                getRandomMove(drone, deltaTime);
             } else {
-                getMove(drone);
+                getMove(drone, deltaTime);
             }
 
             HashMap<String, Object> myAfterTelemetryMap = createTelemetryMap(drone);
@@ -104,22 +107,22 @@ public class TelemetryGenerator {
      *
      * @param theDrone the drone to update with an anomaly
      */
-    public void getRandomMove(DroneInterface theDrone) {
-        System.out.println("Random move.");
+    public void getRandomMove(DroneInterface theDrone, double deltaTime) {
         float latitude = theDrone.getLatitude();
         float longitude = theDrone.getLongitude();
         float altitude = theDrone.getAltitude();
         float velocity = theDrone.getVelocity();
 
-        int anomalyType = myRandom.nextInt(3); // 0 = drop/climb, 1 = speed anomaly, 2 = drift
+        int anomalyType = myRandom.nextInt(3); // 0=altitude,1=speed,2=drift
 
         switch (anomalyType) {
-            case 0: // Sudden drop or climb of 10-20 units
-                float changeAlt = (myRandom.nextBoolean() ? 1 : -1) * (10 + myRandom.nextFloat() * 10);
+            case 0: // Sudden drop/climb
+                float changeAlt = (myRandom.nextBoolean() ? 1 : -1)
+                        * (10 + myRandom.nextFloat() * 10) * (float) deltaTime;
                 altitude = Math.max(MIN_ALTITUDE, altitude + changeAlt);
                 break;
 
-            case 1: // Sudden speed anomaly by 7 units
+            case 1: // Speed anomaly
                 int change = 7;
                 if (myRandom.nextBoolean()) {
                     velocity = Math.min(velocity + change, MAX_VELOCITY);
@@ -128,21 +131,24 @@ public class TelemetryGenerator {
                 }
                 break;
 
-            case 2: // Random drift 15-25 units in long and latitude
-                float driftX = (myRandom.nextBoolean() ? 1 : -1) * (15 + myRandom.nextFloat() * 10);
-                float driftY = (myRandom.nextBoolean() ? 1 : -1) * (15 + myRandom.nextFloat() * 10);
+            case 2: // Random drift
+                float driftX = (myRandom.nextBoolean() ? 1 : -1)
+                        * (15 + myRandom.nextFloat() * 10) * (float) deltaTime;
+                float driftY = (myRandom.nextBoolean() ? 1 : -1)
+                        * (15 + myRandom.nextFloat() * 10) * (float) deltaTime;
                 longitude += driftX;
                 latitude += driftY;
                 break;
         }
 
-        // get the distance change.
+        // Calculate distance change
         float anomalyDistance = (float) Math.sqrt(
                 Math.pow(longitude - theDrone.getLongitude(), 2) +
                         Math.pow(latitude - theDrone.getLatitude(), 2) +
                         Math.pow(altitude - theDrone.getAltitude(), 2)
         );
-        applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, anomalyDistance);
+
+        applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, anomalyDistance, deltaTime);
     }
 
     /**
@@ -153,43 +159,40 @@ public class TelemetryGenerator {
      *
      * @param theDrone the drone to update with a normal move
      */
-    public void getMove(DroneInterface theDrone) {
+    public void getMove(DroneInterface theDrone, double deltaTime) {
         float latitude = theDrone.getLatitude();
         float longitude = theDrone.getLongitude();
         float altitude = theDrone.getAltitude();
         float velocity;
 
-        RoutePoint nextPoint = theDrone.getNextPoint();
+        RoutePoint next = theDrone.getNextPoint();
+        float dx = next.getLongitude() - longitude;
+        float dy = next.getLatitude() - latitude;
+        float dz = next.getAltitude() - altitude;
 
-        float dx = nextPoint.getLongitude() - longitude;
-        float dy = nextPoint.getLatitude() - latitude;
-        float dz = nextPoint.getAltitude() - altitude;
-
-        // distance left until we get to the next point
         float distance = (float) Math.sqrt(dx*dx + dy*dy + dz*dz);
+        float moveDist = theDrone.getVelocity() * (float) deltaTime; // movement this frame
 
-
-        if (distance <= theDrone.getVelocity()) {
-            // reached waypoint
-            longitude = nextPoint.getLongitude();
-            latitude = nextPoint.getLatitude();
-            altitude = nextPoint.getAltitude();
-            theDrone.setNextRoute(); // advance to next waypoint
+        if (distance <= moveDist) {
+            longitude = next.getLongitude();
+            latitude  = next.getLatitude();
+            altitude  = next.getAltitude();
+            theDrone.setNextRoute();
         } else {
-            float ratio = theDrone.getVelocity() / distance;
+            float ratio = moveDist / distance;
             longitude += dx * ratio;
-            latitude += dy * ratio;
-            altitude += dz * ratio;
+            latitude  += dy * ratio;
+            altitude  += dz * ratio;
         }
 
-        // After movement
+        // Adjust velocity slightly (acceleration/deceleration)
         if (distance < 10.0f) {
             velocity = Math.max(theDrone.getVelocity() - ACCELERATION_STEP, MIN_VELOCITY);
         } else {
             velocity = Math.min(theDrone.getVelocity() + ACCELERATION_STEP, MAX_VELOCITY);
         }
 
-        applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, distance);
+        applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, distance, deltaTime);
     }
 
     /**
@@ -240,12 +243,11 @@ public class TelemetryGenerator {
         return telemetryMap;
     }
 
-    private void applyDroneUpdate(DroneInterface theDrone, float theLongitude, float theLatitude, float theAltitude, float theVelocity, float theDistance) {
-        //before we update the drone state, we need to get the amount of battery drained and the orientation it should face
-        float batteryDrained = batteryDrained(theDrone, theDistance);
-        float degree = theDrone.getOrientation().findNextOrientation(theDrone.getLongitude(), theDrone.getLatitude(), theLongitude, theLatitude);
+    private void applyDroneUpdate(DroneInterface d, float lon, float lat, float alt, float vel, float dist, double deltaTime) {
+        float drained = batteryDrained(d, dist, deltaTime);
+        float degree = d.getOrientation().findNextOrientation(d.getLongitude(), d.getLatitude(), lon, lat);
 
-        theDrone.updateDrone(theLongitude, theLatitude, theAltitude, batteryDrained, theVelocity, degree);
+        d.updateDrone(lon, lat, alt, drained, vel, degree);
     }
 
     /**
@@ -254,18 +256,10 @@ public class TelemetryGenerator {
      *
      * @return the amount of battery drained (integer percent or units)
      */
-    private float batteryDrained(DroneInterface theDrone, float distanceTraveled) {
-        // Base drain per tick
-        float drain = 0.07f;
-
-        // Add small penalty for speed (faster = more battery usage)
-        if (theDrone.getVelocity() > 7) {
-            drain += 0.05f;
-        }
-
-        // Add distance factor (so long flights cost more)
-        drain += distanceTraveled * 0.001f; // e.g., 1 per 1000 units of distance
-
+    private float batteryDrained(DroneInterface d, float dist, double deltaTime) {
+        float drain = 0.07f * (float) deltaTime;
+        if (d.getVelocity() > 7) drain += 0.05f * (float) deltaTime;
+        drain += dist * 0.001f * (float) deltaTime;
         return drain;
     }
 
