@@ -1,6 +1,5 @@
 package model;
 
-/**imports **/
 import java.util.*;
 /**
  * TelemetryGenerator is responsible for simulating drone telemetry data.
@@ -13,6 +12,8 @@ import java.util.*;
  * can deviate from expected behavior.
  */
 public class TelemetryGenerator {
+
+    public static TelemetryGenerator instance;
 
     /** List of drones being simulated. */
     ArrayList<DroneInterface> myDrones;
@@ -39,16 +40,18 @@ public class TelemetryGenerator {
     private static final float ACCELERATION_STEP = 1;
 
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
-    private static final int RANDOM_PERCENT = 15; //Should be set from 0-100
+    private static final int RANDOM_PERCENT = 1; //Should be set from 0-100
 
 
-    /**
-     * Constructs a TelemetryGenerator with a list of drones to simulate.
-     *
-     * @param theDrones list of drones implementing DroneInterface
-     */
-    public TelemetryGenerator(ArrayList<DroneInterface> theDrones) {
-        myDrones = theDrones;
+    private TelemetryGenerator() {
+        myDrones = new ArrayList<>();
+    }
+
+    public static synchronized TelemetryGenerator getInstance() {
+        if (instance == null) {
+            instance = new TelemetryGenerator();
+        }
+        return instance;
     }
 
     /**

@@ -46,7 +46,7 @@ public class DroneMonitorApp {
         // ======================
         final int FPS = 60;
         final double DELTA_TIME = .01; // is how much simulated time passes each update
-        final long FRAME_DELAY_MS = 1000 / FPS;                   // is how long the program waits between updates in real time
+        final long FRAME_DELAY_MS = 30;                   // is how long the program waits between updates in real time
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
