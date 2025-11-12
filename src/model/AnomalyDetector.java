@@ -25,12 +25,12 @@ public class AnomalyDetector {
     /**
      * A float to represent the x-axis size of the drone flight area.
      */
-    private static final float LATITUDE_MAX = 930;
+    private static final float LATITUDE_MAX = 90;
 
     /**
      * A float to represent the y-axis size of the drone flight area.
      */
-    private static final float LONGITUDE_MAX = 530;
+    private static final float LONGITUDE_MAX = 180;
 
     /**
      * A float to represent the z-axis size of the drone flight area.
@@ -85,8 +85,8 @@ public class AnomalyDetector {
         float currAltitude = (float) myCurrTelemetry.get("altitude");
 
         // Check in bounds allows for velocity check to diagnose anomaly cause
-        if (currLatitude < 0 || currLatitude > LATITUDE_MAX ||
-                currLongitude < 0 || currLongitude > LONGITUDE_MAX ||
+        if (currLatitude < LATITUDE_MAX * -1 || currLatitude > LATITUDE_MAX ||
+                currLongitude < LONGITUDE_MAX * -1 || currLongitude > LONGITUDE_MAX ||
                 currAltitude < 0 || currAltitude > ALTITUDE_MAX) {
             ret.append(AnomalyEnum.OUT_OF_BOUNDS);
         }

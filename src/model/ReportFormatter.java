@@ -8,14 +8,14 @@ import java.util.HashMap;
 /**
  * A class to aid the AnomalyDetector class in AnomalyReport composition.
  * @author nlevin11
- * @version 11-6
+ * @version 11-12
  */
 public class ReportFormatter {
 
     /**
      * A time format to format time output.
      */
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
             .withZone(ZoneId.systemDefault());
 
     /**
@@ -73,8 +73,8 @@ public class ReportFormatter {
                 "x: " + thePrevTelemetry.get("latitude") +
                 " y: " + thePrevTelemetry.get("longitude") +
                 " z: " + thePrevTelemetry.get("altitude") + "\n" +
-                "Velocity: " + thePrevTelemetry.get("velocity") + " units/second(cycle)\n" +
-                "Orientation: " + thePrevTelemetry.get("orientation") + "\n" +
+                "Velocity: " + thePrevTelemetry.get("velocity") + " units/cycle\n" +
+                "Orientation (Deg from North): " + thePrevTelemetry.get("orientation") + "\n" +
                 "Battery (%): " + thePrevTelemetry.get("batteryLevel") + "\n";
     }
 
