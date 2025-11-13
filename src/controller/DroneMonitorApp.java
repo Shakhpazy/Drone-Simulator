@@ -76,12 +76,12 @@ public class DroneMonitorApp {
         anomalyDTBS.initialize();
 
         //getting the drones in out telemetry Generator
-        ArrayList<AbstractDrone> drones = gen.getMyDrones();
+        ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         //Output to console if developer mode is enabled
         if(myDevMode) {
             System.out.println("---- START ----");
-            for (AbstractDrone drone : drones) {
+            for (DroneInterface drone : drones) {
                 printDrone(drone);
                 System.out.println();
             }
@@ -97,7 +97,7 @@ public class DroneMonitorApp {
             ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(DELTA_TIME);
 
             //For each drone
-            for (AbstractDrone drone : drones) {
+            for (DroneInterface drone : drones) {
                 //TODO there is a problem here where we are looping through drones but only
                 // getting the before and current telemetry for the first drone.
 
@@ -195,9 +195,9 @@ public class DroneMonitorApp {
      * Prints the current telemetry data of a specific drone to the console for debugging purposes.
      * Enabled only in developer mode.
      *
-     * @param theDrone The {@link AbstractDrone} object representing the drone.
+     * @param theDrone The {@link DroneInterface} object representing the drone.
      */
-    private static void printDrone(AbstractDrone theDrone) {
+    private static void printDrone(DroneInterface theDrone) {
         RoutePoint target = theDrone.getNextPoint(); // the waypoint it’s heading to
         System.out.printf(
                 "Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%f | Heading to (%.0f, %.0f, %.0f)%n",

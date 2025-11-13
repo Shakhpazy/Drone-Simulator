@@ -16,28 +16,13 @@ public class TelemetryGenerator {
     public static TelemetryGenerator instance;
 
     /** List of drones being simulated. */
-    ArrayList<AbstractDrone> myDrones;
+    ArrayList<DroneInterface> myDrones;
 
     /** Random generator used for movement and anomaly decisions. */
     private static final Random myRandom = new Random();
 
 //    /** Timestamp reference used for telemetry data. */
 //    private static final Date myDate = new Date();
-
-    /** Maximum allowed velocity in normal moves. */
-    private static final float MAX_VELOCITY = 10;
-
-    /** Minimum allowed velocity in normal moves. */
-    private static final float MIN_VELOCITY = 1;
-
-    /** Maximum allowed altitude in normal moves. */
-    private static final float MAX_ALTITUDE = 700;
-
-    /** Minimum allowed altitude in normal moves. */
-    private static final float MIN_ALTITUDE = 0;
-
-    /** Step size for increasing or decreasing velocity during movement. */
-    private static final float ACCELERATION_STEP = 1;
 
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
     private static final int RANDOM_PERCENT = 1; //Should be set from 0-100
@@ -54,7 +39,7 @@ public class TelemetryGenerator {
         return instance;
     }
 
-    public ArrayList<AbstractDrone> getMyDrones() {
+    public ArrayList<DroneInterface> getMyDrones() {
         return myDrones;
     }
 
@@ -63,7 +48,7 @@ public class TelemetryGenerator {
      *
      * @param theDrone drone to be added
      */
-    public void addDrone(AbstractDrone theDrone) {
+    public void addDrone(DroneInterface theDrone) {
         myDrones.add(theDrone);
     }
 
@@ -78,7 +63,7 @@ public class TelemetryGenerator {
     public ArrayList<HashMap<String, Object>[]> processAllDrones(double deltaTime) {
         ArrayList<HashMap<String, Object>[]> telemetryList = new ArrayList<>();
 
-        for (AbstractDrone drone : myDrones) {
+        for (DroneInterface drone : myDrones) {
             HashMap<String, Object> myBeforeTelemetryMap = createTelemetryMap(drone);
 
             if (!drone.isAlive()) {
@@ -114,7 +99,7 @@ public class TelemetryGenerator {
      *
      * @param theDrone the drone to update with an anomaly
      */
-    public void getRandomMove(AbstractDrone theDrone, double deltaTime) {
+    public void getRandomMove(DroneInterface theDrone, double deltaTime) {
         float latitude = theDrone.getLatitude();
         float longitude = theDrone.getLongitude();
         float altitude = theDrone.getAltitude();
@@ -126,15 +111,15 @@ public class TelemetryGenerator {
             case 0: // Sudden drop/climb
                 float changeAlt = (myRandom.nextBoolean() ? 1 : -1)
                         * (10 + myRandom.nextFloat() * 10) * (float) deltaTime;
-                altitude = Math.max(MIN_ALTITUDE, altitude + changeAlt);
+                altitude = Math.max(theDrone.getMinAltitude(), altitude + changeAlt);
                 break;
 
             case 1: // Speed anomaly
                 int change = 7;
                 if (myRandom.nextBoolean()) {
-                    velocity = Math.min(velocity + change, MAX_VELOCITY);
+                    velocity = Math.min(velocity + change, theDrone.getMaxVelocity());
                 } else {
-                    velocity = Math.max(velocity - change, MIN_VELOCITY);
+                    velocity = Math.max(velocity - change, theDrone.getMaxVelocity());
                 }
                 break;
 
@@ -166,7 +151,7 @@ public class TelemetryGenerator {
      *
      * @param theDrone the drone to update with a normal move
      */
-    public void getMove(AbstractDrone theDrone, double deltaTime) {
+    public void getMove(DroneInterface theDrone, double deltaTime) {
         float latitude = theDrone.getLatitude();
         float longitude = theDrone.getLongitude();
         float altitude = theDrone.getAltitude();
@@ -194,9 +179,9 @@ public class TelemetryGenerator {
 
         // Adjust velocity slightly (acceleration/deceleration)
         if (distance < 10.0f) {
-            velocity = Math.max(theDrone.getVelocity() - ACCELERATION_STEP, MIN_VELOCITY);
+            velocity = Math.max(theDrone.getVelocity() - theDrone.getAccelerationStep(), theDrone.getMinVelocity());
         } else {
-            velocity = Math.min(theDrone.getVelocity() + ACCELERATION_STEP, MAX_VELOCITY);
+            velocity = Math.min(theDrone.getVelocity() + theDrone.getAccelerationStep(), theDrone.getMaxVelocity());
         }
 
         applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, distance, deltaTime);
@@ -212,9 +197,9 @@ public class TelemetryGenerator {
      * to 0. Dead drones (already not alive) are skipped.
      */
     private void checkCollisions() {
-        HashMap<String, AbstractDrone> seen = new HashMap<>();
+        HashMap<String, DroneInterface> seen = new HashMap<>();
 
-        for (AbstractDrone drone: myDrones) {
+        for (DroneInterface drone: myDrones) {
             if (!drone.isAlive()) {
                 continue;
             }
@@ -237,7 +222,7 @@ public class TelemetryGenerator {
      * @return a map containing drone id, altitude, longitude, latitude,
      *         velocity, battery level, orientation, and timestamp
      */
-    public HashMap<String, Object> createTelemetryMap(AbstractDrone theDrone) {
+    public HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
         HashMap<String, Object> telemetryMap = new HashMap<>();
         telemetryMap.put("id", theDrone.getId());
         telemetryMap.put("altitude", theDrone.getAltitude());
@@ -250,7 +235,7 @@ public class TelemetryGenerator {
         return telemetryMap;
     }
 
-    private void applyDroneUpdate(AbstractDrone d, float lon, float lat, float alt, float vel, float dist, double deltaTime) {
+    private void applyDroneUpdate(DroneInterface d, float lon, float lat, float alt, float vel, float dist, double deltaTime) {
         float drained = batteryDrained(d, dist, deltaTime);
         float degree = d.getOrientation().findNextOrientation(d.getLongitude(), d.getLatitude(), lon, lat);
 
@@ -263,7 +248,7 @@ public class TelemetryGenerator {
      *
      * @return the amount of battery drained (integer percent or units)
      */
-    private float batteryDrained(AbstractDrone d, float dist, double deltaTime) {
+    private float batteryDrained(DroneInterface d, float dist, double deltaTime) {
         float drain = 0.07f * (float) deltaTime;
         if (d.getVelocity() > 7) drain += 0.05f * (float) deltaTime;
         drain += dist * 0.001f * (float) deltaTime;

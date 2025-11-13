@@ -18,14 +18,26 @@ public abstract class AbstractDrone implements DroneInterface{
 
     protected static int totalDrones = 0;
 
+    protected final float myMaxVelocity;
+    protected final float myMinVelocity;
+    protected final float myMaxAltitude;
+    protected final float myMinAltitude;
+    protected final float myAccelerationStep;
 
-    public AbstractDrone(float theLong, float theLat, float theAlt, float theVel, float theBat) {
+
+    public AbstractDrone(float theLong, float theLat, float theAlt, float theVel, float theBat, float theMaxVel,
+                         float theMinVel, float theMaxAlt, float theMinAlt, float theAccStep) {
         myLongitude = theLong;
         myLatitude = theLat;
         myAltitude = theAlt;
         myVelocity = theVel;
         myBatteryLevel = theBat;
         myOrientation = new Orientation(0);
+        myMaxVelocity = theMaxVel;
+        myMinVelocity = theMinVel;
+        myMaxAltitude = theMaxAlt;
+        myMinAltitude = theMinAlt;
+        myAccelerationStep = theAccStep;
         totalDrones += 1;
         myID = totalDrones;
     }
@@ -59,10 +71,27 @@ public abstract class AbstractDrone implements DroneInterface{
         return myOrientation;
     }
 
-    /**
-     * Gets the total number of drones
-     * @return Int representing the total number of drones.
-     */
+    public float getMaxVelocity() {
+        return myMaxVelocity;
+    }
+
+    public float getMinVelocity() {
+        return myMinVelocity;
+    }
+
+    public float getMaxAltitude() {
+        return myMaxAltitude;
+    }
+
+    public float getMinAltitude() {
+        return myMinAltitude;
+    }
+
+    public float getAccelerationStep() {
+        return myAccelerationStep;
+    }
+
+
     public static int getTotalDrones() {
         return totalDrones;
     }
