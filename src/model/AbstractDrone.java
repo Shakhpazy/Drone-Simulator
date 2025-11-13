@@ -1,8 +1,6 @@
 package model;
 
-import java.util.ArrayList;
-
-abstract class abstractDrone implements DroneInterface{
+public abstract class AbstractDrone implements DroneInterface{
 
     protected float myAltitude;
 
@@ -21,7 +19,7 @@ abstract class abstractDrone implements DroneInterface{
     protected static int totalDrones = 0;
 
 
-    public abstractDrone(float theLong, float theLat, float theAlt, float theVel, float theBat) {
+    public AbstractDrone(float theLong, float theLat, float theAlt, float theVel, float theBat) {
         myLongitude = theLong;
         myLatitude = theLat;
         myAltitude = theAlt;
