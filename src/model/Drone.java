@@ -2,134 +2,55 @@ package model;
 
 import java.util.ArrayList;
 
-public class Drone implements  DroneInterface {
+public class Drone extends AbstractDrone {
 
-    private float myAltitude;
+    /** Maximum allowed velocity in normal moves. */
+    private static final float MAX_VELOCITY = 10;
 
-    private float myLongitude;
+    /** Minimum allowed velocity in normal moves. */
+    private static final float MIN_VELOCITY = 1;
 
-    private float myLatitude;
+    /** Maximum allowed altitude in normal moves. */
+    private static final float MAX_ALTITUDE = 700;
 
-    private float myVelocity;
+    /** Minimum allowed altitude in normal moves. */
+    private static final float MIN_ALTITUDE = 0;
 
-    private float myBatteryLevel;
-
-    private Orientation myOrientation;
-
-    private final int myID;
-
-    static int totalDrones = 0;
+    /** Step size for increasing or decreasing velocity during movement. */
+    private static final float ACCELERATION_STEP = 1;
 
     ArrayList<RoutePoint> myRoute;
-
     private int nextPoint = 0;
 
-    /**
-     * This is the constructor for the Drone Class that
-     * sets custom values for the drones attributes.
-     *
-     * @param theVelocity float of the velocity
-     * @param theBatterLevel int of the battery level 0-100
-     */
-    public Drone(float theVelocity, int theBatterLevel, ArrayList<RoutePoint> theRoute) {
-        //implement error handling for  these values passed later
+    public Drone(float theVelocity, int theBatteryLevel, ArrayList<RoutePoint> theRoute) {
+        super(
+                !theRoute.isEmpty() ? theRoute.getFirst().getLongitude() : 0f,
+                !theRoute.isEmpty() ? theRoute.getFirst().getLatitude()  : 0f,
+                !theRoute.isEmpty() ? theRoute.getFirst().getAltitude()  : 0f,
+                theVelocity,
+                theBatteryLevel,
+                MAX_VELOCITY,
+                MIN_VELOCITY,
+                MAX_ALTITUDE,
+                MIN_ALTITUDE,
+                ACCELERATION_STEP
+        );
+
         if (theRoute.isEmpty()) {
-            throw new IllegalArgumentException("No route has been set for a drone");
+            throw new IllegalArgumentException("Route cannot be empty");
         }
-        RoutePoint start = theRoute.getFirst();
-        myLongitude = start.getLongitude();
-        myLatitude = start.getLatitude();
-        myAltitude = start.getAltitude();
-        myVelocity = theVelocity;
-        myBatteryLevel = theBatterLevel;
-        myOrientation = new Orientation(0);
         myRoute = theRoute;
-        nextPoint += 1;
-        totalDrones += 1;
-        myID = totalDrones;
-    }
-
-    //These are all the Getters
-    public int getId() {
-        return myID;
-    }
-
-    public float getAltitude() {
-        return myAltitude;
-    }
-
-    public float getLongitude() {
-        return myLongitude;
-    }
-
-    public float getLatitude() {
-        return myLatitude;
-    }
-
-    public float getBatteryLevel() {
-        return myBatteryLevel;
-    }
-
-    public float getVelocity() {
-        return myVelocity;
-    }
-
-    public Orientation getOrientation() {
-        return myOrientation;
+        nextPoint = 1;
     }
 
     public RoutePoint getNextPoint() {
         return myRoute.get(nextPoint % myRoute.size());
     }
 
-    /**
-     * Gets the total number of drones
-     * @return Int representing the total number of drones.
-     */
-    public static int getTotalDrones() {
-        return totalDrones;
-    }
-
-    // These are all the Setters
-    public void setAltitude(float theAltitude) {
-        myAltitude = Math.max(0, theAltitude);
-    }
-
-    public void setLongitude(float theLongitude) {
-        myLongitude = theLongitude;
-    }
-
-    public void setLatitude(float theLatitude) {
-        myLatitude = theLatitude;
-    }
-
-    public void setBatteryLevel(float theBatteryLevel) {
-        myBatteryLevel = theBatteryLevel;
-    }
-
-    public void setVelocity(float theVelocity) {
-        myVelocity = theVelocity;
-    }
-
-    public void setOrientation(float theDegree) {
-        myOrientation.setDegrees(theDegree);
-    }
-
     public void setNextRoute() {
         nextPoint = (nextPoint + 1) % myRoute.size();
     }
 
-    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, float theBatteryDrained, float theVelocity, float theDegree) {
-        setLongitude(theLongitude);
-        setLatitude(theLatitude);
-        setAltitude(theAltitude);
-        setVelocity(theVelocity);
-        setOrientation(theDegree);
-        setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, 0));
-    }
 
-    public boolean isAlive() {
-        return myBatteryLevel > 0  && myAltitude > 0;
-    }
 
 }

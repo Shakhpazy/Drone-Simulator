@@ -24,21 +24,6 @@ public class TelemetryGenerator {
 //    /** Timestamp reference used for telemetry data. */
 //    private static final Date myDate = new Date();
 
-    /** Maximum allowed velocity in normal moves. */
-    private static final float MAX_VELOCITY = 10;
-
-    /** Minimum allowed velocity in normal moves. */
-    private static final float MIN_VELOCITY = 1;
-
-    /** Maximum allowed altitude in normal moves. */
-    private static final float MAX_ALTITUDE = 700;
-
-    /** Minimum allowed altitude in normal moves. */
-    private static final float MIN_ALTITUDE = 0;
-
-    /** Step size for increasing or decreasing velocity during movement. */
-    private static final float ACCELERATION_STEP = 1;
-
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
     private static final int RANDOM_PERCENT = 1; //Should be set from 0-100
 
@@ -126,15 +111,15 @@ public class TelemetryGenerator {
             case 0: // Sudden drop/climb
                 float changeAlt = (myRandom.nextBoolean() ? 1 : -1)
                         * (10 + myRandom.nextFloat() * 10) * (float) deltaTime;
-                altitude = Math.max(MIN_ALTITUDE, altitude + changeAlt);
+                altitude = Math.max(theDrone.getMinAltitude(), altitude + changeAlt);
                 break;
 
             case 1: // Speed anomaly
                 int change = 7;
                 if (myRandom.nextBoolean()) {
-                    velocity = Math.min(velocity + change, MAX_VELOCITY);
+                    velocity = Math.min(velocity + change, theDrone.getMaxVelocity());
                 } else {
-                    velocity = Math.max(velocity - change, MIN_VELOCITY);
+                    velocity = Math.max(velocity - change, theDrone.getMaxVelocity());
                 }
                 break;
 
@@ -194,9 +179,9 @@ public class TelemetryGenerator {
 
         // Adjust velocity slightly (acceleration/deceleration)
         if (distance < 10.0f) {
-            velocity = Math.max(theDrone.getVelocity() - ACCELERATION_STEP, MIN_VELOCITY);
+            velocity = Math.max(theDrone.getVelocity() - theDrone.getAccelerationStep(), theDrone.getMinVelocity());
         } else {
-            velocity = Math.min(theDrone.getVelocity() + ACCELERATION_STEP, MAX_VELOCITY);
+            velocity = Math.min(theDrone.getVelocity() + theDrone.getAccelerationStep(), theDrone.getMaxVelocity());
         }
 
         applyDroneUpdate(theDrone, longitude, latitude, altitude, velocity, distance, deltaTime);
