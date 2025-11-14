@@ -131,6 +131,19 @@ public abstract class AbstractDrone implements DroneInterface{
         setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, 0));
     }
 
+    public abstract void getNextRandomMove(float theDeltaTime);
+
+    public abstract void getNextMove(float theDeltaTime);
+
+    protected float batteryDrained(float dist, double deltaTime) {
+        float drain = 0.07f * (float) deltaTime;
+        if (this.getVelocity() > 7) drain += 0.05f * (float) deltaTime;
+        drain += dist * 0.001f * (float) deltaTime;
+        return drain;
+    }
+
+
+
     public boolean isAlive() {
         return myBatteryLevel > 0  && myAltitude > 0;
     }
