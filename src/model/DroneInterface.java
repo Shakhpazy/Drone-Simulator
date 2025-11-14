@@ -22,17 +22,17 @@ public interface DroneInterface {
     float getBatteryLevel();
     Orientation getOrientation();
 
+    //Core Behaviors
+    void getNextMove(float theDeltaTime);
+    void getNextRandomMove(float theDeltaTime);
+    ////void updateOrientation();
+
     //Remove these after as each Drone will update its state in its own class
     void updateDrone(float theLongitude, float theLatitude, float theAltitude, float theBatteryDrained, float theVelocity, float theDegree);
     RoutePoint getNextPoint();
     void setNextRoute();
     void setAltitude(float theAltitude);
 
-    boolean isAlive();
-
-    // Core behaviors
-    //void move(double deltaTime);             // movement behavior
-    //void updateOrientation();                // turning behavior
 
     // Physics properties
     float getMaxVelocity();
@@ -40,6 +40,8 @@ public interface DroneInterface {
     float getAccelerationStep();
     float getMaxAltitude();
     float getMinAltitude();
+
+    boolean isAlive();
 
     // Telemetry snapshot (optional)
     String toString();
