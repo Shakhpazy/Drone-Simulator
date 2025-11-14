@@ -25,14 +25,8 @@ public interface DroneInterface {
     //Core Behaviors
     void getNextMove(float theDeltaTime);
     void getNextRandomMove(float theDeltaTime);
+    void collided();
     ////void updateOrientation();
-
-    //Remove these after as each Drone will update its state in its own class
-    void updateDrone(float theLongitude, float theLatitude, float theAltitude, float theBatteryDrained, float theVelocity, float theDegree);
-    RoutePoint getNextPoint();
-    void setNextRoute();
-    void setAltitude(float theAltitude);
-
 
     // Physics properties
     float getMaxVelocity();
@@ -45,5 +39,8 @@ public interface DroneInterface {
 
     // Telemetry snapshot (optional)
     String toString();
+
+    //should be removed in prod
+    RoutePoint getNextPoint();
 
 }
