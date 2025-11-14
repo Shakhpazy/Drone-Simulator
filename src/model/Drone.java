@@ -6,7 +6,7 @@ import java.util.Random;
 public class Drone extends AbstractDrone {
 
     /** Maximum allowed velocity in normal moves. */
-    private static final float MAX_VELOCITY = 15;
+    private static final float MAX_VELOCITY = 1;
 
     /** Minimum allowed velocity in normal moves. */
     private static final float MIN_VELOCITY = 5;
@@ -44,6 +44,7 @@ public class Drone extends AbstractDrone {
         nextPoint = 1;
     }
 
+    @Override
     public RoutePoint getNextPoint() {
         return myRoute.get(nextPoint % myRoute.size());
     }

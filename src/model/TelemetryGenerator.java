@@ -134,8 +134,8 @@ public class TelemetryGenerator {
             //cast to an Int to account for the drone having some kind of size associated to it.
             String position = (int)drone.getLongitude() + "," + (int)drone.getLatitude() + "," + (int)drone.getAltitude();
             if (seen.containsKey(position)) {
-                drone.setAltitude(0);
-                seen.get(position).setAltitude(0);
+                drone.collided();
+                seen.get(position).collided();
             }
             else {
                 seen.put(position, drone);
