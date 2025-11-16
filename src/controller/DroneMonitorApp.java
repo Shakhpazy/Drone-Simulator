@@ -38,7 +38,7 @@ public class DroneMonitorApp {
 
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-        MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
+        MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
         //Get a simple route, a rectangle around the map.
         ArrayList<RoutePoint> route = createRoute();
@@ -63,6 +63,7 @@ public class DroneMonitorApp {
         //Initialize AnomalyDatabase
         AnomalyDatabase anomalyDTBS = new AnomalyDatabase();
         anomalyDTBS.initialize();
+        new DatabaseController(anomalyDTBS);
 
         //Output to console if developer mode is enabled
         if(MY_DEV_MODE) {

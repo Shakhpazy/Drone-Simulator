@@ -8,6 +8,11 @@ import java.util.ArrayList;
 
 public class DatabaseWindow extends PropertyEnabledJFrame {
 
+    public static final int IDX_DRONE_ID = 0;
+    public static final int IDX_ANOMALY = 1;
+    public static final int IDX_FROM_DATE = 2;
+    public static final int IDX_TO_DATE = 3;
+
     private static final Dimension SIZE = new Dimension(1100, 700);
 
     private static final ArrayList<JTextArea> ENTRIES = new ArrayList<>();
@@ -57,16 +62,16 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
 
         QueryTextField idField = new QueryTextField("Drone ID");
         QueryTextField typeField = new QueryTextField("Anomaly Type");
-        QueryTextField fromDate = new QueryTextField("From: (DD/MM/YYYY)");
-        QueryTextField toDate = new QueryTextField("To: (DD/MM/YYYY)");
+        QueryTextField fromDate = new QueryTextField("From: (MM/DD/YYYY)");
+        QueryTextField toDate = new QueryTextField("To: (MM/DD/YYYY)");
         JButton goButt = new JButton("GO");
         goButt.addActionListener(theEvent -> {
             String[] arr = {
-                    idField.getText(),
-                    typeField.getText(),
-                    fromDate.getText(),
-                    toDate.getText()};
-            firePropertyChange(PROPERTY_DATABASE_QUERY, null, arr);
+                    idField.getTextNotDef(),
+                    typeField.getTextNotDef(),
+                    fromDate.getTextNotDef(),
+                    toDate.getTextNotDef()};
+            myPCS.firePropertyChange(PROPERTY_DATABASE_QUERY, null, arr);
         });
 
         QUERY_PANEL.add(idField);
@@ -83,23 +88,28 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
 
         private final String myDef;
 
-        private String myVal;
-
         public QueryTextField(final String theDefault) {
             super(theDefault);
-            myDef = theDefault;
-            myVal = "";
             setPreferredSize(SIZE);
+            myDef = theDefault;
             addFocusListener(new FocusAdapter() {
                 @Override
                 public void focusGained(FocusEvent theE) {
-                    setText(String.format("%s: %s", myDef, getText()));
+                    if (theDefault.equals(getText())) {
+                        setText("");
+                    }
                 }
                 @Override
                 public void focusLost(FocusEvent theE) {
-                    setText(myDef);
+                    if ("".equals(getText())) {
+                        setText(theDefault);
+                    }
                 }
             });
+        }
+
+        public String getTextNotDef() {
+            return myDef.equals(getText()) ? "" : getText();
         }
     }
 
