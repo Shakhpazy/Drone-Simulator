@@ -1,17 +1,11 @@
 package controller;
 
 import model.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
-
-
-import javax.sound.sampled.*;
-
 import view.MonitorDashboard;
 
 /**
@@ -29,9 +23,10 @@ public class DroneMonitorApp {
      * Flag to enable or disable developer mode, which prints telemetry to the console
      * and clears the database on exit.
      */
-    private static boolean myDevMode = true;
+    private static final boolean MY_DEV_MODE = true;
 
-    //private static String myBatteryAlert = "C:\\Users\\njart\\UWT\\TCSS360\\Drone-Simulator\\src\\FX\\BatteryAlert.wav";
+    //Define delta time in seconds
+    private static final double MY_DELTA_TIME = 1.0;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -53,14 +48,14 @@ public class DroneMonitorApp {
 //        Drone drone2 = new Drone(2.0f, 85, Orientation.EAST, route);
 //        Drone drone3 = new Drone(1.5f, 75, Orientation.WEST, route);
 
-        //Add drones to pass to telemetry generator.
-        ArrayList<DroneInterface> drones = new ArrayList<>();
-        drones.add(drone1);
-//        drones.add(drone2);
-//        drones.add(drone3);
-
         //Initialize telemetry generator and add drones
-        TelemetryGenerator gen = new TelemetryGenerator(drones);
+        TelemetryGenerator gen = TelemetryGenerator.getInstance();
+        gen.addDrone(drone1);
+//        gen.addDrone(drone2);
+//        gen.addDrone(drone3);
+
+        //Get list of drones
+        ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();
@@ -70,7 +65,7 @@ public class DroneMonitorApp {
         anomalyDTBS.initialize();
 
         //Output to console if developer mode is enabled
-        if(myDevMode) {
+        if(MY_DEV_MODE) {
             System.out.println("---- START ----");
             for (DroneInterface drone : drones) {
                 printDrone(drone);
@@ -85,13 +80,12 @@ public class DroneMonitorApp {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones();
+            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(MY_DELTA_TIME);
 
             //For each drone
             for (DroneInterface drone : drones) {
                 //Get previous Telemetry
                 HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(0)[0];
-//                myBeforeTelemetryMap.put("")
 
                 //Get Current Telemetry
                 HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(0)[1];
@@ -119,15 +113,15 @@ public class DroneMonitorApp {
                 view.drawDrone(drone.getId(), location, theTelemetry);
 
                 //Print to console if developer mode is enabled
-                if(myDevMode) {
+                if(MY_DEV_MODE) {
                     printDrone(drone);
                     System.out.println();
                 }
             }
         };
 
-        //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
-        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 5, TimeUnit.SECONDS);
+        //Have the scheduler fire a thread to run simulateNextStep every 1 seconds
+        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 1000, TimeUnit.MILLISECONDS);
 
         //Create a runnable task that will shut down the scheduler on program exit
         Runnable shutdownScheduler = () -> {
@@ -144,7 +138,7 @@ public class DroneMonitorApp {
         Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
 
         //Clear database after each use if developer mode is enabled.
-        if (myDevMode) {
+        if (MY_DEV_MODE) {
             Runnable clearDatabase = () -> {
                 anomalyDTBS.clear();
             };
@@ -166,16 +160,6 @@ public class DroneMonitorApp {
         route.add(new RoutePoint(60, 60, 130)); // back to start(20 units)
         return route;
     }
-
-//    private static void playBatteryAlert() {
-//        try {
-//            File batteryAlert = new File(myBatteryAlert);
-//            Media media = new Media(batteryAlert.toURI().toString());
-//        }
-//        catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     /**
      * Prints the current telemetry data of a specific drone to the console for debugging purposes.

@@ -12,6 +12,7 @@ import java.util.HashMap;
  */
 public class ReportFormatter {
 
+
     /**
      * A time format to format time output.
      */

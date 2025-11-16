@@ -14,125 +14,33 @@ package model;
  */
 public interface DroneInterface {
 
-    /**
-     * Gets the unique ID of the drone.
-     *
-     * @return the ID of the drone
-     */
     int getId();
-
-    /**
-     * Gets the current altitude of the drone.
-     *
-     * @return the altitude in meters
-     */
-    float getAltitude();
-
-    /**
-     * Gets the current longitude of the drone.
-     *
-     * @return the longitude in decimal degrees
-     */
     float getLongitude();
-
-    /**
-     * Gets the current latitude of the drone.
-     *
-     * @return the latitude in decimal degrees
-     */
     float getLatitude();
-
-    /**
-     * Gets the current velocity of the drone.
-     *
-     * @return the velocity in meters per second
-     */
+    float getAltitude();
     float getVelocity();
-
-    /**
-     * Gets the current battery level of the drone.
-     *
-     * @return the battery level as a percentage (0–100)
-     */
     float getBatteryLevel();
-
-    /**
-     * Gets the current orientation of the Drone
-     *
-     * @return Enum Type NORTH,EAST,SOUTH,WEST
-     */
     Orientation getOrientation();
 
-    /**
-     * Gets the nextPoint the Drone needs to go
-     *
-     * @return RoutePoint
-     */
-    RoutePoint getNextPoint();
+    //Core Behaviors
+    void getNextMove(float theDeltaTime);
+    void getNextRandomMove(float theDeltaTime);
+    void collided();
+    ////void updateOrientation();
 
-    /**
-     * checks if the drone isAlive
-     *
-     * @return true if Alive else False
-     */
+    // Physics properties
+    float getMaxVelocity();
+    float getMinVelocity();
+    float getAccelerationStep();
+    float getMaxAltitude();
+    float getMinAltitude();
+
     boolean isAlive();
 
-    /**
-     * Sets the altitude of the drone.
-     *
-     * @param theAltitude the altitude in meters
-     */
-    void setAltitude(float theAltitude);
-
-    /**
-     * Sets the longitude of the drone.
-     *
-     * @param theLongitude the longitude in decimal degrees
-     */
-    void setLongitude(float theLongitude);
-
-    /**
-     * Sets the latitude of the drone.
-     *
-     * @param theLatitude the latitude in decimal degrees
-     */
-    void setLatitude(float theLatitude);
-
-    /**
-     * Sets the velocity of the drone.
-     *
-     * @param theVelocity the velocity in meters per second
-     */
-    void setVelocity(float theVelocity);
-
-    /**
-     * Sets the battery level of the drone.
-     *
-     * @param theBatteryLevel the battery level as a percentage (0–100)
-     */
-    void setBatteryLevel(float theBatteryLevel);
-
-    /**
-     * Sets the orientation of the drone
-     *
-     * @param theDegree the Orientation ENUM
-     */
-    void setOrientation(float theDegree);
-
-    /**
-     * Sets the nextRoute the drone must go to
-     */
-    void setNextRoute();
-
-    /**
-     *
-     */
-    void updateDrone(float theLongitude, float theLatitude, float theAltitude, float theBatteryDrained, float velocity, float degree);
-
-    /**
-     * Prints the current Drone in a neat fashion
-     *
-     * @return the string representation of a Drone
-     */
+    // Telemetry snapshot (optional)
     String toString();
+
+    //should be removed in prod
+    RoutePoint getNextPoint();
+
 }
