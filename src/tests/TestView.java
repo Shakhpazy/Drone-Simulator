@@ -10,7 +10,7 @@ import java.util.ArrayList;
 public class TestView {
 
     public static void main(String[] args) {
-        MonitorDashboard view  =  new MonitorDashboard();
+        MonitorDashboard view  =  MonitorDashboard.getInstance();
 
         ArrayList<RoutePoint> route = new ArrayList<>();
         route.add(new RoutePoint(100, 100, 110)); // bottom-left

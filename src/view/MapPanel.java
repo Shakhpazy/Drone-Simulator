@@ -206,7 +206,7 @@ class MapPanel extends JPanel {
             addMouseWheelListener(new MouseAdapter() {
                 @Override
                 public void mouseWheelMoved(MouseWheelEvent theE) {
-                    myScale = Math.clamp(myScale + theE.getWheelRotation(), MIN_SCALE, MAX_SCALE);
+                    myScale = Math.clamp(myScale - theE.getWheelRotation(), MIN_SCALE, MAX_SCALE);
                     clampPan();
                     repaint();
                 }

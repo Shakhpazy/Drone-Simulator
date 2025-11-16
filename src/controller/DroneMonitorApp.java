@@ -30,11 +30,13 @@ public class DroneMonitorApp {
      * Flag to enable or disable developer mode, which prints telemetry to the console
      * and clears the database on exit.
      */
-    private static boolean myDevMode = false;
+    private static boolean MY_DEV_MODE = false;
 
     private static final RouteGenerator myRouteGenerator = new RouteGenerator();
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
+    //Define delta time in seconds
+    private static final double MY_DELTA_TIME = 1.0;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -48,12 +50,10 @@ public class DroneMonitorApp {
         // CONFIGURATION
         // ======================
         final int FPS = 60;
-        final double DELTA_TIME = 1.0 / FPS; // ≈ 0.0167
         final long FRAME_DELAY_MS = 1000/FPS; // is how long the program waits between updates in real time (maybe for slider)
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-        MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
-
+        MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
         //Initialize telemetry generator and add drones
         TelemetryGenerator gen = TelemetryGenerator.getInstance();
@@ -64,6 +64,7 @@ public class DroneMonitorApp {
             DroneInterface drone = myDroneGenerator.createDrone(theRoute);
             gen.addDrone(drone);
         }
+        ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();
@@ -71,12 +72,10 @@ public class DroneMonitorApp {
         //Initialize AnomalyDatabase
         AnomalyDatabase anomalyDTBS = new AnomalyDatabase();
         anomalyDTBS.initialize();
-
-        //getting the drones in out telemetry Generator
-        ArrayList<DroneInterface> drones = gen.getMyDrones();
+        new DatabaseController(anomalyDTBS);
 
         //Output to console if developer mode is enabled
-        if(myDevMode) {
+        if(MY_DEV_MODE) {
             System.out.println("---- START ----");
             for (DroneInterface drone : drones) {
                 printDrone(drone);
@@ -91,7 +90,7 @@ public class DroneMonitorApp {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(DELTA_TIME);
+            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(MY_DELTA_TIME);
 
             //For each drone
             for (int i = 0; i < drones.size(); i++) {
@@ -127,7 +126,7 @@ public class DroneMonitorApp {
                 view.drawDrone(drone.getId(), location, theTelemetry);
 
                 //Print to console if developer mode is enabled
-                if(myDevMode) {
+                if(MY_DEV_MODE) {
                     printDrone(drone);
                     System.out.println();
                 }
@@ -154,7 +153,7 @@ public class DroneMonitorApp {
         Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
 
         //Clear database after each use if developer mode is enabled.
-        if (myDevMode) {
+        if (MY_DEV_MODE) {
             Runnable clearDatabase = () -> {
                 anomalyDTBS.clear();
             };
