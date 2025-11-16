@@ -1,11 +1,18 @@
 package controller;
 
 import model.*;
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
+
+
+import javax.sound.sampled.*;
+import javax.swing.*;
+
 import view.MonitorDashboard;
 
 /**
@@ -23,7 +30,10 @@ public class DroneMonitorApp {
      * Flag to enable or disable developer mode, which prints telemetry to the console
      * and clears the database on exit.
      */
-    private static final boolean MY_DEV_MODE = true;
+    private static boolean MY_DEV_MODE = false;
+
+    private static final RouteGenerator myRouteGenerator = new RouteGenerator();
+    private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
     //Define delta time in seconds
     private static final double MY_DELTA_TIME = 1.0;
@@ -36,25 +46,24 @@ public class DroneMonitorApp {
      */
     public static void main(String[] theArgs) {
 
+        // ======================
+        // CONFIGURATION
+        // ======================
+        final int FPS = 60;
+        final long FRAME_DELAY_MS = 1000/FPS; // is how long the program waits between updates in real time (maybe for slider)
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
-        //Get a simple route, a rectangle around the map.
-        ArrayList<RoutePoint> route = createRoute();
-
-        //Create 3 Drones to pass to Telemetry Generator.
-        Drone drone1 = new Drone(3.0f, 100, route);
-//        Drone drone2 = new Drone(2.0f, 85, Orientation.EAST, route);
-//        Drone drone3 = new Drone(1.5f, 75, Orientation.WEST, route);
-
         //Initialize telemetry generator and add drones
         TelemetryGenerator gen = TelemetryGenerator.getInstance();
-        gen.addDrone(drone1);
-//        gen.addDrone(drone2);
-//        gen.addDrone(drone3);
 
-        //Get list of drones
+        //Generate Drones
+        for (int i = 0; i < 1; i++) {
+            ArrayList<RoutePoint> theRoute = myRouteGenerator.generateRoute();
+            DroneInterface drone = myDroneGenerator.createDrone(theRoute);
+            gen.addDrone(drone);
+        }
         ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         //Initialize AnomalyDetector
@@ -84,12 +93,15 @@ public class DroneMonitorApp {
             ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(MY_DELTA_TIME);
 
             //For each drone
-            for (DroneInterface drone : drones) {
+            for (int i = 0; i < drones.size(); i++) {
+                DroneInterface drone = drones.get(i);
+
                 //Get previous Telemetry
-                HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(0)[0];
+                HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(i)[0];
+//                myBeforeTelemetryMap.put("")
 
                 //Get Current Telemetry
-                HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(0)[1];
+                HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(i)[1];
 
                 //Send previous and current telemetry to anomaly detector for analysis
                 AnomalyReport anomaly = detector.detect(myBeforeTelemetryMap, myCurrentTelemetryMap);
@@ -121,8 +133,10 @@ public class DroneMonitorApp {
             }
         };
 
-        //Have the scheduler fire a thread to run simulateNextStep every 1 seconds
-        scheduler.scheduleAtFixedRate(simulateNextStep, 0, 1000, TimeUnit.MILLISECONDS);
+        //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
+        // old : scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
+            scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
+
 
         //Create a runnable task that will shut down the scheduler on program exit
         Runnable shutdownScheduler = () -> {
@@ -147,20 +161,16 @@ public class DroneMonitorApp {
         }
     }
 
-    /**
-     * Creates a predefined simple rectangular route with specific waypoints.
-     *
-     * @return An {@link ArrayList} of {@link RoutePoint} objects defining the route.
-     */
-    private static ArrayList<RoutePoint> createRoute() {
-        ArrayList<RoutePoint> route = new ArrayList<>();
-        route.add(new RoutePoint(60, 60, 110)); // bottom-left
-        route.add(new RoutePoint(90, 60, 115)); // bottom-right (30 units)
-        route.add(new RoutePoint(90, 80, 120)); // top-right    (20 units)
-        route.add(new RoutePoint(60, 80, 125)); // top-left     (30 units)
-        route.add(new RoutePoint(60, 60, 130)); // back to start(20 units)
-        return route;
-    }
+
+//    private static void playBatteryAlert() {
+//        try {
+//            File batteryAlert = new File(myBatteryAlert);
+//            Media media = new Media(batteryAlert.toURI().toString());
+//        }
+//        catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     /**
      * Prints the current telemetry data of a specific drone to the console for debugging purposes.

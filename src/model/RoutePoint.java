@@ -28,7 +28,7 @@ public class RoutePoint {
 
     @Override
     public String toString() {
-        return "(" + myLatitude + ", " + myLongitude + ", " + myAltitude + ")";
+        return "(" + myLongitude + ", " + myLatitude + ", " + myAltitude + ")";
     }
 
 }
