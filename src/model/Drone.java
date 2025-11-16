@@ -40,6 +40,7 @@ public class Drone extends AbstractDrone {
         if (theRoute.isEmpty()) {
             throw new IllegalArgumentException("Route cannot be empty");
         }
+
         myRoute = theRoute;
         nextPoint = 1;
     }
