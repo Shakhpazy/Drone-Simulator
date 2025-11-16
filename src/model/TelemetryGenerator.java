@@ -25,7 +25,7 @@ public class TelemetryGenerator {
 //    private static final Date myDate = new Date();
 
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
-    private static final int RANDOM_PERCENT = 1; //Should be set from 0-100
+    private static final int RANDOM_PERCENT = 15; //Should be set from 0-100
 
 
     private TelemetryGenerator() {
