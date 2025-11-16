@@ -30,7 +30,7 @@ public class DroneMonitorApp {
      * Flag to enable or disable developer mode, which prints telemetry to the console
      * and clears the database on exit.
      */
-    private static boolean MY_DEV_MODE = false;
+    private static boolean MY_DEV_MODE = true;
 
     private static final RouteGenerator myRouteGenerator = new RouteGenerator();
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
@@ -108,7 +108,15 @@ public class DroneMonitorApp {
 
                 //If anomaly is not null.
                 if (anomaly != null) {
-                    //playBatteryAlert();
+                    if(anomaly.anomalyType().contains("Out of Bounds")) {
+                        AlertPlayer.INSTANCE.playSound("spoof");
+                    }
+                    else if(anomaly.anomalyType().contains("Battery")) {
+                        AlertPlayer.INSTANCE.playSound("battery");
+                    }
+                    else {
+                        AlertPlayer.INSTANCE.playSound("crash");
+                    }
                     //Add anomaly to database.
                     anomalyDTBS.insertReport(anomaly);
                     //Add a log entry to view.
@@ -133,7 +141,7 @@ public class DroneMonitorApp {
             }
         };
 
-        //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
+        //Have the scheduler fire a thread to run simulateNextStep every 0.6 seconds
         // old : scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
             scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
 
