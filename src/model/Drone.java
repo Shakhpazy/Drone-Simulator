@@ -6,10 +6,10 @@ import java.util.Random;
 public class Drone extends AbstractDrone {
 
     /** Maximum allowed velocity in normal moves. */
-    private static final float MAX_VELOCITY = 1;
+    private static final float MAX_VELOCITY = 10;
 
     /** Minimum allowed velocity in normal moves. */
-    private static final float MIN_VELOCITY = 5;
+    private static final float MIN_VELOCITY = 1;
 
     /** Maximum allowed altitude in normal moves. */
     private static final float MAX_ALTITUDE = 700;
@@ -18,7 +18,10 @@ public class Drone extends AbstractDrone {
     private static final float MIN_ALTITUDE = 0;
 
     /** Step size for increasing or decreasing velocity during movement. */
-    private static final float ACCELERATION_STEP = 1;
+    private static final float ACCELERATION_STEP = .07f;
+
+    private static final Random myRandom = new Random();
+
 
     ArrayList<RoutePoint> myRoute;
     private int nextPoint = 0;
@@ -63,14 +66,16 @@ public class Drone extends AbstractDrone {
         float altitude = this.getAltitude();
         float velocity = this.getVelocity();
 
-        Random myRandom = new Random();
         int anomalyType = myRandom.nextInt(3); // 0=altitude,1=speed,2=drift
 
         switch (anomalyType) {
             case 0: // Sudden drop/climb
                 float changeAlt = (myRandom.nextBoolean() ? 1 : -1)
                         * (10 + myRandom.nextFloat() * 10) * (float) theDeltaTime;
-                altitude = Math.max(this.getMinAltitude(), altitude + changeAlt);
+                altitude = Math.min(
+                        this.getMaxAltitude(),
+                        Math.max(this.getMinAltitude(), altitude + changeAlt)
+                );
                 break;
 
             case 1: // Speed anomaly
@@ -78,7 +83,7 @@ public class Drone extends AbstractDrone {
                 if (myRandom.nextBoolean()) {
                     velocity = Math.min(velocity + change, this.getMaxVelocity());
                 } else {
-                    velocity = Math.max(velocity - change, this.getMaxVelocity());
+                    velocity = Math.max(velocity - change, this.getMinVelocity());
                 }
                 break;
 
@@ -138,7 +143,7 @@ public class Drone extends AbstractDrone {
             velocity = Math.min(this.getVelocity() + this.getAccelerationStep(), this.getMaxVelocity());
         }
 
-        float drained = batteryDrained(distance, theDeltaTime);
+        float drained = batteryDrained(moveDist, theDeltaTime);
         float degree = getOrientation().findNextOrientation(this.getLongitude(), this.getLatitude(), longitude, latitude);
         updateDrone(longitude, latitude, altitude, drained, velocity, degree);
     }

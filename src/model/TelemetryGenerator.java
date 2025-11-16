@@ -25,7 +25,7 @@ public class TelemetryGenerator {
 //    private static final Date myDate = new Date();
 
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
-    private static final int RANDOM_PERCENT = 1; //Should be set from 0-100
+    private static final int RANDOM_PERCENT = 0; //Should be set from 0-100
 
 
     private TelemetryGenerator() {
@@ -64,11 +64,10 @@ public class TelemetryGenerator {
         ArrayList<HashMap<String, Object>[]> telemetryList = new ArrayList<>();
 
         for (DroneInterface drone : myDrones) {
-            HashMap<String, Object> myBeforeTelemetryMap = createTelemetryMap(drone);
-
             if (!drone.isAlive()) {
                 continue;
             }
+            HashMap<String, Object> myBeforeTelemetryMap = createTelemetryMap(drone);
 
             if (myRandom.nextInt(100) < RANDOM_PERCENT) {
                 getRandomMove(drone, deltaTime);

@@ -30,7 +30,10 @@ public class DroneMonitorApp {
      * Flag to enable or disable developer mode, which prints telemetry to the console
      * and clears the database on exit.
      */
-    private static boolean myDevMode = true;
+    private static boolean myDevMode = false;
+
+    private static final RouteGenerator myRouteGenerator = new RouteGenerator();
+    private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
 
     /**
@@ -45,28 +48,22 @@ public class DroneMonitorApp {
         // CONFIGURATION
         // ======================
         final int FPS = 60;
-        final double DELTA_TIME = .01; // is how much simulated time passes each update
-        final long FRAME_DELAY_MS = 5; // is how long the program waits between updates in real time (maybe for slider)
+        final double DELTA_TIME = 1.0 / FPS; // ≈ 0.0167
+        final long FRAME_DELAY_MS = 1000/FPS; // is how long the program waits between updates in real time (maybe for slider)
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = new MonitorDashboard(); //Initialize the UI.
-
-        //Get a simple route, a rectangle around the map.
-        ArrayList<RoutePoint> route = createRoute();
-
-        //Create 3 Drones to pass to Telemetry Generator.
-        Drone drone1 = new Drone(3.0f, 100, route);
-//        Drone drone2 = new Drone(2.0f, 85, Orientation.EAST, route);
-//        Drone drone3 = new Drone(1.5f, 75, Orientation.WEST, route);
 
 
         //Initialize telemetry generator and add drones
         TelemetryGenerator gen = TelemetryGenerator.getInstance();
 
-        //add the drones into singleton generator
-        gen.addDrone(drone1);
-//      gen.addDrone(drone2);
-//      gen.addDrone(drone3);
+        //Generate Drones
+        for (int i = 0; i < 1; i++) {
+            ArrayList<RoutePoint> theRoute = myRouteGenerator.generateRoute();
+            DroneInterface drone = myDroneGenerator.createDrone(theRoute);
+            gen.addDrone(drone);
+        }
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();
@@ -97,16 +94,15 @@ public class DroneMonitorApp {
             ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(DELTA_TIME);
 
             //For each drone
-            for (DroneInterface drone : drones) {
-                //TODO there is a problem here where we are looping through drones but only
-                // getting the before and current telemetry for the first drone.
+            for (int i = 0; i < drones.size(); i++) {
+                DroneInterface drone = drones.get(i);
 
                 //Get previous Telemetry
-                HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(0)[0];
+                HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(i)[0];
 //                myBeforeTelemetryMap.put("")
 
                 //Get Current Telemetry
-                HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(0)[1];
+                HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(i)[1];
 
                 //Send previous and current telemetry to anomaly detector for analysis
                 AnomalyReport anomaly = detector.detect(myBeforeTelemetryMap, myCurrentTelemetryMap);
@@ -140,7 +136,7 @@ public class DroneMonitorApp {
 
         //Have the scheduler fire a thread to run simulateNextStep every 5 seconds
         // old : scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
-        scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
+            scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
 
 
         //Create a runnable task that will shut down the scheduler on program exit
@@ -166,20 +162,6 @@ public class DroneMonitorApp {
         }
     }
 
-    /**
-     * Creates a predefined simple rectangular route with specific waypoints.
-     *
-     * @return An {@link ArrayList} of {@link RoutePoint} objects defining the route.
-     */
-    private static ArrayList<RoutePoint> createRoute() {
-        ArrayList<RoutePoint> route = new ArrayList<>();
-        route.add(new RoutePoint(0, 0, 110)); // bottom-left
-        route.add(new RoutePoint(120, 40, 115)); // bottom-right (30 units)
-        route.add(new RoutePoint(120, -40, 120)); // top-right    (20 units)
-        route.add(new RoutePoint(-120, -40, 125)); // top-left     (30 units)
-        route.add(new RoutePoint(-120, 40, 130)); // back to start(20 units)
-        return route;
-    }
 
 //    private static void playBatteryAlert() {
 //        try {

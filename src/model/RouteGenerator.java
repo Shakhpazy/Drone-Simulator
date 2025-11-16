@@ -12,8 +12,11 @@ public class RouteGenerator {
     public static final float MAX_LON = 180.0f;
 
     // Altitude boundaries (in meters)
-    public static final float MIN_ALT = 0.0f;      // ground level
+    public static final float MIN_ALT = 1.0f;      // ground level
     public static final float MAX_ALT = 1000.0f;   // max altitude (e.g., 1 km)
+
+    // Minimum required difference between lat/lon (side lengths)
+    private static final float MIN_SIDE_LENGTH = 80.0f;
 
     private static final Random random = new Random();
 
@@ -23,11 +26,7 @@ public class RouteGenerator {
      * @return A Route
      */
     public ArrayList<RoutePoint> generateRoute() {
-        if (random.nextBoolean()) {
-            return generateRectangle();
-        } else {
-            return generateCircle();
-        }
+        return generatePredictableRect();
     }
 
     private ArrayList<RoutePoint> generateRectangle() {
@@ -42,10 +41,10 @@ public class RouteGenerator {
         float altitude4 = getRandom(MIN_ALT, MAX_ALT);
 
         ArrayList<RoutePoint> route = new ArrayList<>();
-        route.add(new RoutePoint(lat1, lon1, altitude1)); // A
-        route.add(new RoutePoint(lat1, lon2, altitude2)); // B
-        route.add(new RoutePoint(lat2, lon2, altitude3)); // C
-        route.add(new RoutePoint(lat2, lon1, altitude4)); // D
+        route.add(new RoutePoint(lon1, lat1, altitude1)); // A
+        route.add(new RoutePoint(lon2, lat1, altitude2)); // B
+        route.add(new RoutePoint(lon2, lat2, altitude3)); // C
+        route.add(new RoutePoint(lon1, lat2, altitude4)); // D
 
         return route;
     }
@@ -62,7 +61,7 @@ public class RouteGenerator {
             float lat = centerLat + radius * (float) Math.cos(angle);
             float lon = centerLon + radius * (float) Math.sin(angle);
             float altitude = getRandom(MIN_ALT, MAX_ALT);
-            route.add(new RoutePoint(lat, lon, altitude));
+            route.add(new RoutePoint(lon, lat, altitude));
         }
 
         return route;
@@ -77,10 +76,35 @@ public class RouteGenerator {
         float lat = getRandom(MIN_LAT, MAX_LAT);
         float lon = getRandom(MIN_LON, MAX_LON);
         float alt = getRandom(MIN_ALT, MAX_ALT);
-        return new RoutePoint(lat, lon, alt);
+        return new RoutePoint(lon, lat, alt);
     }
 
     private float getRandom(float min, float max) {
         return min + random.nextFloat() * (max - min);
+    }
+
+
+    public ArrayList<RoutePoint> generatePredictableRect() {
+        float lon1, lat1, lon2, lat2;
+
+        do {
+            lon1 = getRandom(MIN_LON, MAX_LON);
+            lat1 = getRandom(MIN_LAT, MAX_LAT);
+            lon2 = getRandom(MIN_LON, MAX_LON);
+            lat2 = getRandom(MIN_LAT, MAX_LAT);
+        } while (!validRectangle(lon1, lat1, lon2, lat2));
+
+        ArrayList<RoutePoint> route = new ArrayList<>();
+        route.add(new RoutePoint(lon1, lat1, getRandom(MIN_ALT, MAX_ALT))); // A
+        route.add(new RoutePoint(lon2, lat1, getRandom(MIN_ALT, MAX_ALT))); // B
+        route.add(new RoutePoint(lon2, lat2, getRandom(MIN_ALT, MAX_ALT))); // C
+        route.add(new RoutePoint(lon1, lat2, getRandom(MIN_ALT, MAX_ALT))); // D
+
+        return route;
+    }
+
+    private boolean validRectangle(float lon1, float lat1, float lon2, float lat2) {
+        return Math.abs(lon1 - lon2) >= MIN_SIDE_LENGTH &&
+                Math.abs(lat1 - lat2) >= MIN_SIDE_LENGTH;
     }
 }
