@@ -1,14 +1,13 @@
 package view;
 
 import javax.swing.*;
-import javax.swing.plaf.SliderUI;
 import java.awt.*;
 
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
  * system.
  */
-public class MonitorDashboard extends PropertyEnabledDashboard {
+public class MonitorDashboard extends PropertyEnabledJFrame {
 
     /** This constant determines the size of the window. */
     private static final Dimension SIZE = new Dimension(1100, 700);
@@ -25,10 +24,16 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
     /** This constant contains a reference to the map panel. */
     private static final TelemetryPanel TELEMETRY_PANEL = new TelemetryPanel();
 
+    private static final MonitorDashboard INSTANCE = new MonitorDashboard();
+
     /** Constructor to initialize the window. */
-    public MonitorDashboard() {
+    private MonitorDashboard() {
         super();
         initWindow();
+    }
+
+    public static MonitorDashboard getInstance() {
+        return INSTANCE;
     }
 
     /**
@@ -156,7 +161,7 @@ public class MonitorDashboard extends PropertyEnabledDashboard {
      * Opens a window to view and query the anomaly report database.
      */
     private void openDatabase() {
-        System.out.println("eventually, this will open database");
+        myPCS.firePropertyChange(PROPERTY_DATABASE_OPENED, null, null);
     }
 
     /**
