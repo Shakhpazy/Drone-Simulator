@@ -28,12 +28,6 @@ public class DroneMonitorApp {
     //Define delta time in seconds
     private static final double MY_DELTA_TIME = 1.0;
 
-    //Battery alert file path
-    private static final String MY_BATTERY_ALERT = "../src/SFX/BatteryAlert.wav";
-
-    //Crash Alert file path
-    private static final String MY_CRASH_ALERT = "..src/SFX/CrashAlert.wav";
-
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
      * in order to update each drone. Listens for a change of state in the model and updates the view.
@@ -54,14 +48,14 @@ public class DroneMonitorApp {
 //        Drone drone2 = new Drone(2.0f, 85, Orientation.EAST, route);
 //        Drone drone3 = new Drone(1.5f, 75, Orientation.WEST, route);
 
-        //Add drones to pass to telemetry generator.
-        ArrayList<DroneInterface> drones = new ArrayList<>();
-        drones.add(drone1);
-//        drones.add(drone2);
-//        drones.add(drone3);
-
         //Initialize telemetry generator and add drones
         TelemetryGenerator gen = TelemetryGenerator.getInstance();
+        gen.addDrone(drone1);
+//        gen.addDrone(drone2);
+//        gen.addDrone(drone3);
+
+        //Get list of drones
+        ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();

@@ -9,16 +9,13 @@
 //public enum AlertPlayer {
 //    INSTANCE;
 //
-//    private final Map<String, Clip> myClips = new HashMap<>();
+//    private final Map<String, Clip> myAlerts = new HashMap<>();
+//    private static final String BATTERY_ALERT_PATH = "src/SFX/BatteryAlert.wav";
+//    private static final String CRASH_ALERT_PATH = "src/SFX/CrashAlert.wav";
 //
-//    public static synchronized AlertPlayer getInstance() {
-//        if(myInstance == null) {
-//            myInstance =  new AlertPlayer();
-//        }
-//        return myInstance;
+//    private AlertPlayer() {
+////        myAlerts.put(BATTERY_ALERT_PATH, )
 //    }
-//
-//    private AlertPlayer() {}
 //
 //    public void newClip(String theFilePath) {
 //        try {
@@ -53,9 +50,9 @@
 //        }
 //    }
 //
-////    public void stop() {
-////        if(myClip != null && myClip.isRunning()) {
-////            myClip.stop();
-////        }
-////    }
+//    public void stop() {
+//        if(myClip != null && myClip.isRunning()) {
+//            myClip.stop();
+//        }
+//    }
 //}

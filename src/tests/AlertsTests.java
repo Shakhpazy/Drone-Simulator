@@ -1,5 +1,5 @@
-package tests;
-
+//package tests;
+//
 //import model.AlertPlayer;
 //
 //public class AlertsTests {
