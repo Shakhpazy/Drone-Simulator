@@ -1,6 +1,7 @@
 package view;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -47,8 +48,8 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
     private void initWindow() {
         setPreferredSize(SIZE);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
-        setLayout(new BorderLayout());
         setVisible(false);
+        setLayout(new BorderLayout());
         initPanels();
         pack();
         setResizable(false);
@@ -58,40 +59,49 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
 
     private void initPanels() {
         RESULT_PANEL.setLayout(new BoxLayout(RESULT_PANEL, BoxLayout.Y_AXIS));
-        add(new JScrollPane(RESULT_PANEL), BorderLayout.CENTER);
+        JScrollPane sp = new JScrollPane(RESULT_PANEL);
+        sp.getVerticalScrollBar().setUnitIncrement(10);
+        add(sp, BorderLayout.CENTER);
 
-        QueryTextField idField = new QueryTextField("Drone ID");
-        QueryTextField typeField = new QueryTextField("Anomaly Type");
-        QueryTextField fromDate = new QueryTextField("From: (MM/DD/YYYY)");
-        QueryTextField toDate = new QueryTextField("To: (MM/DD/YYYY)");
+        QueryTextField idField = new QueryTextField("(e.g. 1, 2, ...)");
+
+        JComboBox<String> typeField = new JComboBox<>();
+        typeField.addItem("Abnormal Battery Drain Rate");
+        typeField.addItem("Battery Failure");
+        typeField.addItem("Dangerous Change in Altitude");
+        typeField.addItem("GPS Spoofing");
+        typeField.addItem("Out of Bounds");
+
+        QueryTextField fromDate = new QueryTextField("MM/DD/YYYY");
+        QueryTextField toDate = new QueryTextField("MM/DD/YYYY");
         JButton goButt = new JButton("GO");
         goButt.addActionListener(theEvent -> {
             String[] arr = {
                     idField.getTextNotDef(),
-                    typeField.getTextNotDef(),
+                    (String) typeField.getSelectedItem(),
                     fromDate.getTextNotDef(),
                     toDate.getTextNotDef()};
             myPCS.firePropertyChange(PROPERTY_DATABASE_QUERY, null, arr);
         });
 
-        QUERY_PANEL.add(idField);
-        QUERY_PANEL.add(typeField);
-        QUERY_PANEL.add(fromDate);
-        QUERY_PANEL.add(toDate);
+        QUERY_PANEL.setLayout(new GridLayout(1, 0));
+        QUERY_PANEL.add(new FieldPanel("Anomaly Type", typeField));
+        QUERY_PANEL.add(new FieldPanel("DroneID", idField));
+        QUERY_PANEL.add(new FieldPanel("Begin Date", fromDate));
+        QUERY_PANEL.add(new FieldPanel("End Date", toDate));
         QUERY_PANEL.add(goButt);
-        add(QUERY_PANEL, BorderLayout.SOUTH);
+
+        add(QUERY_PANEL, BorderLayout.NORTH);
     }
 
     private static class QueryTextField extends JTextArea {
 
-        private static final Dimension SIZE = new Dimension(200, 50);
-
         private final String myDef;
 
-        public QueryTextField(final String theDefault) {
+        private QueryTextField(final String theDefault) {
             super(theDefault);
-            setPreferredSize(SIZE);
             myDef = theDefault;
+            setBorder(BorderFactory.createLineBorder(Color.BLACK));
             addFocusListener(new FocusAdapter() {
                 @Override
                 public void focusGained(FocusEvent theE) {
@@ -110,6 +120,22 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
 
         public String getTextNotDef() {
             return myDef.equals(getText()) ? "" : getText();
+        }
+    }
+
+    private static class FieldPanel extends JPanel {
+
+        private FieldPanel(String theLabel, JComponent theField) {
+            super();
+            int gap = 5;
+            setLayout(new GridLayout(0, 1, gap, gap));
+            setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+            JLabel lbl = new JLabel(theLabel, JLabel.LEFT);
+            lbl.setAlignmentX(LEFT_ALIGNMENT);
+            setAlignmentX(LEFT_ALIGNMENT);
+            theField.setAlignmentX(LEFT_ALIGNMENT);
+            add(lbl);
+            add(theField);
         }
     }
 
