@@ -61,10 +61,10 @@ public class BaselineCalculator {
             double velocityStandardDev = calculateStandardDev(velocityReadings, velocityMean);
 
             double batteryDrainMean = calculateMean(batteryDrainReadings);
-            double batteryDrainStandardDev = calculateStandardDev(batteryDrainReadings, velocityMean);
+            double batteryDrainStandardDev = calculateStandardDev(batteryDrainReadings, batteryDrainMean);
 
             double orientationDeltaMean = calculateMean(orientationDeltaReadings);
-            double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, velocityMean);
+            double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, orientationDeltaMean);
 
             saveStatsToProperties(outputProperties, velocityMean, velocityStandardDev, batteryDrainMean,
                     batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev);
@@ -161,6 +161,8 @@ public class BaselineCalculator {
         props.setProperty("velocity.standardDev", String.valueOf(vStandardDev));
         props.setProperty("batteryDrain.mean", String.valueOf(bMean));
         props.setProperty("batteryDrain.standardDev", String.valueOf(bStandardDev));
+        props.setProperty("orientationDelta.mean", String.valueOf(oMean));
+        props.setProperty("orientationDelta.standardDev", String.valueOf(oStandardDev));
 
         try (FileWriter writer = new FileWriter(filepath)) {
             props.store(writer, "Drone Anomaly Baseline Statistics\nGenerated from log data.");

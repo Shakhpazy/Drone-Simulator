@@ -40,7 +40,7 @@ public class AnomalyDetector {
     /**
      * A float to represent the maximum orthogonal velocity of a drone.
      */
-    private static final float ORTHOGONAL_VELOCITY_MAX = 10;
+    private static final float ORTHOGONAL_VELOCITY_MAX = 2F;
 
     /**
      * A float to represent the maximum battery drain of a drone in a cycle.
