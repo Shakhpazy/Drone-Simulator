@@ -1,6 +1,8 @@
 package view;
 
 import javax.swing.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 
 /**
@@ -10,7 +12,7 @@ import java.beans.PropertyChangeSupport;
  * The purpose of having this second class is to prevent bloating the
  * main functionality of the MonitorDashboard class.
  */
-class PropertyEnabledDashboard extends JFrame {
+class PropertyEnabledJFrame extends JFrame implements PropertyChangeListener {
 
     /**
      * Property change event name for saving as CSV.
@@ -33,6 +35,16 @@ class PropertyEnabledDashboard extends JFrame {
     public static final String PROPERTY_TICK_SPEED = "tick speed change";
 
     /**
+     * Property change event for opening the database window.
+     */
+    public static final String PROPERTY_DATABASE_OPENED = "database window opened";
+
+    /**
+     * Property change event for new database query.
+     */
+    public static final String PROPERTY_DATABASE_QUERY = "database queried";
+
+    /**
      * Property change supper object to fire change events.
      */
     protected final PropertyChangeSupport myPCS;
@@ -40,8 +52,18 @@ class PropertyEnabledDashboard extends JFrame {
     /**
      * Constructor to initialize instance.
      */
-    PropertyEnabledDashboard() {
+    PropertyEnabledJFrame() {
         super();
         myPCS = new PropertyChangeSupport(this);
+    }
+
+    @Override
+    public void addPropertyChangeListener(PropertyChangeListener theListener) {
+        myPCS.addPropertyChangeListener(theListener);
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+
     }
 }
