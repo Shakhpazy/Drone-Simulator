@@ -123,11 +123,6 @@ class MapPanel extends JPanel {
     private static final class GridPanel extends JPanel {
 
         /**
-         * This constant represents the size of the grid cells in pixels.
-         */
-        private static final int CELL_SIZE = 10;
-
-        /**
          * This constant is the diameter of the circles used to represent
          * drones on the map (in pixels).
          */
@@ -137,7 +132,7 @@ class MapPanel extends JPanel {
          * This constant represents the buffer zone or margin between the graph lines
          * and the edge of the panel. This zone allows for the axis labels.
          */
-        private static final int BUFFER = 40;
+        private static final Dimension BUFFER = new Dimension(24, 18);
 
         /**
          * This constant represents the size of the grid panel.
@@ -145,19 +140,19 @@ class MapPanel extends JPanel {
         private static final Dimension SIZE = new Dimension(900, 456);
 
         /**
-         * This constant represents the minimum value for the scaling factor.
-         */
-        private static final int MIN_SCALE = 3;
-
-        /**
          * This is the maximum value for the scaling factory.
          */
-        private static final int MAX_SCALE = 8;
+        private static final int MAX_CELL_SIZE = 500;
 
         /**
-         * Zoom scale factor of the grid.
+         * This is the increment for the latitude and longitude labels.
          */
-        private int myScale;
+        private static final int LABEL_STEP = 10;
+
+        /**
+         * This field represents the size of the grid cells in pixels.
+         */
+        private int myCellSize;
 
         /**
          * This field represents the difference calculated to move the
@@ -176,9 +171,9 @@ class MapPanel extends JPanel {
          */
         private GridPanel() {
             super();
-            myScale = 6;
             myDelta = new Point(0, 0);
             myDragPoint = new Point(0, 0);
+            myCellSize = 50;
             initPanel();
         }
 
@@ -190,8 +185,8 @@ class MapPanel extends JPanel {
 
             // Center the grid initially
             myDelta = new Point(
-                    SIZE.width / 2 - BUFFER,
-                    SIZE.height / 2 - BUFFER
+                    SIZE.width / 2 - BUFFER.width,
+                    SIZE.height / 2 - BUFFER.height
             );
 
             // Mouse listener to detect the start of a mouse drag
@@ -206,7 +201,10 @@ class MapPanel extends JPanel {
             addMouseWheelListener(new MouseAdapter() {
                 @Override
                 public void mouseWheelMoved(MouseWheelEvent theE) {
-                    myScale = Math.clamp(myScale - theE.getWheelRotation(), MIN_SCALE, MAX_SCALE);
+                    myCellSize = Math.clamp(
+                            myCellSize - theE.getWheelRotation() * 2L,
+                            (getWidth() - 2 * BUFFER.width) / (LON_MAX * 2 / LABEL_STEP),
+                            MAX_CELL_SIZE);
                     clampPan();
                     repaint();
                 }
@@ -247,38 +245,40 @@ class MapPanel extends JPanel {
             FontMetrics fm = theG2D.getFontMetrics();
 
             // Horizontal lines
-            int yOffset = (myDelta.y % (CELL_SIZE * myScale) + (CELL_SIZE * myScale)) % (CELL_SIZE * myScale) + BUFFER;
-            for (int i = 0; i * (CELL_SIZE * myScale) + yOffset <= getHeight() - BUFFER; i++) {
-                int y = i * (CELL_SIZE * myScale) + yOffset;
-                theG2D.drawLine(BUFFER, y, getWidth() - BUFFER, y);
+            int yOffset = (myDelta.y % myCellSize + myCellSize) % myCellSize + BUFFER.height;
+            for (int i = 0; i * myCellSize + yOffset <= getHeight() - BUFFER.height; i++) {
+                int y = i * myCellSize + yOffset;
+                theG2D.drawLine(BUFFER.width, y, getWidth() - BUFFER.width, y);
 
                 // label centered vertically on the line, in right buffer
-                int worldY = (-(myDelta.y) + y - BUFFER) / (CELL_SIZE * myScale);
-                String label = String.format("%d", -worldY * CELL_SIZE);
+                int worldY = (-(myDelta.y) + y - BUFFER.height) / myCellSize;
+                String label = String.format("%d", -worldY * LABEL_STEP);
                 int labelWidth = fm.stringWidth(label);
                 int labelHeight = fm.getAscent();
                 theG2D.drawString(
                         label,
-                        getWidth() - BUFFER + (BUFFER - labelWidth) / 2,
+                        getWidth() - BUFFER.width + (BUFFER.width - labelWidth) / 2,
                         y + labelHeight / 2 - 2
                 );
             }
 
             // Vertical lines
-            int xOffset = (myDelta.x % (CELL_SIZE * myScale) + (CELL_SIZE * myScale)) % (CELL_SIZE * myScale) + BUFFER;
-            for (int i = 0; i * (CELL_SIZE * myScale) + xOffset <= getWidth() - BUFFER; i++) {
-                int x = i * (CELL_SIZE * myScale) + xOffset;
-                theG2D.drawLine(x, BUFFER, x, getHeight() - BUFFER);
+            int xOffset = (myDelta.x % myCellSize + myCellSize) % myCellSize + BUFFER.width;
+            for (int i = 0; i * myCellSize + xOffset <= getWidth() - BUFFER.width; i++) {
+                int x = i * myCellSize + xOffset;
+                if ((-(myDelta.x) + x - BUFFER.width) / myCellSize * LABEL_STEP >= -LON_MAX) {
+                    theG2D.drawLine(x, BUFFER.height, x, getHeight() - BUFFER.height);
 
-                // label centered horizontally on the line, in bottom buffer
-                int worldX = (-(myDelta.x) + x - BUFFER) / (CELL_SIZE * myScale);
-                String label = String.format("%d", worldX * CELL_SIZE);
-                int labelWidth = fm.stringWidth(label);
-                theG2D.drawString(
-                        label,
-                        x - labelWidth / 2,
-                        getHeight() - BUFFER / 2 + fm.getAscent() / 2
-                );
+                    // label centered horizontally on the line, in bottom buffer
+                    int worldX = (-(myDelta.x) + x - BUFFER.width) / myCellSize;
+                    String label = String.format("%d", worldX * LABEL_STEP);
+                    int labelWidth = fm.stringWidth(label);
+                    theG2D.drawString(
+                            label,
+                            x - labelWidth / 2,
+                            getHeight() - BUFFER.height / 2 + fm.getAscent() / 2
+                    );
+                }
             }
         }
 
@@ -288,23 +288,19 @@ class MapPanel extends JPanel {
          * @param theG2D the graphics object to draw with.
          */
         private void drawDrones(final Graphics2D theG2D) {
+            double scale = 1.0 * myCellSize / LABEL_STEP;
             for (int id : ID_LOC_MAP.keySet()) {
                 int[] loc = ID_LOC_MAP.get(id);
-                int d = DIAMETER * myScale;
-                int x = loc[LON] * myScale + myDelta.x - d / 2 + BUFFER;
-                int y = loc[LAT] * myScale + myDelta.y - d / 2 + BUFFER;
-
-                // Only draw drones if fully visible (avoid buffer zone)
-                if (x >= -LON_MAX * myScale && x <= getWidth() - BUFFER &&
-                        y >= -LAT_MAX * myScale && y <= getHeight() - BUFFER) {
-                    theG2D.setColor(Color.RED);
-                    if (id == mySelectedID) {
-                        theG2D.setColor(Color.GREEN);
-                    }
-                    theG2D.fillOval(x, y, d, d);
-                    theG2D.setColor(Color.BLACK);
-                    theG2D.drawOval(x, y, d, d);
+                int d = (int) Math.floor(DIAMETER * scale);
+                int x = (int) Math.floor(loc[LON] * scale + myDelta.x - d / 2.0 + BUFFER.height);
+                int y = (int) Math.floor(loc[LAT] * scale + myDelta.y - d / 2.0 + BUFFER.width);
+                theG2D.setColor(Color.RED);
+                if (id == mySelectedID) {
+                    theG2D.setColor(Color.GREEN);
                 }
+                theG2D.fillOval(x, y, d, d);
+                theG2D.setColor(Color.BLACK);
+                theG2D.drawOval(x, y, d, d);
             }
         }
 
@@ -313,14 +309,18 @@ class MapPanel extends JPanel {
          * minimum values.
          */
         private void clampPan() {
-            int viewWidth  = getWidth() - 2 * BUFFER;
-            int viewHeight = getHeight() - 2 * BUFFER;
+            // Size of the visible portion of the grid.
+            int viewWidth = getWidth() - 2 * BUFFER.width;
+            int viewHeight = getHeight() - 2 * BUFFER.height;
 
-            int minDeltaX = -LON_MAX * myScale + viewWidth;
-            int maxDeltaX = LON_MAX * myScale;
+            // Bounds for delta, where delta is the
+            // pixel coordinate of the top left corner
+            // of the visible portion of the grid.
+            int minDeltaX = -(LON_MAX / LABEL_STEP * myCellSize - viewWidth);
+            int maxDeltaX = LON_MAX / LABEL_STEP * myCellSize;
 
-            int minDeltaY = -LAT_MAX * myScale + viewHeight;
-            int maxDeltaY = LAT_MAX * myScale;
+            int minDeltaY = -(LAT_MAX / LABEL_STEP * myCellSize - viewHeight);
+            int maxDeltaY = LAT_MAX / LABEL_STEP * myCellSize;
 
             myDelta.x = Math.max(minDeltaX, Math.min(myDelta.x, maxDeltaX));
             myDelta.y = Math.max(minDeltaY, Math.min(myDelta.y, maxDeltaY));
@@ -332,8 +332,9 @@ class MapPanel extends JPanel {
          * @param theID the id of the drone to center on.
          */
         public void focusOnSelected(final int theID) {
-            myDelta.x = -ID_LOC_MAP.get(theID)[LON] * myScale + getWidth() / 2;
-            myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * myScale + getHeight() / 2;
+            int scale = myCellSize / LABEL_STEP;
+            myDelta.x = -ID_LOC_MAP.get(theID)[LON] * scale + getWidth() / 2;
+            myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * scale + getHeight() / 2;
             clampPan();
         }
     }
