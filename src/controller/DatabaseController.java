@@ -5,6 +5,7 @@ import model.AnomalyReport;
 import view.DatabaseWindow;
 import view.MonitorDashboard;
 
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.time.LocalDate;
@@ -38,12 +39,13 @@ public class DatabaseController implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent theEvent) {
         switch (theEvent.getPropertyName()) {
             case MonitorDashboard.PROPERTY_DATABASE_OPENED:
-                myWindow.setVisible(true);
                 List<AnomalyReport> reps = myDTBS.findAllReports();
                 myWindow.clearReports();
                 for (AnomalyReport r : reps) {
                     myWindow.addReport(r.detailedReport());
                 }
+                myWindow.setVisible(true);
+                MonitorDashboard.getInstance().setCursor(Cursor.getDefaultCursor());
                 break;
 
             case MonitorDashboard.PROPERTY_DATABASE_QUERY:

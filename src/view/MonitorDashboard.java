@@ -161,6 +161,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * Opens a window to view and query the anomaly report database.
      */
     private void openDatabase() {
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         myPCS.firePropertyChange(PROPERTY_DATABASE_OPENED, null, null);
     }
 

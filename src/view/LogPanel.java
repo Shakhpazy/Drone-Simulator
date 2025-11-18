@@ -37,7 +37,8 @@ class LogPanel extends JPanel {
      * @param theDetailedReport the detailed report to display after clicking.
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
-        SCROLL_VIEW.add(new LogEntry(theSimpleReport, theDetailedReport));
+        SCROLL_VIEW.add(new LogEntry(theSimpleReport, theDetailedReport), 0);
+        revalidate();
     }
 
     /**
