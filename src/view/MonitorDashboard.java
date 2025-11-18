@@ -107,14 +107,14 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         // Help
         JMenu helpMenu = new JMenu("Help");
         JMenuItem inst = new JMenuItem("Instructions...");
-        inst.addActionListener(theEvent -> openInstructions());
+        inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
 
         // Data
         JMenu dataMenu = new JMenu("Data");
         JMenuItem openDB = new JMenuItem("Open Database...");
-        openDB.addActionListener(theEvent -> openDatabase());
+        openDB.addActionListener(_ -> openDatabase());
         dataMenu.add(openDB);
         bar.add(dataMenu);
 
@@ -122,7 +122,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         JMenu debugMenu = new JMenu("Debug");
         JSlider tickSpdSlider = new JSlider(1, 5, 1);
         tickSpdSlider.addChangeListener(
-                theEvent -> myPCS.firePropertyChange(
+                _ -> myPCS.firePropertyChange(
                         PROPERTY_TICK_SPEED,
                         null,
                         tickSpdSlider.getValue()));
@@ -139,13 +139,13 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     private JMenu initFileMenu() {
         JMenu fileMenu = new JMenu("File");
         JMenuItem saveCSV = new JMenuItem("Save as .csv");
-        saveCSV.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
+        saveCSV.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
         fileMenu.add(saveCSV);
         JMenuItem savePDF = new JMenuItem("Save as .pdf");
-        savePDF.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
+        savePDF.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
         fileMenu.add(savePDF);
         JMenuItem saveJSON = new JMenuItem("Save as .json");
-        saveJSON.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_JSON, null, null));
+        saveJSON.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_JSON, null, null));
         fileMenu.add(saveJSON);
         return fileMenu;
     }

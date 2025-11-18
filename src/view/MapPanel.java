@@ -266,19 +266,17 @@ class MapPanel extends JPanel {
             int xOffset = (myDelta.x % myCellSize + myCellSize) % myCellSize + BUFFER.width;
             for (int i = 0; i * myCellSize + xOffset <= getWidth() - BUFFER.width; i++) {
                 int x = i * myCellSize + xOffset;
-                if ((-(myDelta.x) + x - BUFFER.width) / myCellSize * LABEL_STEP >= -LON_MAX) {
-                    theG2D.drawLine(x, BUFFER.height, x, getHeight() - BUFFER.height);
+                theG2D.drawLine(x, BUFFER.height, x, getHeight() - BUFFER.height);
 
-                    // label centered horizontally on the line, in bottom buffer
-                    int worldX = (-(myDelta.x) + x - BUFFER.width) / myCellSize;
-                    String label = String.format("%d", worldX * LABEL_STEP);
-                    int labelWidth = fm.stringWidth(label);
-                    theG2D.drawString(
-                            label,
-                            x - labelWidth / 2,
-                            getHeight() - BUFFER.height / 2 + fm.getAscent() / 2
-                    );
-                }
+                // label centered horizontally on the line, in bottom buffer
+                int worldX = (-(myDelta.x) + x - BUFFER.width) / myCellSize;
+                String label = String.format("%d", worldX * LABEL_STEP);
+                int labelWidth = fm.stringWidth(label);
+                theG2D.drawString(
+                        label,
+                        x - labelWidth / 2,
+                        getHeight() - BUFFER.height / 2 + fm.getAscent() / 2
+                );
             }
         }
 

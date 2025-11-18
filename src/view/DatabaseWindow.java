@@ -75,7 +75,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         QueryTextField fromDate = new QueryTextField("MM/DD/YYYY");
         QueryTextField toDate = new QueryTextField("MM/DD/YYYY");
         JButton goButt = new JButton("GO");
-        goButt.addActionListener(theEvent -> {
+        goButt.addActionListener(_ -> {
             String[] arr = {
                     idField.getTextNotDef(),
                     (String) typeField.getSelectedItem(),
