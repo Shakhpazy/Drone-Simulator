@@ -9,6 +9,9 @@ import java.util.ArrayList;
 /**
  * This class represents the right-hand-side of the GUI which
  * displays quick descriptions of recent anomaly logs.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 class LogPanel extends JPanel {
 
@@ -37,6 +40,9 @@ class LogPanel extends JPanel {
      * @param theDetailedReport the detailed report to display after clicking.
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
+        if (theSimpleReport == null || theDetailedReport == null) {
+            throw new IllegalArgumentException("Report strings must not be null.");
+        }
         SCROLL_VIEW.add(new LogEntry(theSimpleReport, theDetailedReport), 0);
         revalidate();
     }
@@ -91,6 +97,9 @@ class LogPanel extends JPanel {
          */
         private LogEntry(final String theSimpleReport, final String theDetailedReport) {
             super();
+            if (theSimpleReport == null || theDetailedReport == null) {
+                throw new IllegalArgumentException("Report strings must not be null.");
+            }
             init();
             ENTRIES.add(this);
             setText(theSimpleReport);
