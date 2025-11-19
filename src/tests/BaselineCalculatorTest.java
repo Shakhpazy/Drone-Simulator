@@ -60,7 +60,7 @@ public class BaselineCalculatorTest {
     @Test
     void testCalculateAndSaveStats_Success() throws IOException {
         String logContent = """
-                id,timestamp,velocity,batteryLevel,orientation
+                id,timeStamp,velocity,batteryLevel,orientation
                 1,100,10.0,100.0,90
                 2,101,5.0,80.0,0
                 1,102,20.0,98.0,110,
@@ -76,10 +76,10 @@ public class BaselineCalculatorTest {
         //   Mean: (10+5+20+7)/4 = 10.5
         //   StdDev: 6.55...
         // batteryDrainReadings: [ (100-98)=2.0, (80-79)=1.0 ]
-        //   Mean: (2+1)/2 = 1.5
+        //   Mean: (2+1)/2/deltaTime = 1.5
         //   StdDev: 0.707...
         // orientationDeltaReadings: [ (110-90)=20.0, (0->350, diff=10)=10.0 ]
-        //   Mean: (20+10)/2 = 15.0
+        //   Mean: (20+10)/2/deltaTime = 15.0
         //   StdDev: 7.071...
 
         assertTrue(Files.exists(propsFile));
@@ -88,17 +88,17 @@ public class BaselineCalculatorTest {
         assertEquals(10.5, Double.parseDouble(props.getProperty("velocity.mean")), 0.001);
         assertEquals(6.658,  Double.parseDouble(props.getProperty("velocity.standardDev")), 0.001);
 
-        assertEquals(1.5, Double.parseDouble(props.getProperty("batteryDrain.mean")), 0.001);
-        assertEquals(0.707, Double.parseDouble(props.getProperty("batteryDrain.standardDev")), 0.001);
+        assertEquals(0.75, Double.parseDouble(props.getProperty("batteryDrain.mean")), 0.001);
+        assertEquals(0.3535, Double.parseDouble(props.getProperty("batteryDrain.standardDev")), 0.001);
 
-        assertEquals(15.0, Double.parseDouble(props.getProperty("orientationDelta.mean")), 0.001);
-        assertEquals(7.071, Double.parseDouble(props.getProperty("orientationDelta.standardDev")), 0.001);
+        assertEquals(7.5, Double.parseDouble(props.getProperty("orientationDelta.mean")), 0.001);
+        assertEquals(3.535, Double.parseDouble(props.getProperty("orientationDelta.standardDev")), 0.001);
     }
 
     @Test
     void testCalculateAndSaveStats_OrientationWrapAround() throws IOException {
         String logContent = """
-                id,timestamp,velocity,batteryLevel,orientation
+                id,timeStamp,velocity,batteryLevel,orientation
                 1,100,10.0,100.0,350
                 1,102,10.0,98.0,10
                 """;
@@ -109,13 +109,13 @@ public class BaselineCalculatorTest {
         calc.calculateAndSaveStats(logFile.toString(), propsFile.toString());
 
         // orientationDeltaReadings: [ (350->10, diff=20.0) ]
-        //   Mean: 20.0
+        //   Mean: 20.0/deltaTime
         //   StdDev: 0.0 (since n < 2)
 
         assertTrue(Files.exists(propsFile));
         Properties props = loadProperties(propsFile);
 
-        assertEquals(20.0, Double.parseDouble(props.getProperty("orientationDelta.mean")), 0.001);
+        assertEquals(10.0, Double.parseDouble(props.getProperty("orientationDelta.mean")), 0.001);
         assertEquals(0.0, Double.parseDouble(props.getProperty("orientationDelta.standardDev")), 0.001);
     }
 
@@ -140,7 +140,7 @@ public class BaselineCalculatorTest {
     @Test
     void testProcessLogFile_MalformedAndSkippedLines() throws IOException {
         String logContent = """
-                id,timestamp,velocity,batteryLevel,orientation
+                id,timeStamp,velocity,batteryLevel,orientation
                 1,100,10.0,100.0,90
                 not,a,number,line,
                 1,102,20.0,98.0,110
@@ -157,8 +157,8 @@ public class BaselineCalculatorTest {
         Properties props = loadProperties(propsFile);
 
         assertEquals(12.333, Double.parseDouble(props.getProperty("velocity.mean")), 0.001);
-        assertEquals(2.0, Double.parseDouble(props.getProperty("batteryDrain.mean")), 0.001);
+        assertEquals(1.0, Double.parseDouble(props.getProperty("batteryDrain.mean")), 0.001);
         assertEquals(0.0, Double.parseDouble(props.getProperty("batteryDrain.standardDev")), 0.001);
-        assertEquals(20.0, Double.parseDouble(props.getProperty("orientationDelta.mean")), 0.001);
+        assertEquals(10.0, Double.parseDouble(props.getProperty("orientationDelta.mean")), 0.001);
     }
 }

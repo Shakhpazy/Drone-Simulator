@@ -57,6 +57,7 @@ public class PersistentExporter {
     public void logTelemetryData(HashMap<String, Object> theTelemetryData, List<String> theHeader) {
         if (persistentTelemetryWriter == null) {
             System.err.println("Error: Telemetry log is not open.");
+            return;
         }
 
         try {

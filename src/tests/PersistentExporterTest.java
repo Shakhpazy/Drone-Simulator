@@ -36,10 +36,10 @@ public class PersistentExporterTest {
         testData1.put("altitude", 300);
 
         testData2 = new HashMap<>();
-        testData1.put("id", 2);
-        testData1.put("timestamp", 123456999L);
-        testData1.put("velocity", 9.8);
-        testData1.put("altitude", 310);
+        testData2.put("id", 2);
+        testData2.put("timestamp", 123456999L);
+        testData2.put("velocity", 9.8);
+        testData2.put("altitude", 310);
     }
 
     @Test
@@ -48,7 +48,7 @@ public class PersistentExporterTest {
 
         exporter.startTelemetryLog(outputFile.toString(), testHeader);
         exporter.logTelemetryData(testData1, testHeader);
-        exporter.logTelemetryData(testData1, testHeader);
+        exporter.logTelemetryData(testData2, testHeader);
         exporter.closeTelemetryLog();
 
         assertTrue(Files.exists(outputFile));

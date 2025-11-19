@@ -90,11 +90,13 @@ public class PdfExporter implements ReportExporter {
                 contentStream.newLineAtOffset(0, -leading);
                 currentY -= leading;
 
-                contentStream.showText("Simple Report: " + report.simpleReport());
+                contentStream.showText("Simple Report: " + report.simpleReport()
+                        .replaceAll("[\n\r]", " "));
                 contentStream.newLineAtOffset(0, -leading);
                 currentY -= leading;
 
-                contentStream.showText("Detailed Report: " + report.detailedReport());
+                contentStream.showText("Detailed Report: " + report.detailedReport()
+                        .replaceAll("[\n\r]", " "));
                 contentStream.newLineAtOffset(0, -leading);
                 currentY -= leading;
 

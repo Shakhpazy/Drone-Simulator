@@ -73,10 +73,10 @@ public class ReportExporterTest {
 
         String expectedLine1 = String.join(",",
                 id1.toString(), String.valueOf(ts1), aEnum1, String.valueOf(1),
-                "Simple Report", "Detailed Report");
+                "Simple Report 1", "Detailed Report 1");
         String expectedLine2 = String.join(",",
                 id2.toString(), String.valueOf(ts2), aEnum2, String.valueOf(2),
-                "Simple Report", "Detailed Report");
+                "Simple Report 2", "Detailed Report 2");
 
         assertEquals(expectedLine1, lines.get(1));
         assertEquals(expectedLine2, lines.get(2));
