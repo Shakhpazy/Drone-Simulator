@@ -137,7 +137,7 @@ class MapPanel extends JPanel {
      * @param theLoc the location of the drone to validate.
      * @throws IllegalArgumentException if the loc is out of bounds or not a 2D array.
      */
-    private void validateLocation(float[] theLoc) {
+    private void validateLocation(final float[] theLoc) {
         if (theLoc.length != 2) {
             throw new IllegalArgumentException("Location array not the correct size of 2: {lon, lat}.");
         } else {
@@ -228,7 +228,7 @@ class MapPanel extends JPanel {
             // Mouse listener to detect the start of a mouse drag
             addMouseListener(new MouseAdapter() {
                 @Override
-                public void mousePressed(MouseEvent theE) {
+                public void mousePressed(final MouseEvent theE) {
                     myDragPoint = theE.getPoint();
                 }
             });
@@ -236,7 +236,7 @@ class MapPanel extends JPanel {
             // Mouse wheel listener for zoom in / out.
             addMouseWheelListener(new MouseAdapter() {
                 @Override
-                public void mouseWheelMoved(MouseWheelEvent theE) {
+                public void mouseWheelMoved(final MouseWheelEvent theE) {
                     myCellSize = Math.clamp(
                             myCellSize - theE.getWheelRotation() * 2L,
                             (getWidth() - 2 * BUFFER.width) / (LON_MAX * 2 / LABEL_STEP),
@@ -249,7 +249,7 @@ class MapPanel extends JPanel {
             // Mouse motion listener to allow grid to be dragged / panned.
             addMouseMotionListener(new MouseAdapter() {
                 @Override
-                public void mouseDragged(MouseEvent theE) {
+                public void mouseDragged(final MouseEvent theE) {
                     myDelta = new Point(
                             myDelta.x + theE.getX() - myDragPoint.x,
                             myDelta.y + theE.getY() - myDragPoint.y);

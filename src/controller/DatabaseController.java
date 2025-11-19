@@ -64,7 +64,7 @@ public class DatabaseController implements PropertyChangeListener {
      * @return the equivalent date in Epoch milliseconds.
      * @throws IllegalArgumentException if the date can not be formatted by LocalDate.parse().
      */
-    private long formatDate(String theDate) {
+    private long formatDate(final String theDate) {
         // Attempt to format the date. If it fails, throw exception.
         LocalDate date;
         try {
@@ -77,7 +77,7 @@ public class DatabaseController implements PropertyChangeListener {
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent theEvent) {
+    public void propertyChange(final PropertyChangeEvent theEvent) {
         switch (theEvent.getPropertyName()) {
 
             // Open and initialize the database window.
@@ -156,7 +156,7 @@ public class DatabaseController implements PropertyChangeListener {
      * @param theExporter the specific file type exporter (JSON, CSV, or PDF).
      * @throws IllegalArgumentException if the type exporter is not a PdfExporter, CsvExporter, or JsonExporter.
      */
-    private void exportData(ReportExporter theExporter) {
+    private void exportData(final ReportExporter theExporter) {
         // Determine the filename / type based on input exporter.
         // If not one of the accepted types, throw exception.
         String filename = switch (theExporter) {
