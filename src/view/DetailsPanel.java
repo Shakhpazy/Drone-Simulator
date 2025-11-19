@@ -54,6 +54,9 @@ class DetailsPanel extends JPanel {
      * @param theDetailedReport the detailed report to display.
      */
     public void setReport(final String theDetailedReport) {
+        if (theDetailedReport == null) {
+            throw new IllegalArgumentException("Detailed report must not be null.");
+        }
         myTextArea.setText(theDetailedReport);
     }
 }

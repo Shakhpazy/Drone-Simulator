@@ -27,6 +27,9 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
     }
 
     public void addReport(final String theReport) {
+        if (theReport == null) {
+            throw new IllegalArgumentException("Report cannot be null.");
+        }
         JTextArea rep = new JTextArea(theReport);
         rep.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         rep.setEditable(false);
@@ -66,6 +69,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         QueryTextField idField = new QueryTextField("(e.g. 1, 2, ...)");
 
         JComboBox<String> typeField = new JComboBox<>();
+        typeField.addItem("");
         typeField.addItem("Abnormal Battery Drain Rate");
         typeField.addItem("Battery Failure");
         typeField.addItem("Dangerous Change in Altitude");
@@ -100,6 +104,9 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
 
         private QueryTextField(final String theDefault) {
             super(theDefault);
+            if (theDefault == null) {
+                throw new IllegalArgumentException("Default text cannot be null.");
+            }
             myDef = theDefault;
             setBorder(BorderFactory.createLineBorder(Color.BLACK));
             addFocusListener(new FocusAdapter() {
@@ -127,6 +134,9 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
 
         private FieldPanel(String theLabel, JComponent theField) {
             super();
+            if (theLabel == null || theField == null) {
+                throw new IllegalArgumentException("Label nor field component may be null.");
+            }
             int gap = 5;
             setLayout(new GridLayout(0, 1, gap, gap));
             setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));

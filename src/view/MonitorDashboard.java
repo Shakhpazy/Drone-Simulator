@@ -43,6 +43,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * @param theDetailedReport the detailed report to display after clicked.
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
+        if (theSimpleReport == null || theDetailedReport == null) {
+            throw new IllegalArgumentException("Report strings must not be null.");
+        }
         LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
         revalidate();
         repaint();
@@ -75,6 +78,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * Sets the selected drone in the MapPanel and TelemetryPanel.
      *
      * @param theID the ID number for the drone.
+     * @return true if already selected, false otherwise.
      */
     static boolean setSelectedDrone(final int theID) {
         return MAP_PANEL.setSelectedID(theID);
