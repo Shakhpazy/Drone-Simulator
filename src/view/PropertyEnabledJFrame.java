@@ -61,7 +61,7 @@ class PropertyEnabledJFrame extends JFrame implements PropertyChangeListener {
     }
 
     @Override
-    public void addPropertyChangeListener(PropertyChangeListener theListener) {
+    public void addPropertyChangeListener(final PropertyChangeListener theListener) {
         if (theListener == null) {
             throw new IllegalArgumentException("Listener object must not be null.");
         }
@@ -69,7 +69,7 @@ class PropertyEnabledJFrame extends JFrame implements PropertyChangeListener {
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent theEvent) {
+    public void propertyChange(final PropertyChangeEvent theEvent) {
 
     }
 }

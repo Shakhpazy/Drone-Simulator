@@ -128,7 +128,7 @@ class TelemetryPanel extends JPanel {
             // Mouse listener to select specific drones in the GUI.
             addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent theE) {
+                public void mouseClicked(final MouseEvent theE) {
                     boolean isSelected = MonitorDashboard.setSelectedDrone(myID);
                     ID_ENTRY_MAP.values().forEach(e -> e.setBackground(Color.LIGHT_GRAY));
                     if (!isSelected) {

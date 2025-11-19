@@ -191,7 +191,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
                 // meaning no input is given yet but the user clicked
                 // inside the text field.
                 @Override
-                public void focusGained(FocusEvent theE) {
+                public void focusGained(final FocusEvent theE) {
                     if (theDefault.equals(getText())) {
                         setText("");
                     }
@@ -199,7 +199,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
                 // Set text back to default if user clicked out
                 // without entering any text.
                 @Override
-                public void focusLost(FocusEvent theE) {
+                public void focusLost(final FocusEvent theE) {
                     if ("".equals(getText())) {
                         setText(theDefault);
                     }
@@ -240,7 +240,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
          * @param theLabel the label for the query field.
          * @param theField the component containing the input for the query field.
          */
-        private FieldPanel(String theLabel, JComponent theField) {
+        private FieldPanel(final String theLabel, final JComponent theField) {
             super();
             if (theLabel == null || theField == null) {
                 throw new IllegalArgumentException("Label nor field component may be null.");
