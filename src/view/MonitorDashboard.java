@@ -6,6 +6,9 @@ import java.awt.*;
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
  * system.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 public class MonitorDashboard extends PropertyEnabledJFrame {
 
@@ -32,6 +35,11 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         initWindow();
     }
 
+    /**
+     * Provides a point to access the singleton instance of this class.
+     *
+     * @return the singleton instance.
+     */
     public static MonitorDashboard getInstance() {
         return INSTANCE;
     }
@@ -41,6 +49,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      *
      * @param theSimpleReport the report to log.
      * @param theDetailedReport the detailed report to display after clicked.
+     * @throws IllegalArgumentException if any given string is null.
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
         if (theSimpleReport == null || theDetailedReport == null) {
@@ -84,7 +93,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         return MAP_PANEL.setSelectedID(theID);
     }
 
-    /** Boilerplate JFrame setup. */
+    /**
+     * JFrame setup.
+     */
     private void initWindow() {
         setPreferredSize(SIZE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -140,6 +151,11 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         bar.setVisible(true);
     }
 
+    /**
+     * Sets up the file portion of the menu bar.
+     *
+     * @return the JMenu for 'file' to add to the menu bar.
+     */
     private JMenu initFileMenu() {
         JMenu fileMenu = new JMenu("File");
         JMenuItem saveCSV = new JMenuItem("Save as .csv");
@@ -165,6 +181,8 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * Opens a window to view and query the anomaly report database.
      */
     private void openDatabase() {
+        // Lots of data may cause the window to open after a delay.
+        // Setting cursor to waiting lets user know the window is opening.
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         myPCS.firePropertyChange(PROPERTY_DATABASE_OPENED, null, null);
     }

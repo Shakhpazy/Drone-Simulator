@@ -9,6 +9,9 @@ import java.util.ArrayList;
 /**
  * This class represents the right-hand-side of the GUI which
  * displays quick descriptions of recent anomaly logs.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 class LogPanel extends JPanel {
 

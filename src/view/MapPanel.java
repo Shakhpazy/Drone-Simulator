@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class represents the drone's locations on a map.
+ * This class represents and displays the drone's locations on a map.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 class MapPanel extends JPanel {
 
@@ -71,6 +74,7 @@ class MapPanel extends JPanel {
      *
      * @param theID the id number of the drone.
      * @param theLoc the longitude and latitude of the drone, in that order.
+     * @throws IllegalArgumentException if the drone id is negative, or the location is not a 2D array or out of bounds.
      */
     public void setDroneMapping(final int theID, final float[] theLoc) {
         validateLocation(theLoc);
@@ -86,6 +90,7 @@ class MapPanel extends JPanel {
      *
      * @param theID the drone to set as selected.
      * @return true if already selected, false otherwise.
+     * @throws IllegalArgumentException if the map does not contain the given ID.
      */
     public boolean setSelectedID(final int theID) {
         if (!ID_LOC_MAP.containsKey(theID)) {
@@ -117,6 +122,7 @@ class MapPanel extends JPanel {
      *
      * @param theLoc the float array to convert.
      * @return the given float array as an int array, floored and centered.
+     * @throws IllegalArgumentException if theLoc is out of bounds or not a 2D array.
      */
     private int[] formatLocation(final float[] theLoc) {
         validateLocation(theLoc);
@@ -125,6 +131,12 @@ class MapPanel extends JPanel {
                 (int) Math.floor(-theLoc[LAT])};
     }
 
+    /**
+     * This method validates the given position of a drone.
+     *
+     * @param theLoc the location of the drone to validate.
+     * @throws IllegalArgumentException if the loc is out of bounds or not a 2D array.
+     */
     private void validateLocation(float[] theLoc) {
         if (theLoc.length != 2) {
             throw new IllegalArgumentException("Location array not the correct size of 2: {lon, lat}.");
@@ -140,6 +152,9 @@ class MapPanel extends JPanel {
 
     /**
      * This inner class represents the window in which the grid and drones will be drawn.
+     *
+     * @author Evin Roen
+     * @version 11/19/2025
      */
     private static final class GridPanel extends JPanel {
 
@@ -261,6 +276,7 @@ class MapPanel extends JPanel {
          * Draws the grid for the map.
          *
          * @param theG2D the graphics object to draw with.
+         * @throws IllegalArgumentException if graphics object is null.
          */
         private void drawGrid(final Graphics2D theG2D) {
             if (theG2D == null) {
@@ -309,6 +325,7 @@ class MapPanel extends JPanel {
          * Draws the drones on the map.
          *
          * @param theG2D the graphics object to draw with.
+         * @throws IllegalArgumentException if the graphics object is null.
          */
         private void drawDrones(final Graphics2D theG2D) {
             if (theG2D == null) {
@@ -356,6 +373,7 @@ class MapPanel extends JPanel {
          * Focuses (pans) the grid on the selected drone from the given id.
          *
          * @param theID the id of the drone to center on.
+         * @throws IllegalArgumentException if the map does not contain the given drone ID.
          */
         public void focusOnSelected(final int theID) {
             if (!ID_LOC_MAP.containsKey(theID)) {

@@ -16,27 +16,63 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * This class handles the database operations and updates the GUI via
+ * the DatabaseWindow class.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
+ */
 public class DatabaseController implements PropertyChangeListener {
 
+    /**
+     * This field holds the reference to the database object from the model package.
+     */
     private final AnomalyDatabase myDTBS;
 
+    /**
+     * This field holds the reference to the GUI window from the view package.
+     */
     private final DatabaseWindow myWindow;
 
+    /**
+     * Package-private constructor to ensure only members of the
+     * controller package can instantiate DatabaseController.
+     * \n
+     * Initializes the database model class and the database window
+     * view class.
+     *
+     * @param theDTBS the shared database object used by the main controller.
+     */
     DatabaseController(final AnomalyDatabase theDTBS) {
+        // Assign and initialize database.
         myDTBS = theDTBS;
         myDTBS.initialize();
+
+        // Assign GUI class and add self as listener to GUI.
         myWindow = new DatabaseWindow();
         myWindow.addPropertyChangeListener(this);
         MonitorDashboard.getInstance().addPropertyChangeListener(this);
     }
 
+    /**
+     * This method takes a date in the form of a string and
+     * formats it for use throughout the class. Essentially
+     * converts mm/dd/yyyy to Epoch Milliseconds.
+     *
+     * @param theDate string data of form mm/dd/yyyy.
+     * @return the equivalent date in Epoch milliseconds.
+     * @throws IllegalArgumentException if the date can not be formatted by LocalDate.parse().
+     */
     private long formatDate(String theDate) {
+        // Attempt to format the date. If it fails, throw exception.
         LocalDate date;
         try {
             date = LocalDate.parse(theDate, DateTimeFormatter.ofPattern("MM/dd/yyy"));
         } catch (DateTimeParseException theE) {
             throw new IllegalArgumentException("Date is not formatted correctly: " + theE);
         }
+        // Convert formatted time to Epoch Milli.
         return date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli();
     }
 
@@ -98,7 +134,7 @@ public class DatabaseController implements PropertyChangeListener {
                 }
                 break;
 
-            // Exporting anomaly database
+            // Exporting options for entire anomaly database.
             case MonitorDashboard.PROPERTY_SAVE_CSV:
                 exportData(new CsvExporter());
                 break;
@@ -113,7 +149,16 @@ public class DatabaseController implements PropertyChangeListener {
         }
     }
 
+    /**
+     * Exports the database to an output file. The file type is determined by
+     * the input ReportExporter implementation.
+     *
+     * @param theExporter the specific file type exporter (JSON, CSV, or PDF).
+     * @throws IllegalArgumentException if the type exporter is not a PdfExporter, CsvExporter, or JsonExporter.
+     */
     private void exportData(ReportExporter theExporter) {
+        // Determine the filename / type based on input exporter.
+        // If not one of the accepted types, throw exception.
         String filename = switch (theExporter) {
             case PdfExporter _ -> "/anomaly_data.pdf";
             case CsvExporter _ -> "/anomaly_data.csv";
@@ -122,6 +167,7 @@ public class DatabaseController implements PropertyChangeListener {
                     throw new IllegalArgumentException("Input ReportExporter is not an instance of PDF, CSV, or JSON exporters.");
         };
 
+        // Open file chooser to allow user to select location for the new file.
         JFileChooser chooser = new JFileChooser();
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int selectionApproved = chooser.showOpenDialog(null);

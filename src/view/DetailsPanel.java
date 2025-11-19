@@ -6,6 +6,9 @@ import java.awt.*;
 /**
  * This class represents the detailed section underneath the log panel.
  * When a simple log is clicked on, the detailed log is shown here.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 class DetailsPanel extends JPanel {
 

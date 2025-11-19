@@ -43,6 +43,7 @@ class TelemetryPanel extends JPanel {
      *
      * @param theID the drone's id number.
      * @param theData the drone's telemetry data.
+     * @throws IllegalArgumentException if drone ID is negative or data is null.
      */
     public void addTelemetryEntry(final int theID, final String theData) {
         if (theID < 0) {
@@ -88,6 +89,9 @@ class TelemetryPanel extends JPanel {
 
     /**
      * This inner class represents a telemetry data entry for tracking a single drone.
+     *
+     * @author Evin Roen
+     * @version 11/19/2025
      */
     private static class TelemetryEntry extends JTextArea {
 
@@ -107,6 +111,7 @@ class TelemetryPanel extends JPanel {
          *
          * @param theID the drone's id number.
          * @param theData the telemetry data to display.
+         * @throws IllegalArgumentException if drone ID is negative or data is null.
          */
         private TelemetryEntry(final int theID, final String theData) {
             super();
