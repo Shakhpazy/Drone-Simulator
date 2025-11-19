@@ -27,20 +27,26 @@ public class BaselineCalculator {
     /**
      * A map to hold all previous battery values;
      */
-    private final Map<Integer, Float> prevBatteryLife;
+    private final Map<Integer, Float> prevBatteryReadings;
 
     /**
      * A map to hold all previous orientation values;
      */
     private final Map<Integer, Float> prevOrientationReadings;
 
+    /**
+     * A map to hold all previous timestamp values;
+     */
+    private final Map<Integer, Float> prevTimestampReadings;
+
 
     public BaselineCalculator() {
         this.velocityReadings = new ArrayList<>();
         this.batteryDrainReadings = new ArrayList<>();
         this.orientationDeltaReadings = new ArrayList<>();
-        this.prevBatteryLife = new HashMap<>();
+        this.prevBatteryReadings = new HashMap<>();
         this.prevOrientationReadings = new HashMap<>();
+        this.prevTimestampReadings = new HashMap<>();
     }
 
     /**
@@ -103,10 +109,12 @@ public class BaselineCalculator {
             int velocityIndex = headerMap.get("velocity");
             int batteryIndex = headerMap.get("batteryLevel");
             int orientationIndex = headerMap.get("orientation");
+            int timestampIndex = headerMap.get("timeStamp");
 
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
-                if(values.length <= Math.max(idIndex, Math.max(velocityIndex, batteryIndex))) {
+                if(values.length <= Math.max(idIndex, Math.max(velocityIndex, Math.max(batteryIndex,
+                        orientationIndex)))) {
                     System.err.println("Skipping malformed line: " + line);
                     continue;
                 }
@@ -116,26 +124,36 @@ public class BaselineCalculator {
                     double currVelocity = Double.parseDouble(values[velocityIndex].trim());
                     float currBattery = Float.parseFloat(values[batteryIndex].trim());
                     float currOrientation = Float.parseFloat(values[orientationIndex].trim());
+                    float currTimestamp = Float.parseFloat(values[timestampIndex].trim());
 
                     velocityReadings.add(currVelocity);
 
-                    if (prevBatteryLife.containsKey(droneID)) {
-                        float prevBattery = prevBatteryLife.get(droneID);
-                        float drain = prevBattery - currBattery;
-                        batteryDrainReadings.add((double) drain);
-                    }
+                    if (prevTimestampReadings.containsKey(droneID)) {
+                        float prevTimestamp = prevTimestampReadings.get(droneID);
 
-                    if (prevOrientationReadings.containsKey(droneID)) {
-                        double prevOrientation = prevOrientationReadings.get(droneID);
+                        float deltaTime = currTimestamp - prevTimestamp;
 
-                        double diff = Math.abs(currOrientation - prevOrientation);
-                        if (diff > 180) {
-                            diff = 360 - diff;
+                        if (prevBatteryReadings.containsKey(droneID)) {
+                            float prevBattery = prevBatteryReadings.get(droneID);
+                            float drain = (prevBattery - currBattery);
+                            double normalizedDrain = drain / deltaTime;
+                            batteryDrainReadings.add(normalizedDrain);
                         }
-                        orientationDeltaReadings.add(diff);
+
+                        if (prevOrientationReadings.containsKey(droneID)) {
+                            float prevOrientation = prevOrientationReadings.get(droneID);
+
+                            float diff = Math.abs(currOrientation - prevOrientation);
+                            if (diff > 180) {
+                                diff = 360 - diff;
+                            }
+                            double normalizedDiff = diff / deltaTime;
+                            orientationDeltaReadings.add(normalizedDiff);
+                        }
                     }
 
-                    prevBatteryLife.put(droneID, currBattery);
+                    prevTimestampReadings.put(droneID, currTimestamp);
+                    prevBatteryReadings.put(droneID, currBattery);
                     prevOrientationReadings.put(droneID, currOrientation);
                 } catch (NumberFormatException e) {
                     System.err.println("Skipping line with unparseable number: " + line);
