@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Drone extends AbstractDrone {
+    //This might change if  I want each Drone to have its own
+    //max based on a range of those numbers.
 
     /** Maximum allowed velocity in normal moves. */
     private static final float MAX_VELOCITY = 10;
@@ -20,12 +22,21 @@ public class Drone extends AbstractDrone {
     /** Step size for increasing or decreasing velocity during movement. */
     private static final float ACCELERATION_STEP = .07f;
 
+    /** Random */
     private static final Random myRandom = new Random();
 
-
+    /** Arraylist of RoutePoints that the drone goes to (Circular) */
     ArrayList<RoutePoint> myRoute;
+    /* Current RoutePoint the Drone is moving towards */
     private int nextPoint = 0;
 
+    /**
+     * Constructor for the Drone
+     *
+     * @param theVelocity The velocity of the Drone
+     * @param theBatteryLevel The Battery of the Drone
+     * @param theRoute The Route of the Drone.
+     */
     public Drone(float theVelocity, int theBatteryLevel, ArrayList<RoutePoint> theRoute) {
         super(
                 !theRoute.isEmpty() ? theRoute.getFirst().getLongitude() : 0f,
@@ -48,11 +59,19 @@ public class Drone extends AbstractDrone {
         nextPoint = 1;
     }
 
+    /**
+     * @return {RoutePoint} of the next Position the Drone is moving towards.
+     *          Circular so that the Drone loops through infinite times.
+     */
     @Override
     public RoutePoint getNextPoint() {
         return myRoute.get(nextPoint % myRoute.size());
     }
 
+    /**
+     * Increments NextPoint by 1, circular so that it stays in range of
+     * the size of MyRoute
+     */
     public void setNextRoute() {
         nextPoint = (nextPoint + 1) % myRoute.size();
     }

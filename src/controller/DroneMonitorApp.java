@@ -143,8 +143,9 @@ public class DroneMonitorApp {
             }
         };
 
-        //Have the scheduler fire a thread to run simulateNextStep every few milliseconds based on MY_DELTA_TIME.
-        scheduler.scheduleWithFixedDelay(simulateNextStep, 0, MY_UPDATE_TIME, TimeUnit.MILLISECONDS);
+        //Have the scheduler fire a thread to run simulateNextStep every 0.6 seconds
+        // old : scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
+        scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
 
 
         //Create a runnable task that will shut down the scheduler on program exit
