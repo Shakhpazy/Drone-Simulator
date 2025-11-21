@@ -6,6 +6,9 @@ import java.awt.*;
 /**
  * This class represents the detailed section underneath the log panel.
  * When a simple log is clicked on, the detailed log is shown here.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 class DetailsPanel extends JPanel {
 
@@ -54,6 +57,9 @@ class DetailsPanel extends JPanel {
      * @param theDetailedReport the detailed report to display.
      */
     public void setReport(final String theDetailedReport) {
+        if (theDetailedReport == null) {
+            throw new IllegalArgumentException("Detailed report must not be null.");
+        }
         myTextArea.setText(theDetailedReport);
     }
 }

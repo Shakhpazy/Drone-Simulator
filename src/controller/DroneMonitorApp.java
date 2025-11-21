@@ -1,17 +1,12 @@
 package controller;
 
 import model.*;
-import java.io.File;
-import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
-
-
-import javax.sound.sampled.*;
-import javax.swing.*;
 
 import view.MonitorDashboard;
 
@@ -35,8 +30,22 @@ public class DroneMonitorApp {
     private static final RouteGenerator myRouteGenerator = new RouteGenerator();
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
-    //Define delta time in seconds
-    private static final double MY_DELTA_TIME = 1.0;
+    // ===============
+    //  CONFIGURATION
+    // ===============
+//    private static final int FPS = 120; //REVISIT: Add to slider?
+
+    /*
+     * How long the program waits between updates (in milliseconds)
+     */
+    private static final long MY_UPDATE_TIME = 500;
+//  OLD: private static final long MY_DELTA_TIME = FPS/1000;
+
+   /**
+    * Time delta for smooth updates in TelemetryGenerator
+    * MY_DELTA_TIME = MY_UPDATE_TIME in seconds due to implementation.
+    */
+   private static final double MY_DELTA_TIME = MY_UPDATE_TIME / 1000.0;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -45,12 +54,6 @@ public class DroneMonitorApp {
      * @param theArgs - The command line arguments passed into the program.
      */
     public static void main(String[] theArgs) {
-
-        // ======================
-        // CONFIGURATION
-        // ======================
-        final int FPS = 60;
-        final long FRAME_DELAY_MS = 1000/FPS; // is how long the program waits between updates in real time (maybe for slider)
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
@@ -98,7 +101,6 @@ public class DroneMonitorApp {
 
                 //Get previous Telemetry
                 HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(i)[0];
-//                myBeforeTelemetryMap.put("")
 
                 //Get Current Telemetry
                 HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(i)[1];
@@ -109,13 +111,13 @@ public class DroneMonitorApp {
                 //If anomaly is not null.
                 if (anomaly != null) {
                     if(anomaly.anomalyType().contains("Out of Bounds")) {
-                        AlertPlayer.INSTANCE.playSound("spoof");
+                        AlertPlayer.INSTANCE.addSoundToQueue("spoof");
                     }
                     else if(anomaly.anomalyType().contains("Battery")) {
-                        AlertPlayer.INSTANCE.playSound("battery");
+                        AlertPlayer.INSTANCE.addSoundToQueue("battery");
                     }
                     else {
-                        AlertPlayer.INSTANCE.playSound("crash");
+                        AlertPlayer.INSTANCE.addSoundToQueue("crash");
                     }
                     //Add anomaly to database.
                     anomalyDTBS.insertReport(anomaly);

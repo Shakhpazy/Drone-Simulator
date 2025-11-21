@@ -6,6 +6,9 @@ import java.awt.*;
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
  * system.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 public class MonitorDashboard extends PropertyEnabledJFrame {
 
@@ -32,6 +35,11 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         initWindow();
     }
 
+    /**
+     * Provides a point to access the singleton instance of this class.
+     *
+     * @return the singleton instance.
+     */
     public static MonitorDashboard getInstance() {
         return INSTANCE;
     }
@@ -41,8 +49,12 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      *
      * @param theSimpleReport the report to log.
      * @param theDetailedReport the detailed report to display after clicked.
+     * @throws IllegalArgumentException if any given string is null.
      */
     public void addLogEntry(final String theSimpleReport, final String theDetailedReport) {
+        if (theSimpleReport == null || theDetailedReport == null) {
+            throw new IllegalArgumentException("Report strings must not be null.");
+        }
         LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
         revalidate();
         repaint();
@@ -75,12 +87,15 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * Sets the selected drone in the MapPanel and TelemetryPanel.
      *
      * @param theID the ID number for the drone.
+     * @return true if already selected, false otherwise.
      */
     static boolean setSelectedDrone(final int theID) {
         return MAP_PANEL.setSelectedID(theID);
     }
 
-    /** Boilerplate JFrame setup. */
+    /**
+     * JFrame setup.
+     */
     private void initWindow() {
         setPreferredSize(SIZE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -107,14 +122,14 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         // Help
         JMenu helpMenu = new JMenu("Help");
         JMenuItem inst = new JMenuItem("Instructions...");
-        inst.addActionListener(theEvent -> openInstructions());
+        inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
 
         // Data
         JMenu dataMenu = new JMenu("Data");
         JMenuItem openDB = new JMenuItem("Open Database...");
-        openDB.addActionListener(theEvent -> openDatabase());
+        openDB.addActionListener(_ -> openDatabase());
         dataMenu.add(openDB);
         bar.add(dataMenu);
 
@@ -122,7 +137,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         JMenu debugMenu = new JMenu("Debug");
         JSlider tickSpdSlider = new JSlider(1, 5, 1);
         tickSpdSlider.addChangeListener(
-                theEvent -> myPCS.firePropertyChange(
+                _ -> myPCS.firePropertyChange(
                         PROPERTY_TICK_SPEED,
                         null,
                         tickSpdSlider.getValue()));
@@ -136,16 +151,21 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         bar.setVisible(true);
     }
 
+    /**
+     * Sets up the file portion of the menu bar.
+     *
+     * @return the JMenu for 'file' to add to the menu bar.
+     */
     private JMenu initFileMenu() {
         JMenu fileMenu = new JMenu("File");
         JMenuItem saveCSV = new JMenuItem("Save as .csv");
-        saveCSV.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
+        saveCSV.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
         fileMenu.add(saveCSV);
         JMenuItem savePDF = new JMenuItem("Save as .pdf");
-        savePDF.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
+        savePDF.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
         fileMenu.add(savePDF);
         JMenuItem saveJSON = new JMenuItem("Save as .json");
-        saveJSON.addActionListener(theEvent -> myPCS.firePropertyChange(PROPERTY_SAVE_JSON, null, null));
+        saveJSON.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_JSON, null, null));
         fileMenu.add(saveJSON);
         return fileMenu;
     }
@@ -161,6 +181,8 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * Opens a window to view and query the anomaly report database.
      */
     private void openDatabase() {
+        // Lots of data may cause the window to open after a delay.
+        // Setting cursor to waiting lets user know the window is opening.
         setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
         myPCS.firePropertyChange(PROPERTY_DATABASE_OPENED, null, null);
     }

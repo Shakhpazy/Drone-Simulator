@@ -147,7 +147,7 @@ public class TelemetryGenerator {
      * @return a map containing drone id, altitude, longitude, latitude,
      *         velocity, battery level, orientation, and timestamp
      */
-    public HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
+    private HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
         HashMap<String, Object> telemetryMap = new HashMap<>();
         telemetryMap.put("id", theDrone.getId());
         telemetryMap.put("altitude", theDrone.getAltitude());
