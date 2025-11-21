@@ -1,6 +1,7 @@
 package model;
 
 import java.util.*;
+
 /**
  * TelemetryGenerator is responsible for simulating drone telemetry data.
  * It processes a list of drones, generating either normal movements
@@ -57,8 +58,6 @@ public class TelemetryGenerator {
      * - Skips processing if the drone is not alive.
      * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
      *   a random anomaly move or a normal route-following move.
-     *
-     *   gen.processAllDrones(1.0 / FPS);
      */
     public ArrayList<HashMap<String, Object>[]> processAllDrones(double deltaTime) {
         ArrayList<HashMap<String, Object>[]> telemetryList = new ArrayList<>();
@@ -77,7 +76,6 @@ public class TelemetryGenerator {
 
             HashMap<String, Object> myAfterTelemetryMap = createTelemetryMap(drone);
 
-            @SuppressWarnings("unchecked")
             HashMap<String, Object>[] pair = (HashMap<String, Object>[]) new HashMap[2];
             pair[0] = myBeforeTelemetryMap;
             pair[1] = myAfterTelemetryMap;
