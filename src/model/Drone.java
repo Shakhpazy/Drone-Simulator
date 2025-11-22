@@ -37,7 +37,7 @@ public class Drone extends AbstractDrone {
      * @param theBatteryLevel The Battery of the Drone
      * @param theRoute The Route of the Drone.
      */
-    public Drone(float theVelocity, int theBatteryLevel, ArrayList<RoutePoint> theRoute) {
+    public Drone(final float theVelocity, final int theBatteryLevel, final ArrayList<RoutePoint> theRoute) {
         super(
                 !theRoute.isEmpty() ? theRoute.getFirst().getLongitude() : 0f,
                 !theRoute.isEmpty() ? theRoute.getFirst().getLatitude()  : 0f,
@@ -78,7 +78,7 @@ public class Drone extends AbstractDrone {
 
 
     @Override
-    public void getNextRandomMove(float theDeltaTime) {
+    public void getNextRandomMove(final float theDeltaTime) {
         System.out.println("an anomaly has occurred");
         float latitude = this.getLatitude();
         float longitude = this.getLongitude();
@@ -129,7 +129,7 @@ public class Drone extends AbstractDrone {
     }
 
     @Override
-    public void getNextMove(float theDeltaTime) {
+    public void getNextMove(final float theDeltaTime) {
         float latitude = this.getLatitude();
         float longitude = this.getLongitude();
         float altitude = this.getAltitude();

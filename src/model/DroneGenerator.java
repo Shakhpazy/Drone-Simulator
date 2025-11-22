@@ -20,7 +20,7 @@ public class DroneGenerator {
      *
      * @return a newly created {@link DroneInterface}
      */
-    public DroneInterface createDrone(ArrayList<RoutePoint> theRoute) {
+    public DroneInterface createDrone(final ArrayList<RoutePoint> theRoute) {
         if (theRoute == null) {
             throw new IllegalArgumentException("the route must be defined");
         }

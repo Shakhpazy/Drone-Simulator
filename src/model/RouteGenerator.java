@@ -146,7 +146,7 @@ public class RouteGenerator {
     }
 
     /** Checks if the rectangle is valid {testing only} */
-    private boolean validRectangle(float lon1, float lat1, float lon2, float lat2) {
+    private boolean validRectangle(final float lon1, final float lat1, final float lon2, final float lat2) {
         return Math.abs(lon1 - lon2) >= MIN_SIDE_LENGTH &&
                 Math.abs(lat1 - lat2) >= MIN_SIDE_LENGTH;
     }

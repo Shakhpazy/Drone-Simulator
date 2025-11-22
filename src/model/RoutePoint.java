@@ -18,7 +18,7 @@ public class RoutePoint {
      * @param theLatitude the latitude
      * @param theAltitude the altitude
      */
-    public RoutePoint(float theLongitude, float theLatitude, float theAltitude) {
+    public RoutePoint(final float theLongitude, final float theLatitude, final float theAltitude) {
         myLongitude = theLongitude;
         myLatitude = theLatitude;
         myAltitude = theAltitude;
