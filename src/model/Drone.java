@@ -19,8 +19,22 @@ public class Drone extends AbstractDrone {
     /** Minimum allowed altitude in normal moves. */
     private static final float MIN_ALTITUDE = 0;
 
+    public static final float MIN_LATITUDE = -90.0f;
+
+    public static final float MAX_LATITUDE = 90.0f;
+
+    public static final float MIN_LONGITUDE = -180.0f;
+
+    public static final float MAX_LONGITUDE = 180.0f;
+
     /** Step size for increasing or decreasing velocity during movement. */
     private static final float ACCELERATION_STEP = .07f;
+
+    private static final float ANOMALY_EXTRA_DRAIN_RATE = 0.1f;
+
+    private static final float ANOMALY_ALTITUDE_CHANGE = 50f;
+
+    private static final float ANOMALY_VELOCITY_CHANGE = 7;
 
     private static final AnomalyEnum[] movementAnomalies = {
             AnomalyEnum.BATTERY_DRAIN,
@@ -101,37 +115,35 @@ public class Drone extends AbstractDrone {
 
         switch (anomaly) {
             case BATTERY_DRAIN:
-                drained += 0.1f;
+                drained += ANOMALY_EXTRA_DRAIN_RATE;
                 break;
 
             case BATTERY_FAIL:
-                // maybe set battery to zero?
+                setAltitude(0);
+                setBatteryLevel(0);
                 break;
 
             case ALTITUDE:
                 float changeAlt = (myRandom.nextBoolean() ? 1 : -1)
-                        * (10 + myRandom.nextFloat() * 10) * theDeltaTime;
-                altitude = Math.min(
-                        this.getMaxAltitude(),
-                        Math.max(this.getMinAltitude(), altitude + changeAlt)
-                );
+                        * ANOMALY_ALTITUDE_CHANGE * theDeltaTime;
+
+                // Prevent going below 0, but allow going ABOVE max altitude for out of bound anomaly
+                altitude = Math.max(this.getMinAltitude(), altitude + changeAlt);
+
                 break;
 
-            case SPOOFING:
-                float driftX = (myRandom.nextBoolean() ? 1 : -1)
-                        * (15 + myRandom.nextFloat() * 10) * theDeltaTime;
-                float driftY = (myRandom.nextBoolean() ? 1 : -1)
-                        * (15 + myRandom.nextFloat() * 10) * theDeltaTime;
-                longitude += driftX;
-                latitude  += driftY;
+            case SPOOFING: //Spoofing moves the drone to a completely random position that is in range
+                longitude = myRandom.nextFloat(MIN_LONGITUDE, MAX_LONGITUDE);
+                latitude  = myRandom.nextFloat(MIN_LATITUDE, MAX_LATITUDE);
+                altitude  = myRandom.nextFloat(MIN_ALTITUDE, MAX_ALTITUDE);  // optional: include altitude spoof
                 break;
+
 
             case SPEED:
-                int change = 7;
                 if (myRandom.nextBoolean()) {
-                    velocity = Math.min(velocity + change, this.getMaxVelocity());
+                    velocity = Math.min(velocity + ANOMALY_VELOCITY_CHANGE, this.getMaxVelocity());
                 } else {
-                    velocity = Math.max(velocity - change, this.getMinVelocity());
+                    velocity = Math.max(velocity - ANOMALY_VELOCITY_CHANGE, this.getMinVelocity());
                 }
                 break;
         }
@@ -143,7 +155,9 @@ public class Drone extends AbstractDrone {
                         Math.pow(altitude  - this.getAltitude(), 2)
         );
 
-        drained += batteryDrained(anomalyDistance, theDeltaTime);
+        if (anomaly != AnomalyEnum.BATTERY_FAIL) {
+            drained += batteryDrained(anomalyDistance, theDeltaTime);
+        }
 
         float degree = getOrientation().findNextOrientation(
                 this.getLongitude(),
@@ -193,4 +207,5 @@ public class Drone extends AbstractDrone {
         float degree = getOrientation().findNextOrientation(this.getLongitude(), this.getLatitude(), longitude, latitude);
         updateDrone(longitude, latitude, altitude, drained, velocity, degree);
     }
+
 }
