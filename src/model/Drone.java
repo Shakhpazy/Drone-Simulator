@@ -22,11 +22,21 @@ public class Drone extends AbstractDrone {
     /** Step size for increasing or decreasing velocity during movement. */
     private static final float ACCELERATION_STEP = .07f;
 
+    private static final AnomalyEnum[] movementAnomalies = {
+            AnomalyEnum.BATTERY_DRAIN,
+            AnomalyEnum.BATTERY_FAIL,
+            AnomalyEnum.ALTITUDE,
+            AnomalyEnum.SPOOFING,
+            AnomalyEnum.SPEED
+            // OUT_OF_BOUNDS NOT included on purpose
+    };
+
     /** Random */
     private static final Random myRandom = new Random();
 
     /** Arraylist of RoutePoints that the drone goes to (Circular) */
     ArrayList<RoutePoint> myRoute;
+
     /* Current RoutePoint the Drone is moving towards */
     private int nextPoint = 0;
 
@@ -79,25 +89,44 @@ public class Drone extends AbstractDrone {
 
     @Override
     public void getNextRandomMove(final float theDeltaTime) {
-        System.out.println("an anomaly has occurred");
         float latitude = this.getLatitude();
         float longitude = this.getLongitude();
         float altitude = this.getAltitude();
         float velocity = this.getVelocity();
 
-        int anomalyType = myRandom.nextInt(3); // 0=altitude,1=speed,2=drift
+        float drained = 0f;
 
-        switch (anomalyType) {
-            case 0: // Sudden drop/climb
+        AnomalyEnum anomaly = movementAnomalies[myRandom.nextInt(movementAnomalies.length)];
+        System.out.println("Detected anomaly: " + anomaly);
+
+        switch (anomaly) {
+            case BATTERY_DRAIN:
+                drained += 0.1f;
+                break;
+
+            case BATTERY_FAIL:
+                // maybe set battery to zero?
+                break;
+
+            case ALTITUDE:
                 float changeAlt = (myRandom.nextBoolean() ? 1 : -1)
-                        * (10 + myRandom.nextFloat() * 10) * (float) theDeltaTime;
+                        * (10 + myRandom.nextFloat() * 10) * theDeltaTime;
                 altitude = Math.min(
                         this.getMaxAltitude(),
                         Math.max(this.getMinAltitude(), altitude + changeAlt)
                 );
                 break;
 
-            case 1: // Speed anomaly
+            case SPOOFING:
+                float driftX = (myRandom.nextBoolean() ? 1 : -1)
+                        * (15 + myRandom.nextFloat() * 10) * theDeltaTime;
+                float driftY = (myRandom.nextBoolean() ? 1 : -1)
+                        * (15 + myRandom.nextFloat() * 10) * theDeltaTime;
+                longitude += driftX;
+                latitude  += driftY;
+                break;
+
+            case SPEED:
                 int change = 7;
                 if (myRandom.nextBoolean()) {
                     velocity = Math.min(velocity + change, this.getMaxVelocity());
@@ -105,26 +134,24 @@ public class Drone extends AbstractDrone {
                     velocity = Math.max(velocity - change, this.getMinVelocity());
                 }
                 break;
-
-            case 2: // Random drift
-                float driftX = (myRandom.nextBoolean() ? 1 : -1)
-                        * (15 + myRandom.nextFloat() * 10) * (float) theDeltaTime;
-                float driftY = (myRandom.nextBoolean() ? 1 : -1)
-                        * (15 + myRandom.nextFloat() * 10) * (float) theDeltaTime;
-                longitude += driftX;
-                latitude += driftY;
-                break;
         }
 
-        // Calculate distance change
+        // distance moved due to anomaly
         float anomalyDistance = (float) Math.sqrt(
                 Math.pow(longitude - this.getLongitude(), 2) +
-                        Math.pow(latitude - this.getLatitude(), 2) +
-                        Math.pow(altitude - this.getAltitude(), 2)
+                        Math.pow(latitude  - this.getLatitude(), 2) +
+                        Math.pow(altitude  - this.getAltitude(), 2)
         );
 
-        float drained = batteryDrained(anomalyDistance, theDeltaTime);
-        float degree = getOrientation().findNextOrientation(this.getLongitude(), this.getLatitude(), longitude, latitude);
+        drained += batteryDrained(anomalyDistance, theDeltaTime);
+
+        float degree = getOrientation().findNextOrientation(
+                this.getLongitude(),
+                this.getLatitude(),
+                longitude,
+                latitude
+        );
+
         updateDrone(longitude, latitude, altitude, drained, velocity, degree);
     }
 
@@ -141,7 +168,7 @@ public class Drone extends AbstractDrone {
         float dz = next.getAltitude() - altitude;
 
         float distance = (float) Math.sqrt(dx*dx + dy*dy + dz*dz);
-        float moveDist = this.getVelocity() * (float) theDeltaTime; // movement this frame
+        float moveDist = this.getVelocity() * theDeltaTime; // movement this frame
 
         if (distance <= moveDist) {
             longitude = next.getLongitude();

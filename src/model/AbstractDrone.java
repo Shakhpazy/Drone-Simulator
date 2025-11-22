@@ -1,5 +1,7 @@
 package model;
 
+import java.util.concurrent.ExecutionException;
+
 public abstract class AbstractDrone implements DroneInterface{
 
     /** The altitude of the Drone */
@@ -41,6 +43,9 @@ public abstract class AbstractDrone implements DroneInterface{
     /* The acceleration step of the Drone */
     protected final float myAccelerationStep;
 
+    /* The drones health */
+    protected boolean myDroneIsAlive;
+
     /**
      * Creates an Abstract Drone.
      *
@@ -68,6 +73,7 @@ public abstract class AbstractDrone implements DroneInterface{
         myMaxAltitude = theMaxAlt;
         myMinAltitude = theMinAlt;
         myAccelerationStep = theAccStep;
+        myDroneIsAlive = true;
         totalDrones += 1;
         myID = totalDrones;
     }
@@ -120,6 +126,10 @@ public abstract class AbstractDrone implements DroneInterface{
         return myAccelerationStep;
     }
 
+    public boolean isAlive() {
+        return myDroneIsAlive;
+    }
+
     /**
      * @return Total number of Drones created.
      */
@@ -160,7 +170,15 @@ public abstract class AbstractDrone implements DroneInterface{
      * @param theBatteryLevel float of the Battery
      */
     public void setBatteryLevel(final float theBatteryLevel) {
+        if (theBatteryLevel < 0) {
+            throw new IllegalArgumentException("Battery level cannot be below 0");
+        }
+
         myBatteryLevel = theBatteryLevel;
+
+        if (myBatteryLevel == 0) {
+            setIsAlive(false);
+        }
     }
 
     /**
@@ -180,6 +198,10 @@ public abstract class AbstractDrone implements DroneInterface{
      */
     public void setOrientation(final float theDegree) {
         myOrientation.setDegrees(theDegree);
+    }
+
+    public void setIsAlive(final boolean theHealth) {
+        myDroneIsAlive = theHealth;
     }
 
     /**
@@ -207,6 +229,7 @@ public abstract class AbstractDrone implements DroneInterface{
      */
     public void collided() {
         setAltitude(0);
+        setIsAlive(false);
     }
 
     public abstract void getNextRandomMove(final float theDeltaTime);
@@ -224,14 +247,11 @@ public abstract class AbstractDrone implements DroneInterface{
      * @return the amount of battery that got drained from the Drone
      */
     protected float batteryDrained(final float dist, final double deltaTime) {
-        float drain = 0.07f * (float) deltaTime;
-        if (this.getVelocity() > 7) drain += 0.05f * (float) deltaTime;
+        float drain = 0.01f * (float) deltaTime;
+        if (this.getVelocity() > 7) drain += 0.015f * (float) deltaTime;
         drain += dist * 0.001f * (float) deltaTime;
         return drain;
     }
 
-    public boolean isAlive() {
-        return myBatteryLevel > 0  && myAltitude > 0;
-    }
 
 }
