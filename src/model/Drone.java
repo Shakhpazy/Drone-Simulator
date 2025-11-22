@@ -155,7 +155,7 @@ public class Drone extends AbstractDrone {
                         Math.pow(altitude  - this.getAltitude(), 2)
         );
 
-        if (anomaly != AnomalyEnum.BATTERY_FAIL) {
+        if (anomaly != AnomalyEnum.BATTERY_FAIL && anomaly != AnomalyEnum.SPOOFING) {
             drained += batteryDrained(anomalyDistance, theDeltaTime);
         }
 
