@@ -17,7 +17,7 @@ import view.MonitorDashboard;
  * the model to drive telemetry generation and anomaly checks.
  *
  * @author Natan Artemiev
- * @version 11/2/2025
+ * @version 11/22/2025
  */
 public class DroneMonitorApp {
 
@@ -27,7 +27,10 @@ public class DroneMonitorApp {
      */
     private static boolean MY_DEV_MODE = true;
 
+    /** The route generator used to create flight paths for the drones. */
     private static final RouteGenerator myRouteGenerator = new RouteGenerator();
+
+    /** The drone generator used to instantiate drone objects. */
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
     // ===============
@@ -47,6 +50,8 @@ public class DroneMonitorApp {
     */
    private static final double MY_DELTA_TIME = MY_UPDATE_TIME / 1000.0;
 
+   private static final double MY_ANOMALY_PERCENT = 1.0;
+
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
      * in order to update each drone. Listens for a change of state in the model and updates the view.
@@ -58,7 +63,7 @@ public class DroneMonitorApp {
 
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
-        //Initialize telemetry generator and add drones
+        //Initialize telemetry generator
         TelemetryGenerator gen = TelemetryGenerator.getInstance();
 
         //Generate Drones
@@ -143,10 +148,7 @@ public class DroneMonitorApp {
             }
         };
 
-        //Have the scheduler fire a thread to run simulateNextStep every 0.6 seconds
-        // old : scheduler.scheduleAtFixedRate(simulateNextStep, 0, 500, TimeUnit.MILLISECONDS);
-        scheduler.scheduleWithFixedDelay(simulateNextStep, 0, FRAME_DELAY_MS, TimeUnit.MILLISECONDS);
-
+        scheduler.scheduleWithFixedDelay(simulateNextStep, 0, MY_UPDATE_TIME, TimeUnit.MILLISECONDS);
 
         //Create a runnable task that will shut down the scheduler on program exit
         Runnable shutdownScheduler = () -> {
@@ -171,17 +173,6 @@ public class DroneMonitorApp {
         }
     }
 
-
-//    private static void playBatteryAlert() {
-//        try {
-//            File batteryAlert = new File(myBatteryAlert);
-//            Media media = new Media(batteryAlert.toURI().toString());
-//        }
-//        catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     /**
      * Prints the current telemetry data of a specific drone to the console for debugging purposes.
      * Enabled only in developer mode.
@@ -205,21 +196,20 @@ public class DroneMonitorApp {
     }
 
     /**
-     * Converts a telemetry data map into a formatted string representation
-     * suitable for display in the view.
+     * Converts a map of telemetry data into a formatted string for display purposes.
      *
-     * @param myTelemetryMap A {@link HashMap} containing the drone's telemetry data.
-     * @return The String representation of the Telemetry data.
+     * @param theTelemetryMap A {@link HashMap} containing the drone's current telemetry data.
+     * @return A formatted {@link String} representation of the telemetry.
      */
-    private static String telemetryToString(HashMap<String, Object> myTelemetryMap) {
+    private static String telemetryToString(HashMap<String, Object> theTelemetryMap) {
         StringBuilder sb = new StringBuilder();
-        sb.append("id: ").append(myTelemetryMap.get("id")).append("\n");
-        sb.append("altitude: ").append(myTelemetryMap.get("altitude")).append("\n");
-        sb.append("longitude: ").append(myTelemetryMap.get("longitude")).append("\n");
-        sb.append("latitude: ").append(myTelemetryMap.get("latitude")).append("\n");
-        sb.append("velocity: ").append(myTelemetryMap.get("velocity")).append("\n");
-        sb.append("batteryLevel: ").append(myTelemetryMap.get("batteryLevel")).append("\n");
-        sb.append("orientation: ").append(myTelemetryMap.get("orientation")).append("\n");
+        sb.append("id: ").append(theTelemetryMap.get("id")).append("\n");
+        sb.append("altitude: ").append(theTelemetryMap.get("altitude")).append("\n");
+        sb.append("longitude: ").append(theTelemetryMap.get("longitude")).append("\n");
+        sb.append("latitude: ").append(theTelemetryMap.get("latitude")).append("\n");
+        sb.append("velocity: ").append(theTelemetryMap.get("velocity")).append("\n");
+        sb.append("batteryLevel: ").append(theTelemetryMap.get("batteryLevel")).append("\n");
+        sb.append("orientation: ").append(theTelemetryMap.get("orientation")).append("\n");
         return sb.toString();
     }
 }
