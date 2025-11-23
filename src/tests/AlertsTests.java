@@ -4,10 +4,12 @@ import model.AlertPlayer;
 
 public class AlertsTests {
     public static void main(String[] args) throws InterruptedException {
-        AlertPlayer.INSTANCE.playSound("battery");
-        Thread.sleep(5000);
-        AlertPlayer.INSTANCE.playSound("crash");
-        Thread.sleep(5000);
+        AlertPlayer.INSTANCE.addSoundToQueue("spoof");
+        Thread.sleep(2000);
+        AlertPlayer.INSTANCE.addSoundToQueue("battery");
+        Thread.sleep(2000);
+        AlertPlayer.INSTANCE.addSoundToQueue("crash");
+        Thread.sleep(2000);
         AlertPlayer.INSTANCE.closeAllAlerts();
     }
 }

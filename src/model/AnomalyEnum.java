@@ -8,6 +8,7 @@ public enum AnomalyEnum {
     BATTERY_FAIL("Battery Failure"),
     ALTITUDE("Dangerous Change in Altitude"),
     SPOOFING("GPS Spoofing"),
+    SPEED("Dangerous change in Speed"),
     OUT_OF_BOUNDS("Out of Bounds");
 
     /**

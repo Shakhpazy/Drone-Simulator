@@ -15,20 +15,29 @@ public class RouteGenerator {
     public static final float MIN_ALT = 1.0f;      // ground level
     public static final float MAX_ALT = 1000.0f;   // max altitude (e.g., 1 km)
 
-    // Minimum required difference between lat/lon (side lengths)
+    // Minimum required difference between lat/lon (side lengths) This is just used of testing
     private static final float MIN_SIDE_LENGTH = 80.0f;
 
+    /** Random */
     private static final Random random = new Random();
 
     /**
-     * For now we are just doing circle and rectangular routes
+     * Generates a drone route. By default, this returns a predictable rectangular
+     * route intended for testing reproducible drone behavior.
      *
-     * @return A Route
+     * @return a Route
      */
     public ArrayList<RoutePoint> generateRoute() {
         return generatePredictableRect();
     }
 
+    /**
+     * Generates a random rectangle-shaped route using random latitude, longitude,
+     * and altitude values. The resulting route contains four points representing
+     * a simple quadrilateral (A → B → C → D).
+     *
+     * @return a randomly generated rectangular route
+     */
     private ArrayList<RoutePoint> generateRectangle() {
         float lat1 = getRandom(MIN_LAT, MAX_LAT);
         float lon1 = getRandom(MIN_LON, MAX_LON);
@@ -49,6 +58,12 @@ public class RouteGenerator {
         return route;
     }
 
+    /**
+     * Generates a circular route with 8 equally spaced points around
+     * a random center. Each point has a randomly assigned altitude.
+     *
+     * @return a circular route consisting of 8 points
+     */
     private ArrayList<RoutePoint> generateCircle() {
         float centerLat = getRandom(MIN_LAT + 10, MAX_LAT - 10);
         float centerLon = getRandom(MIN_LON + 10, MAX_LON - 10);
@@ -68,6 +83,24 @@ public class RouteGenerator {
     }
 
     /**
+     * Generates a completely random route consisting of a fixed number
+     * of random objects. Each point with the allowed geographic and altitude ranges.
+     *
+     * @return a route with 10 points
+     */
+    public ArrayList<RoutePoint> generateRandomRoute() {
+        final int NUM_POINTS = 10;
+
+        ArrayList<RoutePoint> route = new ArrayList<>();
+
+        for (int i = 0; i < NUM_POINTS; i++) {
+            route.add(getRandomPoint());
+        }
+
+        return route;
+    }
+
+    /**
      * Use late for other Completely Random Routes
      *
      * @return RoutePoint.
@@ -79,11 +112,20 @@ public class RouteGenerator {
         return new RoutePoint(lon, lat, alt);
     }
 
+    /**
+     * Returns a random float value between {@code min} and {@code max}.
+     *
+     * @param min the minimum value (inclusive)
+     * @param max the maximum value (exclusive)
+     * @return a random float in the range [min, max)
+     */
     private float getRandom(float min, float max) {
         return min + random.nextFloat() * (max - min);
     }
 
-
+    /**
+     * @return a predictable Route of a Drone used for testing
+     */
     public ArrayList<RoutePoint> generatePredictableRect() {
         float lon1, lat1, lon2, lat2;
 
@@ -103,7 +145,8 @@ public class RouteGenerator {
         return route;
     }
 
-    private boolean validRectangle(float lon1, float lat1, float lon2, float lat2) {
+    /** Checks if the rectangle is valid {testing only} */
+    private boolean validRectangle(final float lon1, final float lat1, final float lon2, final float lat2) {
         return Math.abs(lon1 - lon2) >= MIN_SIDE_LENGTH &&
                 Math.abs(lat1 - lat2) >= MIN_SIDE_LENGTH;
     }

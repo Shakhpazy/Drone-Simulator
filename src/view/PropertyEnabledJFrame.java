@@ -11,6 +11,9 @@ import java.beans.PropertyChangeSupport;
  * \n
  * The purpose of having this second class is to prevent bloating the
  * main functionality of the MonitorDashboard class.
+ *
+ * @author Evin Roen
+ * @version 11/29/2025
  */
 class PropertyEnabledJFrame extends JFrame implements PropertyChangeListener {
 
@@ -58,12 +61,15 @@ class PropertyEnabledJFrame extends JFrame implements PropertyChangeListener {
     }
 
     @Override
-    public void addPropertyChangeListener(PropertyChangeListener theListener) {
+    public void addPropertyChangeListener(final PropertyChangeListener theListener) {
+        if (theListener == null) {
+            throw new IllegalArgumentException("Listener object must not be null.");
+        }
         myPCS.addPropertyChangeListener(theListener);
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent evt) {
+    public void propertyChange(final PropertyChangeEvent theEvent) {
 
     }
 }

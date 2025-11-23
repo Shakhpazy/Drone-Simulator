@@ -28,3 +28,6 @@ out
 # IntelliJ IDEA
 .idea/
 *.iml
+
+Drone-Simulator.iml
+misc.xml

@@ -9,7 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class represents the drone's locations on a map.
+ * This class represents and displays the drone's locations on a map.
+ *
+ * @author Evin Roen
+ * @version 11/19/2025
  */
 class MapPanel extends JPanel {
 
@@ -71,8 +74,13 @@ class MapPanel extends JPanel {
      *
      * @param theID the id number of the drone.
      * @param theLoc the longitude and latitude of the drone, in that order.
+     * @throws IllegalArgumentException if the drone id is negative, or the location is not a 2D array or out of bounds.
      */
     public void setDroneMapping(final int theID, final float[] theLoc) {
+        validateLocation(theLoc);
+        if (theID < 0) {
+            throw new IllegalArgumentException("Drone ID must not be negative.");
+        }
         ID_LOC_MAP.put(theID, formatLocation(theLoc));
         repaint();
     }
@@ -82,8 +90,12 @@ class MapPanel extends JPanel {
      *
      * @param theID the drone to set as selected.
      * @return true if already selected, false otherwise.
+     * @throws IllegalArgumentException if the map does not contain the given ID.
      */
     public boolean setSelectedID(final int theID) {
+        if (!ID_LOC_MAP.containsKey(theID)) {
+            throw new IllegalArgumentException("Location map does not contain given key (Drone ID).");
+        }
         boolean isSelected = mySelectedID == theID;
         if (isSelected) {
             mySelectedID = -1;
@@ -110,15 +122,39 @@ class MapPanel extends JPanel {
      *
      * @param theLoc the float array to convert.
      * @return the given float array as an int array, floored and centered.
+     * @throws IllegalArgumentException if theLoc is out of bounds or not a 2D array.
      */
     private int[] formatLocation(final float[] theLoc) {
+        validateLocation(theLoc);
         return new int[] {
                 (int) Math.floor(theLoc[LON]),
                 (int) Math.floor(-theLoc[LAT])};
     }
 
     /**
+     * This method validates the given position of a drone.
+     *
+     * @param theLoc the location of the drone to validate.
+     * @throws IllegalArgumentException if the loc is out of bounds or not a 2D array.
+     */
+    private void validateLocation(final float[] theLoc) {
+        if (theLoc.length != 2) {
+            throw new IllegalArgumentException("Location array not the correct size of 2: {lon, lat}.");
+        } else {
+            if (theLoc[LON] > LON_MAX || theLoc[LON] < -LON_MAX) {
+                throw new IllegalArgumentException("Longitude out of bounds: " + theLoc[LON]);
+            }
+            if (theLoc[LAT] > LAT_MAX || theLoc[LAT] < -LAT_MAX) {
+                throw new IllegalArgumentException("Latitude out of bounds: " + theLoc[LAT]);
+            }
+        }
+    }
+
+    /**
      * This inner class represents the window in which the grid and drones will be drawn.
+     *
+     * @author Evin Roen
+     * @version 11/19/2025
      */
     private static final class GridPanel extends JPanel {
 
@@ -192,7 +228,7 @@ class MapPanel extends JPanel {
             // Mouse listener to detect the start of a mouse drag
             addMouseListener(new MouseAdapter() {
                 @Override
-                public void mousePressed(MouseEvent theE) {
+                public void mousePressed(final MouseEvent theE) {
                     myDragPoint = theE.getPoint();
                 }
             });
@@ -200,7 +236,7 @@ class MapPanel extends JPanel {
             // Mouse wheel listener for zoom in / out.
             addMouseWheelListener(new MouseAdapter() {
                 @Override
-                public void mouseWheelMoved(MouseWheelEvent theE) {
+                public void mouseWheelMoved(final MouseWheelEvent theE) {
                     myCellSize = Math.clamp(
                             myCellSize - theE.getWheelRotation() * 2L,
                             (getWidth() - 2 * BUFFER.width) / (LON_MAX * 2 / LABEL_STEP),
@@ -213,7 +249,7 @@ class MapPanel extends JPanel {
             // Mouse motion listener to allow grid to be dragged / panned.
             addMouseMotionListener(new MouseAdapter() {
                 @Override
-                public void mouseDragged(MouseEvent theE) {
+                public void mouseDragged(final MouseEvent theE) {
                     myDelta = new Point(
                             myDelta.x + theE.getX() - myDragPoint.x,
                             myDelta.y + theE.getY() - myDragPoint.y);
@@ -240,8 +276,13 @@ class MapPanel extends JPanel {
          * Draws the grid for the map.
          *
          * @param theG2D the graphics object to draw with.
+         * @throws IllegalArgumentException if graphics object is null.
          */
         private void drawGrid(final Graphics2D theG2D) {
+            if (theG2D == null) {
+                throw new IllegalArgumentException("Graphics object must not be null.");
+            }
+
             FontMetrics fm = theG2D.getFontMetrics();
 
             // Horizontal lines
@@ -266,19 +307,17 @@ class MapPanel extends JPanel {
             int xOffset = (myDelta.x % myCellSize + myCellSize) % myCellSize + BUFFER.width;
             for (int i = 0; i * myCellSize + xOffset <= getWidth() - BUFFER.width; i++) {
                 int x = i * myCellSize + xOffset;
-                if ((-(myDelta.x) + x - BUFFER.width) / myCellSize * LABEL_STEP >= -LON_MAX) {
-                    theG2D.drawLine(x, BUFFER.height, x, getHeight() - BUFFER.height);
+                theG2D.drawLine(x, BUFFER.height, x, getHeight() - BUFFER.height);
 
-                    // label centered horizontally on the line, in bottom buffer
-                    int worldX = (-(myDelta.x) + x - BUFFER.width) / myCellSize;
-                    String label = String.format("%d", worldX * LABEL_STEP);
-                    int labelWidth = fm.stringWidth(label);
-                    theG2D.drawString(
-                            label,
-                            x - labelWidth / 2,
-                            getHeight() - BUFFER.height / 2 + fm.getAscent() / 2
-                    );
-                }
+                // label centered horizontally on the line, in bottom buffer
+                int worldX = (-(myDelta.x) + x - BUFFER.width) / myCellSize;
+                String label = String.format("%d", worldX * LABEL_STEP);
+                int labelWidth = fm.stringWidth(label);
+                theG2D.drawString(
+                        label,
+                        x - labelWidth / 2,
+                        getHeight() - BUFFER.height / 2 + fm.getAscent() / 2
+                );
             }
         }
 
@@ -286,8 +325,12 @@ class MapPanel extends JPanel {
          * Draws the drones on the map.
          *
          * @param theG2D the graphics object to draw with.
+         * @throws IllegalArgumentException if the graphics object is null.
          */
         private void drawDrones(final Graphics2D theG2D) {
+            if (theG2D == null) {
+                throw new IllegalArgumentException("Graphics object must not be null.");
+            }
             double scale = 1.0 * myCellSize / LABEL_STEP;
             for (int id : ID_LOC_MAP.keySet()) {
                 int[] loc = ID_LOC_MAP.get(id);
@@ -330,8 +373,12 @@ class MapPanel extends JPanel {
          * Focuses (pans) the grid on the selected drone from the given id.
          *
          * @param theID the id of the drone to center on.
+         * @throws IllegalArgumentException if the map does not contain the given drone ID.
          */
         public void focusOnSelected(final int theID) {
+            if (!ID_LOC_MAP.containsKey(theID)) {
+                throw new IllegalArgumentException("Given Drone ID is not in location mapping.");
+            }
             int scale = myCellSize / LABEL_STEP;
             myDelta.x = -ID_LOC_MAP.get(theID)[LON] * scale + getWidth() / 2;
             myDelta.y = -ID_LOC_MAP.get(theID)[LAT] * scale + getHeight() / 2;

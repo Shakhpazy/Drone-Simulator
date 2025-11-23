@@ -43,8 +43,16 @@ class TelemetryPanel extends JPanel {
      *
      * @param theID the drone's id number.
      * @param theData the drone's telemetry data.
+     * @throws IllegalArgumentException if drone ID is negative or data is null.
      */
     public void addTelemetryEntry(final int theID, final String theData) {
+        if (theID < 0) {
+            throw new IllegalArgumentException("Drone ID cannot be negative.");
+        }
+        if (theData == null) {
+            throw new IllegalArgumentException("Data string must not be null.");
+        }
+
         if (ID_ENTRY_MAP.get(theID) == null) {
             // add new entry
             TelemetryEntry e = new TelemetryEntry(theID, theData);
@@ -81,6 +89,9 @@ class TelemetryPanel extends JPanel {
 
     /**
      * This inner class represents a telemetry data entry for tracking a single drone.
+     *
+     * @author Evin Roen
+     * @version 11/19/2025
      */
     private static class TelemetryEntry extends JTextArea {
 
@@ -100,8 +111,16 @@ class TelemetryPanel extends JPanel {
          *
          * @param theID the drone's id number.
          * @param theData the telemetry data to display.
+         * @throws IllegalArgumentException if drone ID is negative or data is null.
          */
         private TelemetryEntry(final int theID, final String theData) {
+            super();
+            if (theID < 0) {
+                throw new IllegalArgumentException("Drone ID cannot be negative.");
+            }
+            if (theData == null) {
+                throw new IllegalArgumentException("Data string must not be null.");
+            }
             myID = theID;
             init();
             setText(theData);
@@ -109,7 +128,7 @@ class TelemetryPanel extends JPanel {
             // Mouse listener to select specific drones in the GUI.
             addMouseListener(new MouseAdapter() {
                 @Override
-                public void mouseClicked(MouseEvent theE) {
+                public void mouseClicked(final MouseEvent theE) {
                     boolean isSelected = MonitorDashboard.setSelectedDrone(myID);
                     ID_ENTRY_MAP.values().forEach(e -> e.setBackground(Color.LIGHT_GRAY));
                     if (!isSelected) {
