@@ -7,15 +7,6 @@ public class Drone extends AbstractDrone {
     //This might change if  I want each Drone to have its own
     //max based on a range of those numbers.
 
-    /** Maximum allowed velocity in normal moves. */
-    private static final float MAX_VELOCITY = 10;
-
-    /** Minimum allowed velocity in normal moves. */
-    private static final float MIN_VELOCITY = 1;
-
-    /** Maximum allowed altitude in normal moves. */
-    private static final float MAX_ALTITUDE = 700;
-
     /** Minimum allowed altitude in normal moves. */
     private static final float MIN_ALTITUDE = 0;
 
@@ -36,6 +27,15 @@ public class Drone extends AbstractDrone {
 
     private static final float ANOMALY_VELOCITY_CHANGE = 7;
 
+    /** Maximum allowed velocity in normal moves. */
+    private static final float MAX_VELOCITY = 10;
+
+    /** Minimum allowed velocity in normal moves. */
+    private static final float MIN_VELOCITY = 1;
+
+    /** Maximum allowed altitude in normal moves. */
+    private static final float MAX_ALTITUDE = 700;
+
     private static final AnomalyEnum[] movementAnomalies = {
             AnomalyEnum.BATTERY_DRAIN,
             AnomalyEnum.BATTERY_FAIL,
@@ -45,8 +45,8 @@ public class Drone extends AbstractDrone {
             // OUT_OF_BOUNDS NOT included on purpose
     };
 
-    /** Random */
-    private static final Random myRandom = new Random();
+    /** Random (instance level race condition?)*/
+    private final Random myRandom = new Random();
 
     /** Arraylist of RoutePoints that the drone goes to (Circular) */
     ArrayList<RoutePoint> myRoute;
@@ -100,6 +100,13 @@ public class Drone extends AbstractDrone {
         nextPoint = (nextPoint + 1) % myRoute.size();
     }
 
+    @Override
+    public void setVelocity(final float theVelocity) {
+        if (theVelocity < MIN_VELOCITY || theVelocity > MAX_VELOCITY) {
+            throw new IllegalArgumentException("The velocity must stay in bound");
+        }
+        myVelocity = theVelocity;
+    }
 
     @Override
     public void getNextRandomMove(final float theDeltaTime) {
@@ -182,7 +189,16 @@ public class Drone extends AbstractDrone {
         float dz = next.getAltitude() - altitude;
 
         float distance = (float) Math.sqrt(dx*dx + dy*dy + dz*dz);
-        float moveDist = this.getVelocity() * theDeltaTime; // movement this frame
+        
+        // Adjust velocity slightly (acceleration/deceleration) BEFORE calculating movement
+        if (distance < 30.0f) {
+            velocity = Math.max(this.getVelocity() - this.getAccelerationStep(), this.getMinVelocity());
+        } else {
+            velocity = Math.min(this.getVelocity() + this.getAccelerationStep(), this.getMaxVelocity());
+        }
+        
+        // Use the updated velocity for movement calculation
+        float moveDist = velocity * theDeltaTime; // movement this frame
 
         if (distance <= moveDist) {
             longitude = next.getLongitude();
@@ -194,13 +210,6 @@ public class Drone extends AbstractDrone {
             longitude += dx * ratio;
             latitude  += dy * ratio;
             altitude  += dz * ratio;
-        }
-
-        // Adjust velocity slightly (acceleration/deceleration)
-        if (distance < 10.0f) {
-            velocity = Math.max(this.getVelocity() - this.getAccelerationStep(), this.getMinVelocity());
-        } else {
-            velocity = Math.min(this.getVelocity() + this.getAccelerationStep(), this.getMaxVelocity());
         }
 
         float drained = batteryDrained(moveDist, theDeltaTime);
