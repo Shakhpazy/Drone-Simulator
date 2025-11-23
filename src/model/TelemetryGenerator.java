@@ -49,7 +49,7 @@ public class TelemetryGenerator {
      *
      * @param theDrone drone to be added
      */
-    public void addDrone(DroneInterface theDrone) {
+    public void addDrone(final DroneInterface theDrone) {
         myDrones.add(theDrone);
     }
 
@@ -59,7 +59,7 @@ public class TelemetryGenerator {
      * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
      *   a random anomaly move or a normal route-following move.
      */
-    public ArrayList<HashMap<String, Object>[]> processAllDrones(double deltaTime) {
+    public ArrayList<HashMap<String, Object>[]> processAllDrones(final float deltaTime) {
         ArrayList<HashMap<String, Object>[]> telemetryList = new ArrayList<>();
 
         for (DroneInterface drone : myDrones) {
@@ -96,8 +96,8 @@ public class TelemetryGenerator {
      *
      * @param theDrone the drone to update with an anomaly
      */
-    public void getRandomMove(DroneInterface theDrone, double deltaTime) {
-        theDrone.getNextRandomMove((float) deltaTime);
+    public void getRandomMove(DroneInterface theDrone, final float deltaTime) {
+        theDrone.getNextRandomMove(deltaTime);
     }
 
     /**
@@ -108,8 +108,8 @@ public class TelemetryGenerator {
      *
      * @param theDrone the drone to update with a normal move
      */
-    public void getMove(DroneInterface theDrone, double deltaTime) {
-        theDrone.getNextMove((float) deltaTime);
+    public void getMove(final DroneInterface theDrone, final float deltaTime) {
+        theDrone.getNextMove(deltaTime);
     }
 
     /**
@@ -147,7 +147,7 @@ public class TelemetryGenerator {
      * @return a map containing drone id, altitude, longitude, latitude,
      *         velocity, battery level, orientation, and timestamp
      */
-    private HashMap<String, Object> createTelemetryMap(DroneInterface theDrone) {
+    private HashMap<String, Object> createTelemetryMap(final DroneInterface theDrone) {
         HashMap<String, Object> telemetryMap = new HashMap<>();
         telemetryMap.put("id", theDrone.getId());
         telemetryMap.put("altitude", theDrone.getAltitude());

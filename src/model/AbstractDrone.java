@@ -41,6 +41,9 @@ public abstract class AbstractDrone implements DroneInterface{
     /* The acceleration step of the Drone */
     protected final float myAccelerationStep;
 
+    /* The drones health */
+    protected boolean myDroneIsAlive;
+
     /**
      * Creates an Abstract Drone.
      *
@@ -55,8 +58,8 @@ public abstract class AbstractDrone implements DroneInterface{
      * @param theMinAlt the min altitude of a drone
      * @param theAccStep the acceleration step of a drone
      */
-    public AbstractDrone(float theLong, float theLat, float theAlt, float theVel, float theBat, float theMaxVel,
-                         float theMinVel, float theMaxAlt, float theMinAlt, float theAccStep) {
+    public AbstractDrone(final float theLong, final float theLat, final float theAlt, final float theVel, final float theBat, final float theMaxVel,
+                         final float theMinVel, final float theMaxAlt, final float theMinAlt, final float theAccStep) {
         myLongitude = theLong;
         myLatitude = theLat;
         myAltitude = theAlt;
@@ -68,6 +71,7 @@ public abstract class AbstractDrone implements DroneInterface{
         myMaxAltitude = theMaxAlt;
         myMinAltitude = theMinAlt;
         myAccelerationStep = theAccStep;
+        myDroneIsAlive = true;
         totalDrones += 1;
         myID = totalDrones;
     }
@@ -120,6 +124,10 @@ public abstract class AbstractDrone implements DroneInterface{
         return myAccelerationStep;
     }
 
+    public boolean isAlive() {
+        return myDroneIsAlive;
+    }
+
     /**
      * @return Total number of Drones created.
      */
@@ -132,7 +140,7 @@ public abstract class AbstractDrone implements DroneInterface{
      *
      * @param theAltitude float of the altitude
      */
-    public void setAltitude(float theAltitude) {
+    public void setAltitude(final float theAltitude) {
         myAltitude = Math.max(0, theAltitude);
     }
 
@@ -141,7 +149,7 @@ public abstract class AbstractDrone implements DroneInterface{
      *
      * @param theLongitude float of the Longitude
      */
-    public void setLongitude(float theLongitude) {
+    public void setLongitude(final float theLongitude) {
         myLongitude = theLongitude;
     }
 
@@ -150,7 +158,7 @@ public abstract class AbstractDrone implements DroneInterface{
      *
      * @param theLatitude float of the Latitude
      */
-    public void setLatitude(float theLatitude) {
+    public void setLatitude(final float theLatitude) {
         myLatitude = theLatitude;
     }
 
@@ -159,8 +167,16 @@ public abstract class AbstractDrone implements DroneInterface{
      *
      * @param theBatteryLevel float of the Battery
      */
-    public void setBatteryLevel(float theBatteryLevel) {
+    public void setBatteryLevel(final float theBatteryLevel) {
+        if (theBatteryLevel < 0) {
+            throw new IllegalArgumentException("Battery level cannot be below 0");
+        }
+
         myBatteryLevel = theBatteryLevel;
+
+        if (myBatteryLevel == 0) {
+            setIsAlive(false);
+        }
     }
 
     /**
@@ -168,7 +184,7 @@ public abstract class AbstractDrone implements DroneInterface{
      *
      * @param theVelocity float of the velocity
      */
-    public void setVelocity(float theVelocity) {
+    public void setVelocity(final float theVelocity) {
         myVelocity = theVelocity;
     }
 
@@ -178,8 +194,12 @@ public abstract class AbstractDrone implements DroneInterface{
      * @param theDegree float of the degree the drone is supposed to face
      *                  N: 0 E: 90 S:180 W: 2770
      */
-    public void setOrientation(float theDegree) {
+    public void setOrientation(final float theDegree) {
         myOrientation.setDegrees(theDegree);
+    }
+
+    public void setIsAlive(final boolean theHealth) {
+        myDroneIsAlive = theHealth;
     }
 
     /**
@@ -192,7 +212,7 @@ public abstract class AbstractDrone implements DroneInterface{
      * @param theVelocity float of the velocity
      * @param theDegree float of the degree (orientation)
      */
-    public void updateDrone(float theLongitude, float theLatitude, float theAltitude, float theBatteryDrained, float theVelocity, float theDegree) {
+    public void updateDrone(final float theLongitude, final float theLatitude, final float theAltitude, final float theBatteryDrained, final float theVelocity, final float theDegree) {
         setLongitude(theLongitude);
         setLatitude(theLatitude);
         setAltitude(theAltitude);
@@ -207,11 +227,12 @@ public abstract class AbstractDrone implements DroneInterface{
      */
     public void collided() {
         setAltitude(0);
+        setIsAlive(false);
     }
 
-    public abstract void getNextRandomMove(float theDeltaTime);
+    public abstract void getNextRandomMove(final float theDeltaTime);
 
-    public abstract void getNextMove(float theDeltaTime);
+    public abstract void getNextMove(final float theDeltaTime);
 
     public RoutePoint getNextPoint() {
         return new RoutePoint(0,0,0);
@@ -223,15 +244,12 @@ public abstract class AbstractDrone implements DroneInterface{
      * @param deltaTime the tick rate, of the simulation
      * @return the amount of battery that got drained from the Drone
      */
-    protected float batteryDrained(float dist, double deltaTime) {
-        float drain = 0.07f * (float) deltaTime;
-        if (this.getVelocity() > 7) drain += 0.05f * (float) deltaTime;
+    protected float batteryDrained(final float dist, final double deltaTime) {
+        float drain = 0.01f * (float) deltaTime;
+        if (this.getVelocity() > 7) drain += 0.015f * (float) deltaTime;
         drain += dist * 0.001f * (float) deltaTime;
         return drain;
     }
 
-    public boolean isAlive() {
-        return myBatteryLevel > 0  && myAltitude > 0;
-    }
 
 }

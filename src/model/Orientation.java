@@ -11,7 +11,7 @@ public class Orientation {
      *
      * @param theDegree starting degree
      */
-    public Orientation(float theDegree) {
+    public Orientation(final float theDegree) {
         myDegree = theDegree;
     }
 
@@ -28,7 +28,7 @@ public class Orientation {
      *
      * @param theDegrees {float} of the degree the drone is facing
      */
-    public void setDegrees(float theDegrees) {
+    public void setDegrees(final float theDegrees) {
         // Normalize using modulo arithmetic
         myDegree = ((theDegrees % 360) + 360) % 360;
     }
@@ -42,7 +42,7 @@ public class Orientation {
      *
      * @return {float} degree of the next orientation
      */
-    public float findNextOrientation(float thePrevLong, float thePrevLat, float theNextLong, float theNextLat) {
+    public float findNextOrientation(final float thePrevLong, final float thePrevLat, final float theNextLong, final float theNextLat) {
         float dx = theNextLong - thePrevLong;
         float dy = theNextLat - thePrevLat;
 
