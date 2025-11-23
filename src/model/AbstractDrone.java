@@ -1,7 +1,5 @@
 package model;
 
-import java.util.concurrent.ExecutionException;
-
 public abstract class AbstractDrone implements DroneInterface{
 
     /** The altitude of the Drone */

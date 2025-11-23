@@ -10,6 +10,8 @@ public class Drone extends AbstractDrone {
     /** Minimum allowed altitude in normal moves. */
     private static final float MIN_ALTITUDE = 0;
 
+    private static final float MAX_ALTITUDE = 1000;
+
     public static final float MIN_LATITUDE = -90.0f;
 
     public static final float MAX_LATITUDE = 90.0f;
@@ -32,9 +34,6 @@ public class Drone extends AbstractDrone {
 
     /** Minimum allowed velocity in normal moves. */
     private static final float MIN_VELOCITY = 1;
-
-    /** Maximum allowed altitude in normal moves. */
-    private static final float MAX_ALTITUDE = 700;
 
     private static final AnomalyEnum[] movementAnomalies = {
             AnomalyEnum.BATTERY_DRAIN,
