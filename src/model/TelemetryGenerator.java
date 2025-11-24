@@ -57,14 +57,15 @@ public class TelemetryGenerator {
      * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
      *   a random anomaly move or a normal route-following move.
      */
-    public ArrayList<HashMap<String, Object>[]> processAllDrones(final float deltaTime) {
-        ArrayList<HashMap<String, Object>[]> telemetryList = new ArrayList<>();
+    public ArrayList<TelemetryRecord[]> processAllDrones(final float deltaTime) {
+        ArrayList<TelemetryRecord[]> telemetryList = new ArrayList<>();
 
         for (DroneInterface drone : myDrones) {
             if (!drone.isAlive()) {
                 continue;
             }
-            HashMap<String, Object> myBeforeTelemetryMap = createTelemetryMap(drone);
+
+            TelemetryRecord prev = drone.getPreviousTelemetryRecord();
 
             if (myRandom.nextInt(100) < RANDOM_PERCENT) {
                 getRandomMove(drone, deltaTime);
@@ -72,13 +73,11 @@ public class TelemetryGenerator {
                 getMove(drone, deltaTime);
             }
 
-            HashMap<String, Object> myAfterTelemetryMap = createTelemetryMap(drone);
+            TelemetryRecord curr = drone.generateTelemetryRecord();
 
-            HashMap<String, Object>[] pair = (HashMap<String, Object>[]) new HashMap[2];
-            pair[0] = myBeforeTelemetryMap;
-            pair[1] = myAfterTelemetryMap;
+            telemetryList.add(new TelemetryRecord[]{prev, curr});
 
-            telemetryList.add(pair);
+            drone.setPrevTelemetryRecord(curr); //so that the time state stays consistent
         }
 
         //After all drones move to the next step we can check for collisions.
@@ -138,24 +137,5 @@ public class TelemetryGenerator {
         }
     }
 
-    /**
-     * Creates a snapshot of telemetry data from the given drone.
-     *
-     * @param theDrone the drone to read telemetry from
-     * @return a map containing drone id, altitude, longitude, latitude,
-     *         velocity, battery level, orientation, and timestamp
-     */
-    private HashMap<String, Object> createTelemetryMap(final DroneInterface theDrone) {
-        HashMap<String, Object> telemetryMap = new HashMap<>();
-        telemetryMap.put("id", theDrone.getId());
-        telemetryMap.put("altitude", theDrone.getAltitude());
-        telemetryMap.put("longitude", theDrone.getLongitude());
-        telemetryMap.put("latitude", theDrone.getLatitude());
-        telemetryMap.put("velocity", theDrone.getVelocity());
-        telemetryMap.put("batteryLevel", theDrone.getBatteryLevel());
-        telemetryMap.put("orientation", theDrone.getOrientation().getDegree());
-        telemetryMap.put("timeStamp", System.currentTimeMillis());
-        return telemetryMap;
-    }
 
 }

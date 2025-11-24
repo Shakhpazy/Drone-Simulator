@@ -117,7 +117,6 @@ public class Drone extends AbstractDrone {
         float drained = 0f;
 
         AnomalyEnum anomaly = movementAnomalies[myRandom.nextInt(movementAnomalies.length)];
-        System.out.println("Detected anomaly: " + anomaly);
 
         switch (anomaly) {
             case BATTERY_DRAIN:
