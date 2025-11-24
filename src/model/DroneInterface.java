@@ -92,6 +92,17 @@ public interface DroneInterface {
     boolean isAlive();
 
     /**
+     *
+     */
+    TelemetryRecord generateTelemetryRecord();
+
+    /**
+     *
+     */
+    TelemetryRecord getPreviousTelemetryRecord();
+
+    void setPrevTelemetryRecord(TelemetryRecord theTelemetryRecord);
+    /**
      * @return string of currentDrone state.
      */
     String toString();
