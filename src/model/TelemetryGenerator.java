@@ -20,22 +20,20 @@ public class TelemetryGenerator {
     ArrayList<DroneInterface> myDrones;
 
     /** Random generator used for movement and anomaly decisions. */
-    private static final Random myRandom = new Random();
-
-//    /** Timestamp reference used for telemetry data. */
-//    private static final Date myDate = new Date();
+    private final Random myRandom = new Random();
 
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
-    private static final int RANDOM_PERCENT = 1; //Should be set from 0-100
+    private final float RANDOM_PERCENT; //Should be set from 0-100
 
 
-    private TelemetryGenerator() {
+    private TelemetryGenerator(float theRandomPercent) {
         myDrones = new ArrayList<>();
+        RANDOM_PERCENT = theRandomPercent;
     }
 
-    public static synchronized TelemetryGenerator getInstance() {
+    public static synchronized TelemetryGenerator getInstance(float theRandomPercent) {
         if (instance == null) {
-            instance = new TelemetryGenerator();
+            instance = new TelemetryGenerator(theRandomPercent);
         }
         return instance;
     }
