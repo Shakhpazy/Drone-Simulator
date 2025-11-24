@@ -154,7 +154,7 @@ public class Drone extends AbstractDrone {
                 break;
         }
 
-        // distance moved due to anomaly
+        // distance moved due to anomaly, might not need this at all
         float anomalyDistance = (float) Math.sqrt(
                 Math.pow(longitude - this.getLongitude(), 2) +
                         Math.pow(latitude  - this.getLatitude(), 2) +
@@ -162,7 +162,7 @@ public class Drone extends AbstractDrone {
         );
 
         if (anomaly != AnomalyEnum.BATTERY_FAIL && anomaly != AnomalyEnum.SPOOFING) {
-            drained += batteryDrained(anomalyDistance, theDeltaTime);
+            drained += batteryDrained(theDeltaTime);
         }
 
         float degree = getOrientation().findNextOrientation(
@@ -211,7 +211,7 @@ public class Drone extends AbstractDrone {
             altitude  += dz * ratio;
         }
 
-        float drained = batteryDrained(moveDist, theDeltaTime);
+        float drained = batteryDrained(theDeltaTime);
         float degree = getOrientation().findNextOrientation(this.getLongitude(), this.getLatitude(), longitude, latitude);
         updateDrone(longitude, latitude, altitude, drained, velocity, degree);
     }

@@ -2,6 +2,12 @@ package model;
 
 public abstract class AbstractDrone implements DroneInterface{
 
+    /** Base battery drain per second (hovering + electronics). */
+    private static final float BASE_DRAIN_RATE = 0.01f;
+
+    /** Additional battery drain per unit of speed per second. */
+    private static final float SPEED_DRAIN_RATE = 0.003f;
+
     /** The altitude of the Drone */
     protected float myAltitude;
 
@@ -240,14 +246,13 @@ public abstract class AbstractDrone implements DroneInterface{
 
     /**
      *
-     * @param dist float of the distance traveled by the drone
      * @param deltaTime the tick rate, of the simulation
      * @return the amount of battery that got drained from the Drone
      */
-    protected float batteryDrained(final float dist, final double deltaTime) {
-        float drain = 0.01f * (float) deltaTime;
-        if (this.getVelocity() > 7) drain += 0.015f * (float) deltaTime;
-        drain += dist * 0.001f * (float) deltaTime;
+    protected float batteryDrained(final float deltaTime) {
+        float drain = BASE_DRAIN_RATE * deltaTime; //Base drain rate
+        float speed = Math.abs(this.getVelocity());
+        drain += speed * SPEED_DRAIN_RATE * deltaTime; //drain based on speed
         return drain;
     }
 
