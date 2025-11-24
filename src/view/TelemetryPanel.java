@@ -45,7 +45,7 @@ class TelemetryPanel extends JPanel {
      * @param theData the drone's telemetry data.
      * @throws IllegalArgumentException if drone ID is negative or data is null.
      */
-    public void addTelemetryEntry(final int theID, final String theData) {
+    void addTelemetryEntry(final int theID, final String theData) {
         if (theID < 0) {
             throw new IllegalArgumentException("Drone ID cannot be negative.");
         }
@@ -53,15 +53,21 @@ class TelemetryPanel extends JPanel {
             throw new IllegalArgumentException("Data string must not be null.");
         }
 
-        if (ID_ENTRY_MAP.get(theID) == null) {
+        if (ID_ENTRY_MAP.containsKey(theID)) {
+            // update existing entry
+            ID_ENTRY_MAP.get(theID).setText(theData);
+        } else {
             // add new entry
             TelemetryEntry e = new TelemetryEntry(theID, theData);
             ID_ENTRY_MAP.put(theID, e);
             SCROLL_VIEW.add(e);
-        } else {
-            // update existing entry
-            ID_ENTRY_MAP.get(theID).setText(theData);
         }
+    }
+
+    void removeTelemetryEntry(final int theID) {
+        remove(ID_ENTRY_MAP.get(theID));
+        revalidate();
+        repaint();
     }
 
     /**

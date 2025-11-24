@@ -76,13 +76,17 @@ class MapPanel extends JPanel {
      * @param theLoc the longitude and latitude of the drone, in that order.
      * @throws IllegalArgumentException if the drone id is negative, or the location is not a 2D array or out of bounds.
      */
-    public void setDroneMapping(final int theID, final float[] theLoc) {
+    void setDroneMapping(final int theID, final float[] theLoc) {
         validateLocation(theLoc);
         if (theID < 0) {
             throw new IllegalArgumentException("Drone ID must not be negative.");
         }
         ID_LOC_MAP.put(theID, formatLocation(theLoc));
         repaint();
+    }
+
+    void removeDrone(final int theID) {
+        ID_LOC_MAP.remove(theID);
     }
 
     /**

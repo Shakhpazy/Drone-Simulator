@@ -74,6 +74,11 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         repaint();
     }
 
+    public void removeDrone(final int theID) {
+        MAP_PANEL.removeDrone(theID);
+        TELEMETRY_PANEL.removeTelemetryEntry(theID);
+    }
+
     /**
      * This static method sets the anomaly report for the details panel.
      *
