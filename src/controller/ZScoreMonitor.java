@@ -18,6 +18,8 @@ public class ZScoreMonitor {
     /** The drone generator used to instantiate drone objects. */
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
+    private static PersistentExporter exporter = new PersistentExporter();
+
     /*
      * How long the program waits between updates (in milliseconds)
      */
@@ -34,7 +36,9 @@ public class ZScoreMonitor {
      */
     private static final double MY_ANOMALY_PERCENT = 0.0;
 
-    private static final String MY_TELEMETRY_LOG_PATH = "Drone-Simulator/TelemetryLog";
+    private static final String MY_TELEMETRY_LOG_PATH = "dataLogs/TelemetryLog.txt";
+
+    private static final String MY_Z_SCORE_LOG_PATH = "dataLogs/BaselineLog.properties";
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -51,7 +55,7 @@ public class ZScoreMonitor {
         TelemetryGenerator gen = TelemetryGenerator.getInstance();
 
         //Generate Drones
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < 4; i++) {
             ArrayList<RoutePoint> theRoute = myRouteGenerator.generateRoute();
             DroneInterface drone = myDroneGenerator.createDrone(theRoute);
             gen.addDrone(drone);
@@ -59,18 +63,15 @@ public class ZScoreMonitor {
         ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         ArrayList<String> headers = new ArrayList<>();
+        headers.add("id");
         headers.add("velocity");
         headers.add("batteryLevel");
         headers.add("orientation");
         headers.add("timeStamp");
 
         //Get Persistent Exporter
-        PersistentExporter exporter = new PersistentExporter();
+        exporter = new PersistentExporter();
         exporter.startTelemetryLog(MY_TELEMETRY_LOG_PATH, headers);
-
-        //Get Baseline Calculator
-        BaselineCalculator calculator = new BaselineCalculator();
-
 
         /*
           A runnable task that simulates the next step of the drone monitoring system.
@@ -79,7 +80,7 @@ public class ZScoreMonitor {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(MY_DELTA_TIME);
+            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
             //For each drone
             for (int i = 0; i < drones.size(); i++) {
@@ -119,10 +120,19 @@ public class ZScoreMonitor {
         };
         Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
 
-        Runnable shutDownLogging = () -> {
+        Runnable shutDownLoggingAndCalculate = () -> {
             exporter.closeTelemetryLog();
+            System.out.println("Telemetry log closed. Baseline calculation started.");
+
+            try {
+                BaselineCalculator calc = new BaselineCalculator();
+                calc.calculateAndSaveStats(MY_TELEMETRY_LOG_PATH, MY_Z_SCORE_LOG_PATH);
+            } catch (Exception e) {
+                System.err.println("Error in running baseline calculation: " + e.getMessage());
+            }
+
         };
-        Runtime.getRuntime().addShutdownHook(new Thread(shutDownLogging));
+        Runtime.getRuntime().addShutdownHook(new Thread(shutDownLoggingAndCalculate));
     }
 
     /**

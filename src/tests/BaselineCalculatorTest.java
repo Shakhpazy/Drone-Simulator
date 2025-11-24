@@ -125,16 +125,17 @@ public class BaselineCalculatorTest {
         Path propsFile = tempDir.resolve("output.properties");
 
         assertThrows(IOException.class, () ->
-                calc.processLogFile(logFile.toString()));
+                calc.calculateAndSaveStats(logFile.toString(), propsFile.toString()));
     }
 
     @Test
     void testProcessLogFile_MissingHeaders() throws IOException {
         String logContent = "id,timestamp,vel,batt,orient";
         Path logFile = createTestLog("bad_header.csv", logContent);
+        Path propsFile = tempDir.resolve("output.properties");
 
         assertThrows(IOException.class, () ->
-                calc.processLogFile(logFile.toString()));
+                calc.calculateAndSaveStats(logFile.toString(), propsFile.toString()));
     }
 
     @Test

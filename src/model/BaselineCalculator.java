@@ -9,6 +9,7 @@ import java.util.*;
  * @version 11-6
  */
 public class BaselineCalculator {
+    private static final double WARMUP_TIME = 10.0;
     /**
      * A list to hold all velocity data.
      */
@@ -37,7 +38,9 @@ public class BaselineCalculator {
     /**
      * A map to hold all previous timestamp values;
      */
-    private final Map<Integer, Float> prevTimestampReadings;
+    private final Map<Integer, Double> prevTimestampReadings;
+    
+    private final Map<Integer, Double> firstTimestampReadings;
 
 
     public BaselineCalculator() {
@@ -47,6 +50,7 @@ public class BaselineCalculator {
         this.prevBatteryReadings = new HashMap<>();
         this.prevOrientationReadings = new HashMap<>();
         this.prevTimestampReadings = new HashMap<>();
+        this.firstTimestampReadings = new HashMap<>();
     }
 
     /**
@@ -85,7 +89,7 @@ public class BaselineCalculator {
      * @param filepath          The string representation of the log filepath.
      * @throws IOException      Throws an exception when incoming files are improperly formatted.
      */
-    public void processLogFile(String filepath) throws IOException {
+    private void processLogFile(String filepath) throws IOException {
         try (BufferedReader br = new BufferedReader(new FileReader(filepath))){
             String line;
 
@@ -101,7 +105,8 @@ public class BaselineCalculator {
             }
 
             if (!headerMap.containsKey("id") || !headerMap.containsKey("velocity") ||
-                    !headerMap.containsKey("batteryLevel") || !headerMap.containsKey("orientation")) {
+                    !headerMap.containsKey("batteryLevel") || !headerMap.containsKey("orientation") ||
+                    !headerMap.containsKey("timeStamp")) {
                 throw new IOException("Log file is missing required headers.");
             }
 
@@ -114,7 +119,7 @@ public class BaselineCalculator {
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");
                 if(values.length <= Math.max(idIndex, Math.max(velocityIndex, Math.max(batteryIndex,
-                        orientationIndex)))) {
+                        Math.max(orientationIndex, timestampIndex))))) {
                     System.err.println("Skipping malformed line: " + line);
                     continue;
                 }
@@ -124,14 +129,26 @@ public class BaselineCalculator {
                     double currVelocity = Double.parseDouble(values[velocityIndex].trim());
                     float currBattery = Float.parseFloat(values[batteryIndex].trim());
                     float currOrientation = Float.parseFloat(values[orientationIndex].trim());
-                    float currTimestamp = Float.parseFloat(values[timestampIndex].trim());
-
+                    double currTimestamp = Double.parseDouble(values[timestampIndex].trim());
+                    
+                    if (!firstTimestampReadings.containsKey(droneID)) {
+                        firstTimestampReadings.put(droneID, currTimestamp);
+                    }
+                    
+                    double timeSinceStart = (currTimestamp - firstTimestampReadings.get(droneID)) / 1000.0;
+                    if (timeSinceStart < WARMUP_TIME) {
+                        prevTimestampReadings.put(droneID, currTimestamp);
+                        prevBatteryReadings.put(droneID, currBattery);
+                        prevOrientationReadings.put(droneID, currOrientation);
+                        continue;
+                    }
+                    
                     velocityReadings.add(currVelocity);
 
                     if (prevTimestampReadings.containsKey(droneID)) {
-                        float prevTimestamp = prevTimestampReadings.get(droneID);
+                        double prevTimestamp = prevTimestampReadings.get(droneID);
 
-                        float deltaTime = currTimestamp - prevTimestamp;
+                        double deltaTime = currTimestamp - prevTimestamp;
 
                         if (prevBatteryReadings.containsKey(droneID)) {
                             float prevBattery = prevBatteryReadings.get(droneID);
