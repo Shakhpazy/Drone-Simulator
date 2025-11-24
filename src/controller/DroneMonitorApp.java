@@ -98,20 +98,20 @@ public class DroneMonitorApp {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
+            ArrayList<TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
             //For each drone
             for (int i = 0; i < drones.size(); i++) {
                 DroneInterface drone = drones.get(i);
 
                 //Get previous Telemetry
-                HashMap<String, Object> myBeforeTelemetryMap = droneTelemetry.get(i)[0];
+                TelemetryRecord myBeforeTelemetryRecord = droneTelemetry.get(i)[0];
 
                 //Get Current Telemetry
-                HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(i)[1];
+                TelemetryRecord myCurrentTelemetryRecord = droneTelemetry.get(i)[1];
 
                 //Send previous and current telemetry to anomaly detector for analysis
-                AnomalyReport anomaly = detector.detect(myBeforeTelemetryMap, myCurrentTelemetryMap);
+                AnomalyReport anomaly = detector.detect(myBeforeTelemetryRecord, myCurrentTelemetryRecord);
 
                 //If anomaly is not null.
                 if (anomaly != null) {
@@ -131,11 +131,13 @@ public class DroneMonitorApp {
                 }
 
                 //Get drone location to pass to view
-                float[] location = {(float) myCurrentTelemetryMap.get("longitude"),
-                        (float) myCurrentTelemetryMap.get("latitude")};
+//                float[] location = {(float) myCurrentTelemetryRecord.get("longitude"),
+//                        (float) myCurrentTelemetryRecord.get("latitude")};
+                float[] location = {(float) myCurrentTelemetryRecord.longitude(),
+                        (float) myCurrentTelemetryRecord.latitude()};
 
                 //Get telemetry as a String to pass to view
-                String theTelemetry = telemetryToString(myCurrentTelemetryMap);
+                String theTelemetry = telemetryToString(myCurrentTelemetryRecord);
 
                 //Draw the drone on the view.
                 view.drawDrone(drone.getId(), location, theTelemetry);
@@ -198,18 +200,18 @@ public class DroneMonitorApp {
     /**
      * Converts a map of telemetry data into a formatted string for display purposes.
      *
-     * @param theTelemetryMap A {@link HashMap} containing the drone's current telemetry data.
+     * @param theTelemetryRecord A {@link HashMap} containing the drone's current telemetry data.
      * @return A formatted {@link String} representation of the telemetry.
      */
-    private static String telemetryToString(HashMap<String, Object> theTelemetryMap) {
+    private static String telemetryToString(TelemetryRecord theTelemetryRecord) {
         StringBuilder sb = new StringBuilder();
-        sb.append("id: ").append(theTelemetryMap.get("id")).append("\n");
-        sb.append("altitude: ").append(theTelemetryMap.get("altitude")).append("\n");
-        sb.append("longitude: ").append(theTelemetryMap.get("longitude")).append("\n");
-        sb.append("latitude: ").append(theTelemetryMap.get("latitude")).append("\n");
-        sb.append("velocity: ").append(theTelemetryMap.get("velocity")).append("\n");
-        sb.append("batteryLevel: ").append(theTelemetryMap.get("batteryLevel")).append("\n");
-        sb.append("orientation: ").append(theTelemetryMap.get("orientation")).append("\n");
+        sb.append("id: ").append(theTelemetryRecord.id()).append("\n");
+        sb.append("altitude: ").append(theTelemetryRecord.altitude()).append("\n");
+        sb.append("longitude: ").append(theTelemetryRecord.longitude()).append("\n");
+        sb.append("latitude: ").append(theTelemetryRecord.latitude()).append("\n");
+        sb.append("velocity: ").append(theTelemetryRecord.velocity()).append("\n");
+        sb.append("batteryLevel: ").append(theTelemetryRecord.batterLevel()).append("\n");
+        sb.append("orientation: ").append(theTelemetryRecord.orientation()).append("\n");
         return sb.toString();
     }
 }

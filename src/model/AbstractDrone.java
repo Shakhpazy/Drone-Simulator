@@ -50,6 +50,8 @@ public abstract class AbstractDrone implements DroneInterface{
     /* The drones health */
     protected boolean myDroneIsAlive;
 
+    private TelemetryRecord prevTelemetryRecord;
+
     /**
      * Creates an Abstract Drone.
      *
@@ -80,6 +82,7 @@ public abstract class AbstractDrone implements DroneInterface{
         myDroneIsAlive = true;
         totalDrones += 1;
         myID = totalDrones;
+        prevTelemetryRecord = new TelemetryRecord(myID, myLongitude, myLatitude, myAltitude, myVelocity, myBatteryLevel, myOrientation.getDegree(), System.currentTimeMillis());
     }
 
     public int getId() {
@@ -254,6 +257,27 @@ public abstract class AbstractDrone implements DroneInterface{
         float speed = Math.abs(this.getVelocity());
         drain += speed * SPEED_DRAIN_RATE * deltaTime; //drain based on speed
         return drain;
+    }
+
+    public void setPrevTelemetryRecord(TelemetryRecord theTelemetryRecord) {
+        prevTelemetryRecord = theTelemetryRecord;
+    }
+
+    public TelemetryRecord getPreviousTelemetryRecord() {
+        return prevTelemetryRecord;
+    }
+
+    public TelemetryRecord generateTelemetryRecord() {
+        return new TelemetryRecord(
+                myID,
+                myLongitude,
+                myLatitude,
+                myAltitude,
+                myVelocity,
+                myBatteryLevel,
+                myOrientation.getDegree(),
+                System.currentTimeMillis()
+        );
     }
 
 
