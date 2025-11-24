@@ -48,7 +48,7 @@ public class ZScoreMonitor {
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
         //Initialize telemetry generator
-        TelemetryGenerator gen = TelemetryGenerator.getInstance();
+        TelemetryGenerator gen = TelemetryGenerator.getInstance((float) MY_ANOMALY_PERCENT);
 
         //Generate Drones
         for (int i = 0; i < 1; i++) {
@@ -79,7 +79,7 @@ public class ZScoreMonitor {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(MY_DELTA_TIME);
+            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
             //For each drone
             for (int i = 0; i < drones.size(); i++) {

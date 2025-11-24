@@ -50,7 +50,7 @@ public class DroneMonitorApp {
     */
    private static final double MY_DELTA_TIME = MY_UPDATE_TIME / 1000.0;
 
-   private static final double MY_ANOMALY_PERCENT = 1.0;
+   private static final float MY_ANOMALY_PERCENT = 1.0F;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -64,7 +64,7 @@ public class DroneMonitorApp {
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
         //Initialize telemetry generator
-        TelemetryGenerator gen = TelemetryGenerator.getInstance();
+        TelemetryGenerator gen = TelemetryGenerator.getInstance(MY_ANOMALY_PERCENT);
 
         //Generate Drones
         for (int i = 0; i < 1; i++) {
@@ -98,7 +98,7 @@ public class DroneMonitorApp {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones(MY_DELTA_TIME);
+            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
             //For each drone
             for (int i = 0; i < drones.size(); i++) {
