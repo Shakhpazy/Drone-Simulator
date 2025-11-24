@@ -52,7 +52,7 @@ public class ZScoreMonitor {
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
         //Initialize telemetry generator
-        TelemetryGenerator gen = TelemetryGenerator.getInstance();
+        TelemetryGenerator gen = TelemetryGenerator.getInstance((float) MY_ANOMALY_PERCENT);
 
         //Generate Drones
         for (int i = 0; i < 4; i++) {
