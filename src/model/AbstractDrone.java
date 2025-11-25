@@ -52,6 +52,8 @@ public abstract class AbstractDrone implements DroneInterface{
 
     private TelemetryRecord prevTelemetryRecord;
 
+    private AnomalyEnum myLastAnomaly;
+
     /**
      * Creates an Abstract Drone.
      *
@@ -83,6 +85,7 @@ public abstract class AbstractDrone implements DroneInterface{
         totalDrones += 1;
         myID = totalDrones;
         prevTelemetryRecord = new TelemetryRecord(myID, myLongitude, myLatitude, myAltitude, myVelocity, myBatteryLevel, myOrientation.getDegree(), System.currentTimeMillis());
+        myLastAnomaly = null;
     }
 
     public int getId() {
@@ -131,6 +134,10 @@ public abstract class AbstractDrone implements DroneInterface{
 
     public float getAccelerationStep() {
         return myAccelerationStep;
+    }
+
+    public AnomalyEnum getMyLastAnomaly() {
+        return myLastAnomaly;
     }
 
     public boolean isAlive() {
@@ -278,6 +285,10 @@ public abstract class AbstractDrone implements DroneInterface{
                 myOrientation.getDegree(),
                 System.currentTimeMillis()
         );
+    }
+
+    protected void setMyLastAnomaly(AnomalyEnum theAnomaly) {
+        myLastAnomaly = theAnomaly;
     }
 
 

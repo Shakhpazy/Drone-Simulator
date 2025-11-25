@@ -117,6 +117,7 @@ public class Drone extends AbstractDrone {
         float drained = 0f;
 
         AnomalyEnum anomaly = movementAnomalies[myRandom.nextInt(movementAnomalies.length)];
+        setMyLastAnomaly(anomaly);
 
         switch (anomaly) {
             case BATTERY_DRAIN:
@@ -138,9 +139,8 @@ public class Drone extends AbstractDrone {
                 break;
 
             case SPOOFING: //Spoofing moves the drone to a completely random position that is in range
-                longitude = myRandom.nextFloat(MIN_LONGITUDE, MAX_LONGITUDE);
-                latitude  = myRandom.nextFloat(MIN_LATITUDE, MAX_LATITUDE);
-                altitude  = myRandom.nextFloat(MIN_ALTITUDE, MAX_ALTITUDE);  // optional: include altitude spoof
+                //Spoofing will make it so drone makes no movements however, the Telemetry Generator
+                //Decides what spoofing will do. (in our case it will give fake data)
                 break;
 
 
@@ -160,7 +160,7 @@ public class Drone extends AbstractDrone {
                         Math.pow(altitude  - this.getAltitude(), 2)
         );
 
-        if (anomaly != AnomalyEnum.BATTERY_FAIL && anomaly != AnomalyEnum.SPOOFING) {
+        if (anomaly != AnomalyEnum.BATTERY_FAIL) {
             drained += batteryDrained(theDeltaTime);
         }
 

@@ -25,6 +25,8 @@ public class TelemetryGenerator {
     /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
     private final float RANDOM_PERCENT; //Should be set from 0-100
 
+    private final float SPOOFING_CHANGE = 50;
+
 
     private TelemetryGenerator(float theRandomPercent) {
         myDrones = new ArrayList<>();
@@ -63,21 +65,46 @@ public class TelemetryGenerator {
         for (DroneInterface drone : myDrones) {
             if (!drone.isAlive()) {
                 continue;
+//                TelemetryRecord deadstate = drone.generateTelemetryRecord();
+//                telemetryList.add(new TelemetryRecord[]{deadstate, deadstate});
             }
+            else {
+                TelemetryRecord prev = drone.getPreviousTelemetryRecord();
+                boolean spoofed = false;
 
-            TelemetryRecord prev = drone.getPreviousTelemetryRecord();
+                if (myRandom.nextInt(100) < RANDOM_PERCENT) {
+                    getRandomMove(drone, deltaTime);
+                    if (drone.getMyLastAnomaly() == AnomalyEnum.SPOOFING) {
+                        spoofed = true;
+                    }
+                } else {
+                    getMove(drone, deltaTime);
+                }
 
-            if (myRandom.nextInt(100) < RANDOM_PERCENT) {
-                getRandomMove(drone, deltaTime);
-            } else {
-                getMove(drone, deltaTime);
+                TelemetryRecord curr;
+
+                if (spoofed) {
+                    float offsetLon = myRandom.nextFloat(-SPOOFING_CHANGE, SPOOFING_CHANGE);
+                    float offsetLat = myRandom.nextFloat(-SPOOFING_CHANGE, SPOOFING_CHANGE);
+                    float offsetAlt = myRandom.nextFloat(-SPOOFING_CHANGE, SPOOFING_CHANGE);
+
+                    curr = new TelemetryRecord(
+                            drone.getId(),
+                            drone.getLongitude() + offsetLon,
+                            drone.getLatitude() + offsetLat,
+                            drone.getAltitude() + offsetAlt,
+                            drone.getVelocity(),
+                            drone.getBatteryLevel(),
+                            drone.getOrientation().getDegree(),
+                            System.currentTimeMillis()
+                    );
+                } else {
+                    curr = drone.generateTelemetryRecord();
+                }
+                telemetryList.add(new TelemetryRecord[]{prev, curr});
+
+                drone.setPrevTelemetryRecord(curr); //so that the time state stays consistent
             }
-
-            TelemetryRecord curr = drone.generateTelemetryRecord();
-
-            telemetryList.add(new TelemetryRecord[]{prev, curr});
-
-            drone.setPrevTelemetryRecord(curr); //so that the time state stays consistent
         }
 
         //After all drones move to the next step we can check for collisions.
