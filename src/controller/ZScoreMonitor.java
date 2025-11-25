@@ -72,11 +72,12 @@ public class ZScoreMonitor {
         TelemetryGenerator gen = TelemetryGenerator.getInstance((float) MY_ANOMALY_PERCENT);
 
         //Generate Drones
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 10; i++) {
             ArrayList<RoutePoint> theRoute = myRouteGenerator.generateRoute();
             DroneInterface drone = myDroneGenerator.createDrone(theRoute);
             gen.addDrone(drone);
         }
+        System.out.println("Drones Generated");
         ArrayList<DroneInterface> drones = gen.getMyDrones();
 
         ArrayList<String> headers = new ArrayList<>();
@@ -84,7 +85,7 @@ public class ZScoreMonitor {
         headers.add("velocity");
         headers.add("batteryLevel");
         headers.add("orientation");
-        headers.add("timeStamp");
+        headers.add("timestamp");
 
         //Get Persistent Exporter
         exporter = new PersistentExporter();
@@ -104,17 +105,17 @@ public class ZScoreMonitor {
                 DroneInterface drone = drones.get(i);
 
                 //Get Current Telemetry
-                TelemetryRecord myCurrentTelemetryMap = droneTelemetry.get(i)[1];
+                TelemetryRecord myCurrentTelemetry = droneTelemetry.get(i)[1];
 
                 //Log telemetry data
-                exporter.logTelemetryData(myCurrentTelemetryMap, headers);
+                exporter.logTelemetryData(myCurrentTelemetry, headers);
 
                 //Get drone location to pass to view
-                float[] location = {myCurrentTelemetryMap.longitude(),
-                        myCurrentTelemetryMap.latitude()};
+                float[] location = {myCurrentTelemetry.longitude(),
+                        myCurrentTelemetry.latitude()};
 
                 //Get telemetry as a String to pass to view
-                String theTelemetry = telemetryToString(myCurrentTelemetryMap);
+                String theTelemetry = telemetryToString(myCurrentTelemetry);
 
                 //Draw the drone on the view.
                 view.drawDrone(drone.getId(), location, theTelemetry);
@@ -134,10 +135,7 @@ public class ZScoreMonitor {
                 scheduler.shutdownNow();
                 Thread.currentThread().interrupt();
             }
-        };
-        Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
-
-        Runnable shutDownLoggingAndCalculate = () -> {
+            // Close telemetry log and calculate baseline data.
             exporter.closeTelemetryLog();
             System.out.println("Telemetry log closed. Baseline calculation started.");
 
@@ -147,9 +145,8 @@ public class ZScoreMonitor {
             } catch (Exception e) {
                 System.err.println("Error in running baseline calculation: " + e.getMessage());
             }
-
         };
-        Runtime.getRuntime().addShutdownHook(new Thread(shutDownLoggingAndCalculate));
+        Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
     }
 
     /**
@@ -166,6 +163,6 @@ public class ZScoreMonitor {
                 "latitude: " + theTelemetry.latitude() + "\n" +
                 "velocity: " + theTelemetry.velocity() + "\n" +
                 "batteryLevel: " + theTelemetry.batterLevel() + "\n" +
-                "orientation: " + theTelemetry.batterLevel() + "\n";
+                "orientation: " + theTelemetry.orientation() + "\n";
     }
 }

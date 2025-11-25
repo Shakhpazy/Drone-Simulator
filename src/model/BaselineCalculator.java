@@ -69,7 +69,8 @@ public class BaselineCalculator {
     public void calculateAndSaveStats(String inputLog, String outputProperties) {
         try {
             // Process the file
-            processLogFile(inputLog);
+            int lineCount = processLogFile(inputLog);
+
 
             if (velocityReadings.isEmpty()) {
                 System.err.println("No data read from log file. Cannot calculate stats.");
@@ -86,9 +87,9 @@ public class BaselineCalculator {
             double orientationDeltaMean = calculateMean(orientationDeltaReadings);
             double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, orientationDeltaMean);
 
-            saveStatsToProperties(outputProperties, velocityMean, velocityStandardDev, batteryDrainMean,
+            saveStatsToProperties(outputProperties, lineCount, velocityMean, velocityStandardDev, batteryDrainMean,
                     batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev);
-
+            System.out.println(lineCount + " data points calculated.");
         } catch (IOException e) {
             System.err.println("Error during baseline calculation: " + e.getMessage());
         }
@@ -99,7 +100,9 @@ public class BaselineCalculator {
      * @param filepath          The string representation of the log filepath.
      * @throws IOException      Throws an exception when incoming files are improperly formatted.
      */
-    private void processLogFile(String filepath) throws IOException {
+    private int processLogFile(String filepath) throws IOException {
+        int lineCount = 0;
+
         try (BufferedReader br = new BufferedReader(new FileReader(filepath))){
             String line;
 
@@ -116,7 +119,7 @@ public class BaselineCalculator {
 
             if (!headerMap.containsKey("id") || !headerMap.containsKey("velocity") ||
                     !headerMap.containsKey("batteryLevel") || !headerMap.containsKey("orientation") ||
-                    !headerMap.containsKey("timeStamp")) {
+                    !headerMap.containsKey("timestamp")) {
                 throw new IOException("Log file is missing required headers.");
             }
 
@@ -124,9 +127,11 @@ public class BaselineCalculator {
             int velocityIndex = headerMap.get("velocity");
             int batteryIndex = headerMap.get("batteryLevel");
             int orientationIndex = headerMap.get("orientation");
-            int timestampIndex = headerMap.get("timeStamp");
+            int timestampIndex = headerMap.get("timestamp");
+
 
             while ((line = br.readLine()) != null) {
+                lineCount += 1;
                 String[] values = line.split(",");
                 if(values.length <= Math.max(idIndex, Math.max(velocityIndex, Math.max(batteryIndex,
                         Math.max(orientationIndex, timestampIndex))))) {
@@ -188,6 +193,7 @@ public class BaselineCalculator {
                 }
             }
         }
+        return lineCount;
     }
 
     /**
@@ -199,7 +205,7 @@ public class BaselineCalculator {
      * @param bStandardDev      The calculated standard deviation of drone battery behavior.
      * @throws IOException      Throws an exception when data cannot be written to the file.
      */
-    private void saveStatsToProperties(String filepath, double vMean, double vStandardDev, double bMean,
+    private void saveStatsToProperties(String filepath, int lineCount, double vMean, double vStandardDev, double bMean,
                                        double bStandardDev, double oMean, double oStandardDev) throws IOException {
         Properties props = new Properties();
 
@@ -211,7 +217,8 @@ public class BaselineCalculator {
         props.setProperty("orientationDelta.standardDev", String.valueOf(oStandardDev));
 
         try (FileWriter writer = new FileWriter(filepath)) {
-            props.store(writer, "Drone Anomaly Baseline Statistics\nGenerated from log data.");
+            props.store(writer, "Drone Anomaly Baseline Statistics\nGenerated from " +
+                    lineCount + " data points.");
             System.out.println("Successfully saved baseline stats to " + filepath);
         }
     }

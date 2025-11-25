@@ -64,6 +64,9 @@ public class PersistentExporter {
             for (String header : theHeader) {
                 String value = switch (header) {
                     case "id" -> String.valueOf(theTelemetryData.id());
+                    case "longitude" -> String.valueOf(theTelemetryData.longitude());
+                    case "latitude" -> String.valueOf(theTelemetryData.latitude());
+                    case "altitude" -> String.valueOf(theTelemetryData.altitude());
                     case "velocity" -> String.valueOf(theTelemetryData.velocity());
                     case "batteryLevel" -> String.valueOf(theTelemetryData.batterLevel());
                     case "orientation" -> String.valueOf(theTelemetryData.orientation());
