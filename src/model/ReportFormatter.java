@@ -3,15 +3,13 @@ package model;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 
 /**
  * A class to aid the AnomalyDetector class in AnomalyReport composition.
  * @author nlevin11
- * @version 11-12
+ * @version 11-24
  */
 public class ReportFormatter {
-
 
     /**
      * A time format to format time output.
@@ -22,11 +20,11 @@ public class ReportFormatter {
     /**
      * A method to return a user readable timestamp string.
      *
-     * @param telemetry         The telemetry snapshot to derive the time.
-     * @return                  Returns a user readable timestamp string.
+     * @param theCurrTelemetry         The telemetry snapshot to derive the time.
+     * @return                         Returns a user readable timestamp string.
      */
-    public static String getFormattedTime(HashMap<String, Object> telemetry) {
-        long timestamp = (Long) telemetry.get("timeStamp");
+    public static String getFormattedTime(TelemetryRecord theCurrTelemetry) {
+        long timestamp = theCurrTelemetry.timeStamp();
         Instant instant = Instant.ofEpochMilli(timestamp);
         return FORMATTER.format(instant);
     }
@@ -35,12 +33,13 @@ public class ReportFormatter {
      * A method to create a simplified anomaly report string.
      *
      * @param theAnomalyType A string representing the type of anomaly being reported.
+     * @param theCurrTelemetry A telemetry record representing the data needed for a report string.
      * @return Returns a simplified string anomaly report.
      */
-    public static String createDescSimple(String theAnomalyType, HashMap<String, Object> theCurrTelemetry) {
+    public static String createDescSimple(String theAnomalyType, TelemetryRecord theCurrTelemetry) {
 
         return "Anomaly Detected! \nDrone ID: " +
-                theCurrTelemetry.get("id") +
+                theCurrTelemetry.id() +
                 "\nAnomaly Type: " +
                 theAnomalyType +
                 "\nTime Stamp: " +
@@ -51,32 +50,33 @@ public class ReportFormatter {
      * A method to create a detailed anomaly report string.
      *
      * @param theAnomalyType A string representing the type of anomaly being reported.
+     * @param theCurrTelemetry A telemetry record representing the data needed for a report string.
      * @return Returns a detailed string anomaly report.
      */
-    public static String createDescDetailed(String theAnomalyType, HashMap<String, Object> theCurrTelemetry, HashMap<String, Object> thePrevTelemetry) {
+    public static String createDescDetailed(String theAnomalyType, TelemetryRecord theCurrTelemetry, TelemetryRecord thePrevTelemetry) {
 
-        return "\nDrone Number: " + theCurrTelemetry.get("id") +
+        return "\nDrone Number: " + theCurrTelemetry.id() +
                 " Has experienced an anomaly at time: " + getFormattedTime(theCurrTelemetry) +
                 "\nDetails:\n" +
                 theAnomalyType + " anomaly detected\n" +
 
                 //Current State
                 "Current State: \n" +
-                "x: " + theCurrTelemetry.get("latitude") +
-                " y: " + theCurrTelemetry.get("longitude") +
-                " z: " + theCurrTelemetry.get("altitude") + "\n" +
-                "Velocity: " + theCurrTelemetry.get("velocity") + " units/second(cycle)\n" +
-                "Orientation: " + theCurrTelemetry.get("orientation") + "\n" +
-                "Battery (%): " + theCurrTelemetry.get("batteryLevel") +
+                "x: " + theCurrTelemetry.latitude() +
+                " y: " + theCurrTelemetry.longitude() +
+                " z: " + theCurrTelemetry.altitude() + "\n" +
+                "Velocity: " + theCurrTelemetry.velocity() + " units/second(cycle)\n" +
+                "Orientation: " + theCurrTelemetry.orientation() + "\n" +
+                "Battery (%): " + theCurrTelemetry.batterLevel() +
 
                 //Previous state
                 "\nPrevious State: \n" +
-                "x: " + thePrevTelemetry.get("latitude") +
-                " y: " + thePrevTelemetry.get("longitude") +
-                " z: " + thePrevTelemetry.get("altitude") + "\n" +
-                "Velocity: " + thePrevTelemetry.get("velocity") + " units/cycle\n" +
-                "Orientation (Deg from North): " + thePrevTelemetry.get("orientation") + "\n" +
-                "Battery (%): " + thePrevTelemetry.get("batteryLevel") + "\n";
+                "x: " + thePrevTelemetry.latitude() +
+                " y: " + thePrevTelemetry.longitude() +
+                " z: " + thePrevTelemetry.altitude() + "\n" +
+                "Velocity: " + thePrevTelemetry.velocity() + " units/cycle\n" +
+                "Orientation (Deg from North): " + thePrevTelemetry.orientation() + "\n" +
+                "Battery (%): " + thePrevTelemetry.batterLevel() + "\n";
     }
 
 }

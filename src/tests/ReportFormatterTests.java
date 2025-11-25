@@ -2,10 +2,9 @@ package tests;
 
 import model.AnomalyEnum;
 import model.ReportFormatter;
+import model.TelemetryRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -16,8 +15,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @version 11-12
  */
 public class ReportFormatterTests {
-    private HashMap<String, Object> myCurrTelemetry;
-    private HashMap<String, Object> myPrevTelemetry;
+    private TelemetryRecord myCurrTelemetry;
+    private TelemetryRecord myPrevTelemetry;
     private String myFormattedTimestamp;
     private String myAnomalyEnum;
 
@@ -27,25 +26,11 @@ public class ReportFormatterTests {
         myFormattedTimestamp = "2023-03-15 06:20:00.000";
         myAnomalyEnum = AnomalyEnum.ALTITUDE.toString();
 
-        myCurrTelemetry = new HashMap<>();
-        myCurrTelemetry.put("id",5);
-        myCurrTelemetry.put("timeStamp", myTimestamp);
-        myCurrTelemetry.put("latitude",100);
-        myCurrTelemetry.put("longitude",200);
-        myCurrTelemetry.put("altitude",300);
-        myCurrTelemetry.put("velocity",10);
-        myCurrTelemetry.put("batteryLevel",90);
-        myCurrTelemetry.put("orientation",90);
+        myCurrTelemetry = new TelemetryRecord(5, 200, 100, 300, 10, 79,
+                90, myTimestamp);
 
-        myPrevTelemetry = new HashMap<>();
-        myPrevTelemetry.put("id",5);
-        myPrevTelemetry.put("timeStamp", myTimestamp);
-        myPrevTelemetry.put("latitude",101);
-        myPrevTelemetry.put("longitude",201);
-        myPrevTelemetry.put("altitude",301);
-        myPrevTelemetry.put("velocity",10);
-        myPrevTelemetry.put("batteryLevel",80);
-        myPrevTelemetry.put("orientation",90);
+        myPrevTelemetry = new TelemetryRecord(5, 201, 101, 301, 10, 80,
+                80, myTimestamp);
     }
 
     @Test

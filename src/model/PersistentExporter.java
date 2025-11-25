@@ -4,13 +4,12 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * A persistent log of drone data for use in statistical analysis and machine learning.
  * @author nlevin11
- * @version 11-6
+ * @version 11-24
  */
 public class PersistentExporter {
     /**
@@ -54,7 +53,7 @@ public class PersistentExporter {
      * @param theTelemetryData      A HashMap representation of the telemetry data.
      * @param theHeader             A list of strings to represent the headers of the data being written.
      */
-    public void logTelemetryData(HashMap<String, Object> theTelemetryData, List<String> theHeader) {
+    public void logTelemetryData(TelemetryRecord theTelemetryData, List<String> theHeader) {
         if (persistentTelemetryWriter == null) {
             System.err.println("Error: Telemetry log is not open.");
             return;
@@ -63,7 +62,15 @@ public class PersistentExporter {
         try {
             List<String> droneData = new ArrayList<>();
             for (String header : theHeader) {
-                droneData.add(String.valueOf(theTelemetryData.get(header)));
+                String value = switch (header) {
+                    case "id" -> String.valueOf(theTelemetryData.id());
+                    case "velocity" -> String.valueOf(theTelemetryData.velocity());
+                    case "batteryLevel" -> String.valueOf(theTelemetryData.batterLevel());
+                    case "orientation" -> String.valueOf(theTelemetryData.orientation());
+                    case "timestamp" -> String.valueOf(theTelemetryData.timeStamp());
+                    default -> throw new IllegalStateException("Unexpected value: " + header);
+                };
+                droneData.add(value);
             }
 
             String line = String.join(",", droneData);

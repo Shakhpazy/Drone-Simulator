@@ -6,10 +6,14 @@ import java.util.*;
 /**
  * A class to parse and calculate drone data from a CSV log of activity.
  * @author nlevin11
- * @version 11-6
+ * @version 11-24
  */
 public class BaselineCalculator {
+    /**
+     * A double to hold the amount of time for a drone to reach velocity.
+     */
     private static final double WARMUP_TIME = 10.0;
+
     /**
      * A list to hold all velocity data.
      */
@@ -39,7 +43,11 @@ public class BaselineCalculator {
      * A map to hold all previous timestamp values;
      */
     private final Map<Integer, Double> prevTimestampReadings;
-    
+
+    /**
+     * A map to hold the first timestamp readings for a drone.
+     * Allows calculator to ignore "startup" conditions for steady state monitoring.
+     */
     private final Map<Integer, Double> firstTimestampReadings;
 
 
@@ -60,6 +68,7 @@ public class BaselineCalculator {
      */
     public void calculateAndSaveStats(String inputLog, String outputProperties) {
         try {
+            // Process the file
             processLogFile(inputLog);
 
             if (velocityReadings.isEmpty()) {
@@ -67,6 +76,7 @@ public class BaselineCalculator {
                 return;
             }
 
+            // Calculate values
             double velocityMean = calculateMean(velocityReadings);
             double velocityStandardDev = calculateStandardDev(velocityReadings, velocityMean);
 
@@ -160,12 +170,13 @@ public class BaselineCalculator {
                         if (prevOrientationReadings.containsKey(droneID)) {
                             float prevOrientation = prevOrientationReadings.get(droneID);
 
-                            float diff = Math.abs(currOrientation - prevOrientation);
+                            double diff = Math.abs(currOrientation - prevOrientation);
                             if (diff > 180) {
                                 diff = 360 - diff;
                             }
-                            double normalizedDiff = diff / deltaTime;
-                            orientationDeltaReadings.add(normalizedDiff);
+                            if (diff > 1.0) {
+                                orientationDeltaReadings.add(diff);
+                            }
                         }
                     }
 

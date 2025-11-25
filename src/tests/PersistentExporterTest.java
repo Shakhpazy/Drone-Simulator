@@ -1,6 +1,7 @@
 package tests;
 
 import model.PersistentExporter;
+import model.TelemetryRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -8,7 +9,6 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,8 +20,8 @@ public class PersistentExporterTest {
 
     private PersistentExporter exporter;
     private List<String> testHeader;
-    private HashMap<String, Object> testData1;
-    private HashMap<String, Object> testData2;
+    private TelemetryRecord testData1;
+    private TelemetryRecord testData2;
 
     @BeforeEach
     void setUp() {
@@ -29,17 +29,11 @@ public class PersistentExporterTest {
 
         testHeader = List.of("id", "timestamp", "velocity", "altitude");
 
-        testData1 = new HashMap<>();
-        testData1.put("id", 1);
-        testData1.put("timestamp", 123456789L);
-        testData1.put("velocity", 10.5);
-        testData1.put("altitude", 300);
+        testData1 = new TelemetryRecord(1, 0, 0, 0, 10.5F, 100,
+                270, 123456789L);
 
-        testData2 = new HashMap<>();
-        testData2.put("id", 2);
-        testData2.put("timestamp", 123456999L);
-        testData2.put("velocity", 9.8);
-        testData2.put("altitude", 310);
+        testData2 = new TelemetryRecord(2, 0, 0, 0, 9.8F, 100,
+                90, 123456999L);
     }
 
     @Test

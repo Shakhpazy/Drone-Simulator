@@ -2,7 +2,6 @@ package controller;
 
 import model.*;
 
-import java.util.HashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -10,6 +9,15 @@ import java.util.ArrayList;
 
 import view.MonitorDashboard;
 
+/**
+ * A class to gather and calculate drone behavior data.
+ *
+ * @author nlevin11
+ * @author Natan
+ * @author Yusuf
+ *
+ * @version 11-24
+ */
 public class ZScoreMonitor {
 
     /** The route generator used to create flight paths for the drones. */
@@ -18,9 +26,12 @@ public class ZScoreMonitor {
     /** The drone generator used to instantiate drone objects. */
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
+    /**
+     * A persistent exporter for gathering drone data.
+     */
     private static PersistentExporter exporter = new PersistentExporter();
 
-    /*
+    /**
      * How long the program waits between updates (in milliseconds)
      */
     private static final long MY_UPDATE_TIME = 500;
@@ -36,8 +47,14 @@ public class ZScoreMonitor {
      */
     private static final double MY_ANOMALY_PERCENT = 0.0;
 
+    /**
+     * A string to represent the telemetry log filepath.
+     */
     private static final String MY_TELEMETRY_LOG_PATH = "dataLogs/TelemetryLog.txt";
 
+    /**
+     * A string to represent the z-score data filepath.
+     */
     private static final String MY_Z_SCORE_LOG_PATH = "dataLogs/BaselineLog.properties";
 
     /**
@@ -80,21 +97,21 @@ public class ZScoreMonitor {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<HashMap<String, Object>[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
+            ArrayList<TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
             //For each drone
             for (int i = 0; i < drones.size(); i++) {
                 DroneInterface drone = drones.get(i);
 
                 //Get Current Telemetry
-                HashMap<String, Object> myCurrentTelemetryMap = droneTelemetry.get(i)[1];
+                TelemetryRecord myCurrentTelemetryMap = droneTelemetry.get(i)[1];
 
                 //Log telemetry data
                 exporter.logTelemetryData(myCurrentTelemetryMap, headers);
 
                 //Get drone location to pass to view
-                float[] location = {(float) myCurrentTelemetryMap.get("longitude"),
-                        (float) myCurrentTelemetryMap.get("latitude")};
+                float[] location = {myCurrentTelemetryMap.longitude(),
+                        myCurrentTelemetryMap.latitude()};
 
                 //Get telemetry as a String to pass to view
                 String theTelemetry = telemetryToString(myCurrentTelemetryMap);
@@ -139,18 +156,16 @@ public class ZScoreMonitor {
      * Converts a telemetry data map into a formatted string representation
      * suitable for display in the view.
      *
-     * @param myTelemetryMap A {@link HashMap} containing the drone's telemetry data.
+     * @param theTelemetry  A telemetry record to parse for data.
      * @return The String representation of the Telemetry data.
      */
-    private static String telemetryToString(HashMap<String, Object> myTelemetryMap) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("id: ").append(myTelemetryMap.get("id")).append("\n");
-        sb.append("altitude: ").append(myTelemetryMap.get("altitude")).append("\n");
-        sb.append("longitude: ").append(myTelemetryMap.get("longitude")).append("\n");
-        sb.append("latitude: ").append(myTelemetryMap.get("latitude")).append("\n");
-        sb.append("velocity: ").append(myTelemetryMap.get("velocity")).append("\n");
-        sb.append("batteryLevel: ").append(myTelemetryMap.get("batteryLevel")).append("\n");
-        sb.append("orientation: ").append(myTelemetryMap.get("orientation")).append("\n");
-        return sb.toString();
+    private static String telemetryToString(TelemetryRecord theTelemetry) {
+        return "id: " + theTelemetry.id() + "\n" +
+                "altitude: " + theTelemetry.altitude() + "\n" +
+                "longitude: " + theTelemetry.longitude() + "\n" +
+                "latitude: " + theTelemetry.latitude() + "\n" +
+                "velocity: " + theTelemetry.velocity() + "\n" +
+                "batteryLevel: " + theTelemetry.batterLevel() + "\n" +
+                "orientation: " + theTelemetry.batterLevel() + "\n";
     }
 }
