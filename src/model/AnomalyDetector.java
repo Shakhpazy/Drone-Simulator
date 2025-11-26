@@ -12,9 +12,19 @@ import java.util.UUID;
 public class AnomalyDetector {
 
     /**
+     * A double to hold the first timestamp given to the AnomalyDetector.
+     */
+    private double firstTimestamp = -1;
+
+    /**
      * A double representing the maximum deviation from normal behavior a drone can express before detection.
      */
     private static final double MAX_Z_SCORE = 3.0;
+
+    /**
+     * A long representing the warmup time for drone flights.
+     */
+    private static final long DRONE_WARMUP_MS = 48000;
 
     /**
      * A private telemetry field for use in the Anomaly Detector class.
@@ -130,18 +140,23 @@ public class AnomalyDetector {
 
         // Position + Velocity check
         AnomalyEnum error = positionAnomaly();
+        boolean altitudeErr = false;
         if (error != null) {
             sb.append(error);
+            if (error.equals(AnomalyEnum.ALTITUDE))  altitudeErr = true;
         }
 
         // Battery check
         error = powerAnomaly();
         if (error != null) {
+            if (!sb.isEmpty()) sb.append(", ");
             sb.append(error);
         }
 
+        // Statistical Detection
         AnomalyEnum statResult = statisticalDetect(theCurrTelemetry, thePrevTelemetry);
-        if (statResult != null) {
+        if (statResult != null && !altitudeErr) {
+            if (!sb.isEmpty()) sb.append(", ");
             sb.append(statResult);
         }
 
@@ -164,19 +179,24 @@ public class AnomalyDetector {
         long prevTime = myPrevTelemetry.timeStamp();
         double deltaTime = (double) (currTime - prevTime);
 
+        if (firstTimestamp == -1) firstTimestamp = currTime;
+
         // Velocity check
         double currVelocity = myCurrTelemetry.velocity();
         double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE)
                 / VELOCITY_STANDARD_DEV_BASELINE;
-        if (velocityZScore >= MAX_Z_SCORE) {
+        if (velocityZScore > MAX_Z_SCORE) {
             return AnomalyEnum.SPOOFING;
         }
+//        if ((currTime - firstTimestamp > DRONE_WARMUP_MS) && Math.abs(velocityZScore) > MAX_Z_SCORE) {
+//            return AnomalyEnum.SPOOFING;
+//        }
 
         // Battery check
         double currBattery = myCurrTelemetry.batterLevel();
         double prevBattery = myPrevTelemetry.batterLevel();
 
-        double batteryNormDelta = ((currBattery - prevBattery) / deltaTime);
+        double batteryNormDelta = ((prevBattery - currBattery) / deltaTime);
         double batteryZScore = (batteryNormDelta - BATTERY_DRAIN_MEAN_BASELINE) / BATTERY_DRAIN_STANDARD_DEV_BASELINE;
         if (batteryZScore >= MAX_Z_SCORE) {
             return AnomalyEnum.BATTERY_DRAIN;
@@ -190,6 +210,7 @@ public class AnomalyDetector {
         double orientationZScore = (orientationDelta - ORIENTATION_DELTA_MEAN_BASELINE)
                 / ORIENTATION_DELTA_STANDARD_DEV_BASELINE;
         if (orientationZScore >= 3) {
+            if (firstTimestamp == currTime) return AnomalyEnum.IMPROPER_START_ORIENTATION;
             return AnomalyEnum.SPOOFING;
         }
         return null;
@@ -213,13 +234,11 @@ public class AnomalyDetector {
             return AnomalyEnum.OUT_OF_BOUNDS;
         }
 
-        float prevAltitude = myPrevTelemetry.altitude();
-
         // Check z-axis velocity
+        float prevAltitude = myPrevTelemetry.altitude();
         if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX) {
             return AnomalyEnum.ALTITUDE;
         }
-
         return null;
     }
 
@@ -232,6 +251,8 @@ public class AnomalyDetector {
         float currBatteryLevel = myCurrTelemetry.batterLevel();
         if (currBatteryLevel <= 0.0F) {
             return AnomalyEnum.BATTERY_FAIL;
+        } else if (currBatteryLevel <= 15){
+            return AnomalyEnum.BATTERY_WARNING;
         }
         return null;
     }

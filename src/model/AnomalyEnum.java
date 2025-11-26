@@ -6,10 +6,12 @@ package model;
 public enum AnomalyEnum {
     BATTERY_DRAIN("Abnormal Battery Drain Rate"),
     BATTERY_FAIL("Battery Failure"),
+    BATTERY_WARNING("Battery Close to Depletion"),
     ALTITUDE("Dangerous Change in Altitude"),
     SPOOFING("GPS Spoofing"),
-    SPEED("Dangerous change in Speed"),
-    OUT_OF_BOUNDS("Out of Bounds");
+    SPEED("Dangerous Change in Speed"),
+    OUT_OF_BOUNDS("Out of Bounds"),
+    IMPROPER_START_ORIENTATION("Invalid Start Position");
 
     /**
      * A String to hold the String representation of an AnomalyEnum.
