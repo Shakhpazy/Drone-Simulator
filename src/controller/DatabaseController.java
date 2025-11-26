@@ -14,9 +14,8 @@ import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 /**
  * This class handles the database operations and updates the GUI via
@@ -39,7 +38,7 @@ public class DatabaseController implements PropertyChangeListener {
      */
     private final DatabaseWindow myWindow;
 
-    private Set<AnomalyReport> myFilteredReports;
+    private List<AnomalyReport> myFilteredReports;
 
     /**
      * Package-private constructor to ensure only members of the
@@ -51,7 +50,7 @@ public class DatabaseController implements PropertyChangeListener {
      * @param theDTBS the shared database object used by the main controller.
      */
     DatabaseController(final AnomalyDatabase theDTBS) {
-        myFilteredReports = new HashSet<>();
+        myFilteredReports = new ArrayList<>();
 
         // Assign and initialize database.
         myDTBS = theDTBS;
@@ -91,6 +90,7 @@ public class DatabaseController implements PropertyChangeListener {
             // Open and initialize the database window.
             case MonitorDashboard.PROPERTY_DATABASE_OPENED:
                 List<AnomalyReport> reps = myDTBS.findAllReports();
+                myFilteredReports = reps;
 
                 // Clear reports from window and re-add them.
                 myWindow.clearReports();
@@ -106,7 +106,7 @@ public class DatabaseController implements PropertyChangeListener {
                 if (theEvent.getNewValue() instanceof String[] arr) {
 
                     // Define set to store all reports, which we will filter using arr
-                    Set<AnomalyReport> intersection = new HashSet<>(myDTBS.findAllReports());
+                    List<AnomalyReport> intersection = new ArrayList<>(myDTBS.findAllReports());
 
                     // Filter by drone ID if not empty
                     if (!"".equals(arr[DatabaseWindow.IDX_DRONE_ID])) {
@@ -147,7 +147,11 @@ public class DatabaseController implements PropertyChangeListener {
 
             // Exporting options for entire anomaly database.
             case MonitorDashboard.PROPERTY_SAVE_AS:
-                exportData();
+                if (theEvent.getSource() instanceof MonitorDashboard) {
+                    exportData(myDTBS.findAllReports());
+                } else if (theEvent.getSource() instanceof DatabaseWindow) {
+                    exportData(List.copyOf(myFilteredReports));
+                }
                 break;
         }
     }
@@ -155,7 +159,7 @@ public class DatabaseController implements PropertyChangeListener {
     /**
      * Exports the database to an output file.
      */
-    private void exportData() {
+    private void exportData(final List<AnomalyReport> theReports) {
 
         // Create file chooser
         JFileChooser choose = initChooser();
@@ -183,7 +187,7 @@ public class DatabaseController implements PropertyChangeListener {
                 case "json" -> new JsonExporter();
                 default -> throw new IllegalStateException("Unexpected filetype: " + ext);
             };
-            e.export(List.copyOf(myFilteredReports), path);
+            e.export(theReports, path);
         }
     }
 
