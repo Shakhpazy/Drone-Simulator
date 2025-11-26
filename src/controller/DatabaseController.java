@@ -5,9 +5,11 @@ import view.DatabaseWindow;
 import view.MonitorDashboard;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +27,8 @@ import java.util.Set;
  */
 public class DatabaseController implements PropertyChangeListener {
 
+    private final String FILENAME = "anomaly_report";
+
     /**
      * This field holds the reference to the database object from the model package.
      */
@@ -34,6 +38,8 @@ public class DatabaseController implements PropertyChangeListener {
      * This field holds the reference to the GUI window from the view package.
      */
     private final DatabaseWindow myWindow;
+
+    private Set<AnomalyReport> myFilteredReports;
 
     /**
      * Package-private constructor to ensure only members of the
@@ -45,6 +51,8 @@ public class DatabaseController implements PropertyChangeListener {
      * @param theDTBS the shared database object used by the main controller.
      */
     DatabaseController(final AnomalyDatabase theDTBS) {
+        myFilteredReports = new HashSet<>();
+
         // Assign and initialize database.
         myDTBS = theDTBS;
         myDTBS.initialize();
@@ -131,49 +139,88 @@ public class DatabaseController implements PropertyChangeListener {
                     for (AnomalyReport rep : intersection) {
                         myWindow.addReport(rep.detailedReport());
                     }
+
+                    // update field
+                    myFilteredReports = intersection;
                 }
                 break;
 
             // Exporting options for entire anomaly database.
-            case MonitorDashboard.PROPERTY_SAVE_CSV:
-                exportData(new CsvExporter());
-                break;
-
-            case MonitorDashboard.PROPERTY_SAVE_PDF:
-                exportData(new PdfExporter());
-                break;
-
-            case MonitorDashboard.PROPERTY_SAVE_JSON:
-                exportData(new JsonExporter());
+            case MonitorDashboard.PROPERTY_SAVE_AS:
+                exportData();
                 break;
         }
     }
 
     /**
-     * Exports the database to an output file. The file type is determined by
-     * the input ReportExporter implementation.
-     *
-     * @param theExporter the specific file type exporter (JSON, CSV, or PDF).
-     * @throws IllegalArgumentException if the type exporter is not a PdfExporter, CsvExporter, or JsonExporter.
+     * Exports the database to an output file.
      */
-    private void exportData(final ReportExporter theExporter) {
-        // Determine the filename / type based on input exporter.
-        // If not one of the accepted types, throw exception.
-        String filename = switch (theExporter) {
-            case PdfExporter _ -> "/anomaly_data.pdf";
-            case CsvExporter _ -> "/anomaly_data.csv";
-            case JsonExporter _ -> "/anomaly_data.json";
-            case null, default ->
-                    throw new IllegalArgumentException("Input ReportExporter is not an instance of PDF, CSV, or JSON exporters.");
-        };
+    private void exportData() {
 
-        // Open file chooser to allow user to select location for the new file.
-        JFileChooser chooser = new JFileChooser();
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        int selectionApproved = chooser.showOpenDialog(null);
-        if (selectionApproved == JFileChooser.APPROVE_OPTION) {
-            String filePath = chooser.getSelectedFile().getAbsolutePath();
-            theExporter.export(myDTBS.findAllReports(), filePath + filename);
+        // Create file chooser
+        JFileChooser choose = initChooser();
+
+        // Listener for when user changes file extension filter
+        choose.addPropertyChangeListener(fileTypeChanged());
+
+        if (choose.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
+
+            File selected = choose.getSelectedFile();
+            FileNameExtensionFilter filter =
+                    (FileNameExtensionFilter) choose.getFileFilter();
+
+            String ext = filter.getExtensions()[0];  // pdf, csv, or json
+            String path = selected.getAbsolutePath();
+
+            // Add extension if missing
+            if (!path.toLowerCase().endsWith("." + ext)) {
+                path += "." + ext;
+            }
+
+            ReportExporter e = switch (ext) {
+                case "pdf" -> new PdfExporter();
+                case "csv" -> new CsvExporter();
+                case "json" -> new JsonExporter();
+                default -> throw new IllegalStateException("Unexpected filetype: " + ext);
+            };
+            e.export(List.copyOf(myFilteredReports), path);
         }
+    }
+
+    private JFileChooser initChooser() {
+
+        // Create file chooser
+        JFileChooser choose = new JFileChooser();
+        choose.setDialogTitle("Save Anomaly Report");
+        choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
+
+        // Add file name extension filters
+        String[] desc = {"PDF Files (*.pdf)", "CSV Files (*.csv)", "JSON Files (*.json)"};
+        String[] exts = {"pdf", "csv", "json"};
+        for (int i = 0; i < desc.length; i++) {
+            choose.addChoosableFileFilter(new FileNameExtensionFilter(desc[i], exts[i]));
+        }
+        // turn off "accept all files" aka "no filters"
+        choose.setAcceptAllFileFilterUsed(false);
+
+        // default option (save as pdf)
+        choose.setSelectedFile(new File(FILENAME + ".pdf"));
+        return choose;
+    }
+
+    private PropertyChangeListener fileTypeChanged() {
+        return evt -> {
+            if (JFileChooser.FILE_FILTER_CHANGED_PROPERTY.equals(evt.getPropertyName())) {
+                // get the chooser
+                JFileChooser c = (JFileChooser) evt.getSource();
+
+                // get the new filter
+                FileNameExtensionFilter f = (FileNameExtensionFilter) evt.getNewValue();
+
+                // update text in the chooser file name area
+                String newFilename = FILENAME + "." + f.getExtensions()[0];
+                c.setSelectedFile(new File(newFilename));
+            }
+        };
     }
 }
