@@ -39,6 +39,8 @@ public class DatabaseController implements PropertyChangeListener {
      */
     private final DatabaseWindow myWindow;
 
+    private Set<AnomalyReport> myFilteredReports;
+
     /**
      * Package-private constructor to ensure only members of the
      * controller package can instantiate DatabaseController.
@@ -49,6 +51,8 @@ public class DatabaseController implements PropertyChangeListener {
      * @param theDTBS the shared database object used by the main controller.
      */
     DatabaseController(final AnomalyDatabase theDTBS) {
+        myFilteredReports = new HashSet<>();
+
         // Assign and initialize database.
         myDTBS = theDTBS;
         myDTBS.initialize();
@@ -135,6 +139,9 @@ public class DatabaseController implements PropertyChangeListener {
                     for (AnomalyReport rep : intersection) {
                         myWindow.addReport(rep.detailedReport());
                     }
+
+                    // update field
+                    myFilteredReports = intersection;
                 }
                 break;
 
@@ -176,7 +183,7 @@ public class DatabaseController implements PropertyChangeListener {
                 case "json" -> new JsonExporter();
                 default -> throw new IllegalStateException("Unexpected filetype: " + ext);
             };
-            e.export(myDTBS.findAllReports(), path);
+            e.export(List.copyOf(myFilteredReports), path);
         }
     }
 

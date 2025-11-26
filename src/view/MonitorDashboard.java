@@ -74,6 +74,11 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         repaint();
     }
 
+    /**
+     * Removes all traces of drones with the given ID from the front end.
+     *
+     * @param theID the id of the drone to remove from the sim.
+     */
     public void removeDrone(final int theID) {
         MAP_PANEL.removeDrone(theID);
         TELEMETRY_PANEL.removeTelemetryEntry(theID);
@@ -163,7 +168,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      */
     private JMenu initFileMenu() {
         JMenu fileMenu = new JMenu("File");
-        JMenuItem saveAs = new JMenuItem("Save as...");
+        JMenuItem saveAs = new JMenuItem("Save all reports as...");
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
         return fileMenu;
