@@ -18,19 +18,9 @@ import java.beans.PropertyChangeSupport;
 class PropertyEnabledJFrame extends JFrame implements PropertyChangeListener {
 
     /**
-     * Property change event name for saving as CSV.
+     * Property change event name for saving data as CSV, JSON, or PDF.
      */
-    public static final String PROPERTY_SAVE_CSV = "save as csv";
-
-    /**
-     * Property change event name for saving as PDF.
-     */
-    public static final String PROPERTY_SAVE_PDF = "save as pdf";
-
-    /**
-     * Property change event for saving as JSON.
-     */
-    public static final String PROPERTY_SAVE_JSON = "save as json";
+    public static final String PROPERTY_SAVE_AS = "save database file";
 
     /**
      * Property change event for debug tick speed change.

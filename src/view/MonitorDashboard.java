@@ -163,15 +163,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      */
     private JMenu initFileMenu() {
         JMenu fileMenu = new JMenu("File");
-        JMenuItem saveCSV = new JMenuItem("Save as .csv");
-        saveCSV.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_CSV, null, null));
-        fileMenu.add(saveCSV);
-        JMenuItem savePDF = new JMenuItem("Save as .pdf");
-        savePDF.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_PDF, null, null));
-        fileMenu.add(savePDF);
-        JMenuItem saveJSON = new JMenuItem("Save as .json");
-        saveJSON.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_JSON, null, null));
-        fileMenu.add(saveJSON);
+        JMenuItem saveAs = new JMenuItem("Save as...");
+        saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
+        fileMenu.add(saveAs);
         return fileMenu;
     }
 
