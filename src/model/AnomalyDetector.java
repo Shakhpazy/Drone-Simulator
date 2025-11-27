@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * A class to detect anomalies with drone behavior.
  * @author nlevin11
- * @version 11-24
+ * @version 11-26
  */
 public class AnomalyDetector {
 
@@ -20,11 +20,6 @@ public class AnomalyDetector {
      * A double representing the maximum deviation from normal behavior a drone can express before detection.
      */
     private static final double MAX_Z_SCORE = 3.0;
-
-    /**
-     * A long representing the warmup time for drone flights.
-     */
-    private static final long DRONE_WARMUP_MS = 48000;
 
     /**
      * A private telemetry field for use in the Anomaly Detector class.
@@ -89,10 +84,19 @@ public class AnomalyDetector {
     private static double ORIENTATION_DELTA_STANDARD_DEV_BASELINE;
 
     /**
+     * A double to represent the mean expected acceleration of a drone.
+     */
+    private static double ACCELERATION_MEAN_BASELINE;
+
+    /**
+     * A double to represent the standard deviation of the expected acceleration of a drone.
+     */
+    private static double ACCELERATION_STANDARD_DEV_BASELINE;
+
+    /**
      * A string representing the baseline data filepath.
      */
     private static final String MY_Z_SCORE_LOG_PATH = "dataLogs/BaselineLog.properties";
-
 
     public AnomalyDetector() {
         loadBaseline();
@@ -115,6 +119,10 @@ public class AnomalyDetector {
             ORIENTATION_DELTA_MEAN_BASELINE = Double.parseDouble(props.getProperty("orientationDelta.mean"));
             ORIENTATION_DELTA_STANDARD_DEV_BASELINE = Double.parseDouble(props.
                     getProperty("orientationDelta.standardDev"));
+
+            ACCELERATION_MEAN_BASELINE = Double.parseDouble(props.getProperty("acceleration.mean"));
+            ACCELERATION_STANDARD_DEV_BASELINE = Double.parseDouble(props.
+                    getProperty("acceleration.standardDev"));
 
             System.out.println("Baseline Data Gathered");
 
@@ -181,16 +189,23 @@ public class AnomalyDetector {
 
         if (firstTimestamp == -1) firstTimestamp = currTime;
 
-        // Velocity check
+        // Velocity + Acceleration check
         double currVelocity = myCurrTelemetry.velocity();
-        double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE)
-                / VELOCITY_STANDARD_DEV_BASELINE;
+        double prevVelocity = myPrevTelemetry.velocity();
+        double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE) / VELOCITY_STANDARD_DEV_BASELINE;
         if (velocityZScore > MAX_Z_SCORE) {
             return AnomalyEnum.SPOOFING;
+        } else if (Math.abs(velocityZScore) > MAX_Z_SCORE) {
+            double currAcceleration = Math.abs(prevVelocity - currVelocity) / (deltaTime / 1000);
+
+            double effectiveStandardDev = Math.max(ACCELERATION_STANDARD_DEV_BASELINE, 0.05);
+            double accelerationZScore = (currAcceleration - ACCELERATION_MEAN_BASELINE)
+                    / effectiveStandardDev;
+            if (Math.abs(accelerationZScore) > MAX_Z_SCORE) {
+                System.out.println(currAcceleration);
+                return AnomalyEnum.ACCELERATION;
+            }
         }
-//        if ((currTime - firstTimestamp > DRONE_WARMUP_MS) && Math.abs(velocityZScore) > MAX_Z_SCORE) {
-//            return AnomalyEnum.SPOOFING;
-//        }
 
         // Battery check
         double currBattery = myCurrTelemetry.batterLevel();
@@ -207,15 +222,14 @@ public class AnomalyDetector {
         double prevOrientation = myPrevTelemetry.orientation();
 
         double orientationDelta = Math.abs(currOrientation - prevOrientation);
+        if (orientationDelta > 180) orientationDelta = 360 - orientationDelta;
         double orientationZScore = (orientationDelta - ORIENTATION_DELTA_MEAN_BASELINE)
                 / ORIENTATION_DELTA_STANDARD_DEV_BASELINE;
         if (orientationZScore >= 3) {
-            if (firstTimestamp == currTime) return AnomalyEnum.IMPROPER_START_ORIENTATION;
             return AnomalyEnum.SPOOFING;
         }
         return null;
     }
-
 
     /**
      * A private method to hold positional anomaly detection logic.

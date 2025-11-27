@@ -6,13 +6,13 @@ import java.util.*;
 /**
  * A class to parse and calculate drone data from a CSV log of activity.
  * @author nlevin11
- * @version 11-24
+ * @version 11-26
  */
 public class BaselineCalculator {
     /**
      * A double to hold the amount of time for a drone to reach velocity.
      */
-    private static final double WARMUP_TIME = 10.0;
+    private static final double WARMUP_TIME_MS = 48000;
 
     /**
      * A list to hold all velocity data.
@@ -25,9 +25,14 @@ public class BaselineCalculator {
     private final List<Double> batteryDrainReadings;
 
     /**
-     * A list to hold all battery drain data.
+     * A list to hold all orientation change data.
      */
     private final List<Double> orientationDeltaReadings;
+
+    /**
+     * A list to hold all acceleration data.
+     */
+    private final List<Double> accelerationReadings;
 
     /**
      * A map to hold all previous battery values;
@@ -38,6 +43,11 @@ public class BaselineCalculator {
      * A map to hold all previous orientation values;
      */
     private final Map<Integer, Float> prevOrientationReadings;
+
+    /**
+     * A map to hold all previous orientation values;
+     */
+    private final Map<Integer, Double> prevVelocityReadings;
 
     /**
      * A map to hold all previous timestamp values;
@@ -55,8 +65,10 @@ public class BaselineCalculator {
         this.velocityReadings = new ArrayList<>();
         this.batteryDrainReadings = new ArrayList<>();
         this.orientationDeltaReadings = new ArrayList<>();
+        this.accelerationReadings = new ArrayList<>();
         this.prevBatteryReadings = new HashMap<>();
         this.prevOrientationReadings = new HashMap<>();
+        this.prevVelocityReadings = new HashMap<>();
         this.prevTimestampReadings = new HashMap<>();
         this.firstTimestampReadings = new HashMap<>();
     }
@@ -70,7 +82,6 @@ public class BaselineCalculator {
         try {
             // Process the file
             int lineCount = processLogFile(inputLog);
-
 
             if (velocityReadings.isEmpty()) {
                 System.err.println("No data read from log file. Cannot calculate stats.");
@@ -87,8 +98,12 @@ public class BaselineCalculator {
             double orientationDeltaMean = calculateMean(orientationDeltaReadings);
             double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, orientationDeltaMean);
 
+            double accelerationMean = calculateMean(accelerationReadings);
+            double accelerationStandardDev = calculateStandardDev(accelerationReadings, accelerationMean);
+
             saveStatsToProperties(outputProperties, lineCount, velocityMean, velocityStandardDev, batteryDrainMean,
-                    batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev);
+                    batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev,
+                    accelerationMean, accelerationStandardDev);
             System.out.println(lineCount + " data points calculated.");
         } catch (IOException e) {
             System.err.println("Error during baseline calculation: " + e.getMessage());
@@ -150,8 +165,19 @@ public class BaselineCalculator {
                         firstTimestampReadings.put(droneID, currTimestamp);
                     }
                     
-                    double timeSinceStart = (currTimestamp - firstTimestampReadings.get(droneID)) / 1000.0;
-                    if (timeSinceStart < WARMUP_TIME) {
+                    double timeSinceStart = currTimestamp - firstTimestampReadings.get(droneID);
+                    if (timeSinceStart < WARMUP_TIME_MS) {
+
+                        if (prevVelocityReadings.containsKey(droneID) && prevTimestampReadings.containsKey(droneID)) {
+                            double prevVelocity = prevVelocityReadings.get(droneID);
+                            double prevTimestamp = prevTimestampReadings.get(droneID);
+                            double deltaTime = (currTimestamp - prevTimestamp) / 1000;
+
+                            double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTime;
+                            accelerationReadings.add(currAcceleration);
+                        }
+
+                        prevVelocityReadings.put(droneID, currVelocity);
                         prevTimestampReadings.put(droneID, currTimestamp);
                         prevBatteryReadings.put(droneID, currBattery);
                         prevOrientationReadings.put(droneID, currOrientation);
@@ -206,7 +232,8 @@ public class BaselineCalculator {
      * @throws IOException      Throws an exception when data cannot be written to the file.
      */
     private void saveStatsToProperties(String filepath, int lineCount, double vMean, double vStandardDev, double bMean,
-                                       double bStandardDev, double oMean, double oStandardDev) throws IOException {
+                                       double bStandardDev, double oMean, double oStandardDev, double aMean,
+                                       double aStandardDev) throws IOException {
         Properties props = new Properties();
 
         props.setProperty("velocity.mean", String.valueOf(vMean));
@@ -215,6 +242,8 @@ public class BaselineCalculator {
         props.setProperty("batteryDrain.standardDev", String.valueOf(bStandardDev));
         props.setProperty("orientationDelta.mean", String.valueOf(oMean));
         props.setProperty("orientationDelta.standardDev", String.valueOf(oStandardDev));
+        props.setProperty("acceleration.mean", String.valueOf(aMean));
+        props.setProperty("acceleration.standardDev", String.valueOf(aStandardDev));
 
         try (FileWriter writer = new FileWriter(filepath)) {
             props.store(writer, "Drone Anomaly Baseline Statistics\nGenerated from " +
