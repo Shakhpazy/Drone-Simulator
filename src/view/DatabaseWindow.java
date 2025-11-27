@@ -92,8 +92,8 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
     public void clearReports() {
         for (JTextArea rep : ENTRIES) {
             RESULT_PANEL.remove(rep);
-            ENTRIES.remove(rep);
         }
+        ENTRIES.clear();
         revalidate();
         repaint();
     }
@@ -106,11 +106,25 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         setVisible(false);
         setLayout(new BorderLayout());
+        initMenuBar();
         initPanels();
         pack();
         setResizable(false);
         setLocationRelativeTo(null);
         setTitle("Drone Anomaly Database");
+    }
+
+    /**
+     * Initializes the JMenuBar for file saving.
+     */
+    private void initMenuBar() {
+        JMenuBar bar = new JMenuBar();
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem saveAs = new JMenuItem("Save current selection as...");
+        saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
+        fileMenu.add(saveAs);
+        bar.add(fileMenu);
+        setJMenuBar(bar);
     }
 
     /**
