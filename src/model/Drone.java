@@ -21,7 +21,7 @@ public class Drone extends AbstractDrone {
     public static final float MAX_LONGITUDE = 180.0f;
 
     /** Step size for increasing or decreasing velocity during movement. */
-    private static final float ACCELERATION_STEP = .07f;
+    private static final float ACCELERATION_STEP = .5f;
 
     private static final float ANOMALY_EXTRA_DRAIN_RATE = 0.1f;
 
