@@ -2,6 +2,7 @@ package controller;
 
 import model.*;
 
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -98,14 +99,15 @@ public class ZScoreMonitor {
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
+            Map<DroneInterface, TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
             //For each drone
-            for (int i = 0; i < drones.size(); i++) {
-                DroneInterface drone = drones.get(i);
+            for (Map.Entry<DroneInterface, TelemetryRecord[]> entry : droneTelemetry.entrySet()) {
+                DroneInterface drone = entry.getKey();
+                TelemetryRecord[] pair = entry.getValue();
 
                 //Get Current Telemetry
-                TelemetryRecord myCurrentTelemetry = droneTelemetry.get(i)[1];
+                TelemetryRecord myCurrentTelemetry = pair[1];
 
                 //Log telemetry data
                 exporter.logTelemetryData(myCurrentTelemetry, headers);

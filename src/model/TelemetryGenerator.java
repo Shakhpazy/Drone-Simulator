@@ -53,6 +53,10 @@ public class TelemetryGenerator {
         myDrones.add(theDrone);
     }
 
+    public void removeDrone(final DroneInterface theDrone) {
+        myDrones.remove((theDrone));
+    }
+
     /**
      * Iterates through all drones in the simulation. For each drone:
      * - Skips processing if the drone is not alive.
@@ -62,15 +66,9 @@ public class TelemetryGenerator {
     public Map<DroneInterface, TelemetryRecord[]> processAllDrones(final float deltaTime) {
 
         Map<DroneInterface, TelemetryRecord[]> map = new HashMap<>();
-
         for (DroneInterface drone : myDrones) {
 
             if (!drone.isAlive()) {
-                // Skip movement, telemetry generation, and anomaly logic
-                TelemetryRecord prev = drone.getPreviousTelemetryRecord();
-                TelemetryRecord curr = prev; // dead drone stays frozen
-
-                map.put(drone, new TelemetryRecord[]{prev, curr});
                 continue;
             }
 
@@ -148,20 +146,25 @@ public class TelemetryGenerator {
      * to 0. Dead drones (already not alive) are skipped.
      */
     private void checkCollisions() {
-        HashMap<String, DroneInterface> seen = new HashMap<>();
+        for (int i = 0; i < myDrones.size(); i++) {
+            DroneInterface a = myDrones.get(i);
+            if (!a.isAlive()) continue;
 
-        for (DroneInterface drone: myDrones) {
-            if (!drone.isAlive()) {
-                continue;
-            }
-            //cast to an Int to account for the drone having some kind of size associated to it.
-            String position = (int)drone.getLongitude() + "," + (int)drone.getLatitude() + "," + (int)drone.getAltitude();
-            if (seen.containsKey(position)) {
-                drone.collided();
-                seen.get(position).collided();
-            }
-            else {
-                seen.put(position, drone);
+            for (int j = i + 1; j < myDrones.size(); j++) {
+                DroneInterface b = myDrones.get(j);
+                if (!b.isAlive()) continue;
+
+                float dx = a.getLongitude() - b.getLongitude();
+                float dy = a.getLatitude() - b.getLatitude();
+                float dz = a.getAltitude() - b.getAltitude();
+
+                float distanceSq = dx*dx + dy*dy + dz*dz;
+
+                // collision threshold (adjust if needed)
+                if (distanceSq < 4.0f) {  // radius of 2 units
+                    a.collided();
+                    b.collided();
+                }
             }
         }
     }
