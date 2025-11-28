@@ -21,7 +21,7 @@ public class Drone extends AbstractDrone {
     public static final float MAX_LONGITUDE = 180.0f;
 
     /** Step size for increasing or decreasing velocity during movement. */
-    private static final float ACCELERATION_STEP = .07f;
+    private static final float ACCELERATION_STEP = .5f;
 
     private static final float ANOMALY_EXTRA_DRAIN_RATE = 0.1f;
 
@@ -113,7 +113,7 @@ public class Drone extends AbstractDrone {
         float longitude = this.getLongitude();
         float altitude = this.getAltitude();
         float velocity = this.getVelocity();
-
+        float battery = this.getBatteryLevel();
         float drained = 0f;
 
         AnomalyEnum anomaly = movementAnomalies[myRandom.nextInt(movementAnomalies.length)];
@@ -125,8 +125,9 @@ public class Drone extends AbstractDrone {
                 break;
 
             case BATTERY_FAIL:
-                setAltitude(0);
-                setBatteryLevel(0);
+                altitude = 0;
+                battery = 0;
+                velocity = 0;
                 break;
 
             case ALTITUDE:
@@ -153,17 +154,14 @@ public class Drone extends AbstractDrone {
                 break;
         }
 
-        // distance moved due to anomaly, might not need this at all
-        float anomalyDistance = (float) Math.sqrt(
-                Math.pow(longitude - this.getLongitude(), 2) +
-                        Math.pow(latitude  - this.getLatitude(), 2) +
-                        Math.pow(altitude  - this.getAltitude(), 2)
-        );
 
-        if (anomaly != AnomalyEnum.BATTERY_FAIL) {
-            drained += batteryDrained(theDeltaTime);
+        if (anomaly == AnomalyEnum.BATTERY_FAIL) {
+            setVelocity(velocity);
+            setAltitude(altitude);
+            setBatteryLevel(battery);
         }
 
+        drained += batteryDrained(theDeltaTime);
         float degree = getOrientation().findNextOrientation(
                 this.getLongitude(),
                 this.getLatitude(),

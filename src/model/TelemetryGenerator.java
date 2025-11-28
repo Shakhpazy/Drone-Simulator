@@ -53,63 +53,63 @@ public class TelemetryGenerator {
         myDrones.add(theDrone);
     }
 
+    public void removeDrone(final DroneInterface theDrone) {
+        myDrones.remove((theDrone));
+    }
+
     /**
      * Iterates through all drones in the simulation. For each drone:
      * - Skips processing if the drone is not alive.
      * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
      *   a random anomaly move or a normal route-following move.
      */
-    public ArrayList<TelemetryRecord[]> processAllDrones(final float deltaTime) {
-        ArrayList<TelemetryRecord[]> telemetryList = new ArrayList<>();
+    public Map<DroneInterface, TelemetryRecord[]> processAllDrones(final float deltaTime) {
 
+        Map<DroneInterface, TelemetryRecord[]> map = new HashMap<>();
         for (DroneInterface drone : myDrones) {
+
             if (!drone.isAlive()) {
                 continue;
-//                TelemetryRecord deadstate = drone.generateTelemetryRecord();
-//                telemetryList.add(new TelemetryRecord[]{deadstate, deadstate});
             }
-            else {
-                TelemetryRecord prev = drone.getPreviousTelemetryRecord();
-                boolean spoofed = false;
 
-                if (myRandom.nextInt(100) < RANDOM_PERCENT) {
-                    getRandomMove(drone, deltaTime);
-                    if (drone.getMyLastAnomaly() == AnomalyEnum.SPOOFING) {
-                        spoofed = true;
-                    }
-                } else {
-                    getMove(drone, deltaTime);
+            TelemetryRecord prev = drone.getPreviousTelemetryRecord();
+            boolean spoofed = false;
+
+            if (myRandom.nextInt(100) < RANDOM_PERCENT) {
+                getRandomMove(drone, deltaTime);
+                if (drone.getMyLastAnomaly() == AnomalyEnum.SPOOFING) {
+                    spoofed = true;
                 }
-
-                TelemetryRecord curr;
-
-                if (spoofed) {
-                    float offsetLon = myRandom.nextFloat(-SPOOFING_CHANGE, SPOOFING_CHANGE);
-                    float offsetLat = myRandom.nextFloat(-SPOOFING_CHANGE, SPOOFING_CHANGE);
-                    float offsetAlt = myRandom.nextFloat(-SPOOFING_CHANGE, SPOOFING_CHANGE);
-
-                    curr = new TelemetryRecord(
-                            drone.getId(),
-                            drone.getLongitude() + offsetLon,
-                            drone.getLatitude() + offsetLat,
-                            drone.getAltitude() + offsetAlt,
-                            drone.getVelocity(),
-                            drone.getBatteryLevel(),
-                            drone.getOrientation().getDegree(),
-                            System.currentTimeMillis()
-                    );
-                } else {
-                    curr = drone.generateTelemetryRecord();
-                }
-                telemetryList.add(new TelemetryRecord[]{prev, curr});
-
-                drone.setPrevTelemetryRecord(curr); //so that the time state stays consistent
+            } else {
+                getMove(drone, deltaTime);
             }
+
+            TelemetryRecord curr;
+            if (spoofed) {
+                float offsetLon = (myRandom.nextFloat() * 2 - 1) * SPOOFING_CHANGE;
+                float offsetLat = (myRandom.nextFloat() * 2 - 1) * SPOOFING_CHANGE;
+                float offsetAlt = (myRandom.nextFloat() * 2 - 1) * SPOOFING_CHANGE;
+
+                curr = new TelemetryRecord(
+                        drone.getId(),
+                        drone.getLongitude() + offsetLon,
+                        drone.getLatitude() + offsetLat,
+                        drone.getAltitude() + offsetAlt,
+                        drone.getVelocity(),
+                        drone.getBatteryLevel(),
+                        drone.getOrientation().getDegree(),
+                        System.currentTimeMillis()
+                );
+            } else {
+                curr = drone.generateTelemetryRecord();
+            }
+
+            map.put(drone, new TelemetryRecord[]{prev, curr});
+            drone.setPrevTelemetryRecord(curr);
         }
 
-        //After all drones move to the next step we can check for collisions.
         checkCollisions();
-        return telemetryList;
+        return map;
     }
 
     /**
@@ -146,20 +146,25 @@ public class TelemetryGenerator {
      * to 0. Dead drones (already not alive) are skipped.
      */
     private void checkCollisions() {
-        HashMap<String, DroneInterface> seen = new HashMap<>();
+        for (int i = 0; i < myDrones.size(); i++) {
+            DroneInterface a = myDrones.get(i);
+            if (!a.isAlive()) continue;
 
-        for (DroneInterface drone: myDrones) {
-            if (!drone.isAlive()) {
-                continue;
-            }
-            //cast to an Int to account for the drone having some kind of size associated to it.
-            String position = (int)drone.getLongitude() + "," + (int)drone.getLatitude() + "," + (int)drone.getAltitude();
-            if (seen.containsKey(position)) {
-                drone.collided();
-                seen.get(position).collided();
-            }
-            else {
-                seen.put(position, drone);
+            for (int j = i + 1; j < myDrones.size(); j++) {
+                DroneInterface b = myDrones.get(j);
+                if (!b.isAlive()) continue;
+
+                float dx = a.getLongitude() - b.getLongitude();
+                float dy = a.getLatitude() - b.getLatitude();
+                float dz = a.getAltitude() - b.getAltitude();
+
+                float distanceSq = dx*dx + dy*dy + dz*dz;
+
+                // collision threshold (adjust if needed)
+                if (distanceSq < 4.0f) {  // radius of 2 units
+                    a.collided();
+                    b.collided();
+                }
             }
         }
     }
