@@ -12,7 +12,12 @@ public class BaselineCalculator {
     /**
      * A double to hold the amount of time for a drone to reach velocity.
      */
-    private static final double WARMUP_TIME_MS = 48000;
+    private static final double WARMUP_TIME_MS = 30000;
+
+    /**
+     * A double to hold the threshold for drone acceleration.
+     */
+    private static final double ACCELERATION_THRESHOLD = 0.01;
 
     /**
      * A list to hold all velocity data.
@@ -160,64 +165,59 @@ public class BaselineCalculator {
                     float currBattery = Float.parseFloat(values[batteryIndex].trim());
                     float currOrientation = Float.parseFloat(values[orientationIndex].trim());
                     double currTimestamp = Double.parseDouble(values[timestampIndex].trim());
-                    
+
                     if (!firstTimestampReadings.containsKey(droneID)) {
                         firstTimestampReadings.put(droneID, currTimestamp);
                     }
-                    
-                    double timeSinceStart = currTimestamp - firstTimestampReadings.get(droneID);
-                    if (timeSinceStart < WARMUP_TIME_MS) {
 
-                        if (prevVelocityReadings.containsKey(droneID) && prevTimestampReadings.containsKey(droneID)) {
-                            double prevVelocity = prevVelocityReadings.get(droneID);
-                            double prevTimestamp = prevTimestampReadings.get(droneID);
-                            double deltaTime = (currTimestamp - prevTimestamp) / 1000;
-
-                            double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTime;
-                            accelerationReadings.add(currAcceleration);
-                        }
-
-                        prevVelocityReadings.put(droneID, currVelocity);
-                        prevTimestampReadings.put(droneID, currTimestamp);
-                        prevBatteryReadings.put(droneID, currBattery);
-                        prevOrientationReadings.put(droneID, currOrientation);
-                        continue;
-                    }
-                    
-                    velocityReadings.add(currVelocity);
-
-                    if (prevTimestampReadings.containsKey(droneID)) {
+                    if (prevTimestampReadings.containsKey(droneID) && prevVelocityReadings.containsKey(droneID)) {
                         double prevTimestamp = prevTimestampReadings.get(droneID);
+                        double deltaTimeSec = (currTimestamp - prevTimestamp) / 1000;
+                        double prevVelocity = prevVelocityReadings.get(droneID);
 
-                        double deltaTime = currTimestamp - prevTimestamp;
+                        double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTimeSec;
+                        if (currAcceleration > ACCELERATION_THRESHOLD) accelerationReadings.add(currAcceleration);
+                    }
 
-                        if (prevBatteryReadings.containsKey(droneID)) {
-                            float prevBattery = prevBatteryReadings.get(droneID);
-                            float drain = (prevBattery - currBattery);
-                            double normalizedDrain = drain / deltaTime;
-                            batteryDrainReadings.add(normalizedDrain);
-                        }
+                    double timeSinceStart = currTimestamp - firstTimestampReadings.get(droneID);
+                    if (timeSinceStart >= WARMUP_TIME_MS) {
+                        velocityReadings.add(currVelocity);
 
-                        if (prevOrientationReadings.containsKey(droneID)) {
-                            float prevOrientation = prevOrientationReadings.get(droneID);
+                        if (prevTimestampReadings.containsKey(droneID)) {
+                            double prevTimestamp = prevTimestampReadings.get(droneID);
 
-                            double diff = Math.abs(currOrientation - prevOrientation);
-                            if (diff > 180) {
-                                diff = 360 - diff;
+                            double deltaTime = currTimestamp - prevTimestamp;
+
+                            if (prevBatteryReadings.containsKey(droneID)) {
+                                float prevBattery = prevBatteryReadings.get(droneID);
+                                float drain = (prevBattery - currBattery);
+                                double normalizedDrain = drain / deltaTime;
+                                batteryDrainReadings.add(normalizedDrain);
                             }
-                            if (diff > 1.0) {
-                                orientationDeltaReadings.add(diff);
+
+                            if (prevOrientationReadings.containsKey(droneID)) {
+                                float prevOrientation = prevOrientationReadings.get(droneID);
+
+                                double diff = Math.abs(currOrientation - prevOrientation);
+                                if (diff > 180) {
+                                    diff = 360 - diff;
+                                }
+                                if (diff > 1.0) {
+                                    orientationDeltaReadings.add(diff);
+                                }
                             }
                         }
                     }
-
+                    prevVelocityReadings.put(droneID, currVelocity);
                     prevTimestampReadings.put(droneID, currTimestamp);
                     prevBatteryReadings.put(droneID, currBattery);
                     prevOrientationReadings.put(droneID, currOrientation);
+
                 } catch (NumberFormatException e) {
                     System.err.println("Skipping line with unparseable number: " + line);
                 }
             }
+
         }
         return lineCount;
     }

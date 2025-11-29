@@ -201,7 +201,7 @@ public class AnomalyDetector {
             double effectiveStandardDev = Math.max(ACCELERATION_STANDARD_DEV_BASELINE, 0.05);
             double accelerationZScore = (currAcceleration - ACCELERATION_MEAN_BASELINE)
                     / effectiveStandardDev;
-            if (Math.abs(accelerationZScore) > MAX_Z_SCORE) {
+            if (Math.abs(accelerationZScore) > MAX_Z_SCORE && currTime != firstTimestamp) {
                 System.out.println(currAcceleration);
                 return AnomalyEnum.ACCELERATION;
             }
