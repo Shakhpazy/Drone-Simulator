@@ -77,7 +77,6 @@ public class DroneMonitorApp {
             DroneInterface drone = myDroneGenerator.createDrone(theRoute);
             gen.addDrone(drone);
         }
-//        ArrayList<DroneInterface> drones = gen.getMyDrones(); //Get an arraylist of drones
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();
@@ -112,11 +111,20 @@ public class DroneMonitorApp {
 
                 //If anomaly is not null.
                 if (anomaly != null) {
-                    if(anomaly.anomalyType().contains("Out of Bounds")) { //If velocity, or  play spoof
-                        AlertPlayer.INSTANCE.addSoundToQueue("spoof");
+                    String anomalyString = anomaly.anomalyType();
+                    if(anomalyString.contains("Out of Bounds")) {
+                        AlertPlayer.INSTANCE.addSoundToQueue("out-of-bounds");
                     }
-                    else if(anomaly.anomalyType().contains("Battery")) {
+                    else if(anomalyString.contains("Battery") &&
+                            !anomalyString.contains("Failure")) {
                         AlertPlayer.INSTANCE.addSoundToQueue("battery");
+                    }
+                    else if(anomalyString.contains("Acceleration") &&
+                            !anomalyString.contains("Speed")) {
+                        AlertPlayer.INSTANCE.addSoundToQueue("acceleration");
+                    }
+                    else if(anomalyString.contains("Spoof")) {
+                        AlertPlayer.INSTANCE.addSoundToQueue("spoof");
                     }
                     else {
                         AlertPlayer.INSTANCE.addSoundToQueue("crash");
