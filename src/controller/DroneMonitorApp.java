@@ -34,11 +34,6 @@ public class DroneMonitorApp {
     /** The drone generator used to instantiate drone objects. */
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
-    // ===============
-    //  CONFIGURATION
-    // ===============
-//    private static final int FPS = 120; //REVISIT: Add to slider?
-
     /*
      * How long the program waits between updates (in milliseconds)
      */
@@ -55,6 +50,9 @@ public class DroneMonitorApp {
      */
    private static final float MY_ANOMALY_PERCENT = 1.0F;
 
+    /**
+     * A constant to define the drone count for the simulation.
+     */
    private static final float MY_DRONE_COUNT = 10;
 
     /**
