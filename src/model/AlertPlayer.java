@@ -19,7 +19,7 @@ public enum AlertPlayer {
     private static final String ACCELERATION_ALERT_PATH = "src/SFX/acceleration.wav";
 
     //Set up playback queue to make sure each sound is played in order.
-    private final BlockingQueue<String> myPlaybackQueue = new LinkedBlockingQueue<String>();
+    private final BlockingQueue<String> myPlaybackQueue = new LinkedBlockingQueue<>();
     private final Thread myPlaybackThread;
     private volatile boolean isRunning = true;
 
@@ -144,7 +144,7 @@ public enum AlertPlayer {
             if(theAlert != null && theAlert.isOpen()) {
                 theAlert.stop();
                 theAlert.close();
-                System.out.println("Successfully closed alert: " + theAlert.toString());
+                System.out.println("Successfully closed alert: " + theAlert);
             }
         }
         myAlerts.clear();
@@ -152,19 +152,13 @@ public enum AlertPlayer {
     }
 
     private String getPathForSound(String theSoundName) { //Helper method to return sound paths based on sound name
-        switch(theSoundName) {
-            case "battery":
-                return BATTERY_ALERT_PATH;
-            case "crash":
-                return CRASH_ALERT_PATH;
-            case "spoof":
-                return SPOOF_ALERT_PATH;
-            case "out-of-bounds":
-                return BOUNDS_ALERT_PATH;
-            case "acceleration":
-                return ACCELERATION_ALERT_PATH;
-            default:
-                return null;
-        }
+        return switch (theSoundName) {
+            case "battery" -> BATTERY_ALERT_PATH;
+            case "crash" -> CRASH_ALERT_PATH;
+            case "spoof" -> SPOOF_ALERT_PATH;
+            case "out-of-bounds" -> BOUNDS_ALERT_PATH;
+            case "acceleration" -> ACCELERATION_ALERT_PATH;
+            default -> null;
+        };
     }
 }
