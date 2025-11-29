@@ -49,8 +49,13 @@ public class DroneMonitorApp {
     * MY_DELTA_TIME = MY_UPDATE_TIME in seconds due to implementation.
     */
    private static final double MY_DELTA_TIME = MY_UPDATE_TIME / 1000.0;
-
+    /**
+     * The anomaly percentage that Telemetry Generator should use
+     * to determine frequency of anomalous movement.
+     */
    private static final float MY_ANOMALY_PERCENT = 1.0F;
+
+   private static final float MY_DRONE_COUNT = 10;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -67,12 +72,12 @@ public class DroneMonitorApp {
         TelemetryGenerator gen = TelemetryGenerator.getInstance(MY_ANOMALY_PERCENT);
 
         //Generate Drones
-        for (int i = 0; i < 1; i++) {
+        for (int i = 0; i < MY_DRONE_COUNT; i++) {
             ArrayList<RoutePoint> theRoute = myRouteGenerator.generateRoute();
             DroneInterface drone = myDroneGenerator.createDrone(theRoute);
             gen.addDrone(drone);
         }
-        ArrayList<DroneInterface> drones = gen.getMyDrones();
+        ArrayList<DroneInterface> drones = gen.getMyDrones(); //Get an arraylist of drones
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();
@@ -80,7 +85,7 @@ public class DroneMonitorApp {
         //Initialize AnomalyDatabase
         AnomalyDatabase anomalyDTBS = new AnomalyDatabase();
         anomalyDTBS.initialize();
-        new DatabaseController(anomalyDTBS);
+        new DatabaseController(anomalyDTBS); //Initialize Database controllers
 
         //Output to console if developer mode is enabled
         if(MY_DEV_MODE) {
@@ -115,7 +120,7 @@ public class DroneMonitorApp {
 
                 //If anomaly is not null.
                 if (anomaly != null) {
-                    if(anomaly.anomalyType().contains("Out of Bounds")) {
+                    if(anomaly.anomalyType().contains("Out of Bounds")) { //If velocity, or  play spoof
                         AlertPlayer.INSTANCE.addSoundToQueue("spoof");
                     }
                     else if(anomaly.anomalyType().contains("Battery")) {
@@ -141,12 +146,12 @@ public class DroneMonitorApp {
 
                 //Draw the drone on the view.
                 view.drawDrone(drone.getId(), location, theTelemetry);
-
-                //Print to console if developer mode is enabled
-                if(MY_DEV_MODE) {
-                    printDrone(drone);
-                    System.out.println();
-                }
+//FIXME: DELETE ONCE NO LONGER NEEDED
+//                //Print to console if developer mode is enabled
+//                if(MY_DEV_MODE) {
+//                    printDrone(drone);
+//                    System.out.println();
+//                }
             }
         };
 
@@ -205,13 +210,13 @@ public class DroneMonitorApp {
      */
     private static String telemetryToString(TelemetryRecord theTelemetryRecord) {
         StringBuilder sb = new StringBuilder();
-        sb.append("id: ").append(theTelemetryRecord.id()).append("\n");
-        sb.append("altitude: ").append(theTelemetryRecord.altitude()).append("\n");
-        sb.append("longitude: ").append(theTelemetryRecord.longitude()).append("\n");
-        sb.append("latitude: ").append(theTelemetryRecord.latitude()).append("\n");
-        sb.append("velocity: ").append(theTelemetryRecord.velocity()).append("\n");
-        sb.append("batteryLevel: ").append(theTelemetryRecord.batterLevel()).append("\n");
-        sb.append("orientation: ").append(theTelemetryRecord.orientation()).append("\n");
+        sb.append("ID: ").append(theTelemetryRecord.id()).append("\n");
+        sb.append("Altitude: ").append(theTelemetryRecord.altitude()).append("\n");
+        sb.append("Longitude: ").append(theTelemetryRecord.longitude()).append("\n");
+        sb.append("Latitude: ").append(theTelemetryRecord.latitude()).append("\n");
+        sb.append("Velocity: ").append(theTelemetryRecord.velocity()).append("\n");
+        sb.append("Battery Level: ").append(theTelemetryRecord.batterLevel()).append("\n");
+        sb.append("Orientation: ").append(theTelemetryRecord.orientation()).append("\n");
         return sb.toString();
     }
 }
