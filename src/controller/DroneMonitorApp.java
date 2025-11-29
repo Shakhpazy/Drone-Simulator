@@ -3,6 +3,7 @@ package controller;
 import model.*;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ public class DroneMonitorApp {
      * Flag to enable or disable developer mode, which prints telemetry to the console
      * and clears the database on exit.
      */
-    private static boolean MY_DEV_MODE = true;
+    private static final boolean MY_DEV_MODE = true;
 
     /** The route generator used to create flight paths for the drones. */
     private static final RouteGenerator myRouteGenerator = new RouteGenerator();
@@ -42,7 +43,6 @@ public class DroneMonitorApp {
      * How long the program waits between updates (in milliseconds)
      */
     private static final long MY_UPDATE_TIME = 500;
-//  OLD: private static final long MY_DELTA_TIME = FPS/1000;
 
    /**
     * Time delta for smooth updates in TelemetryGenerator
@@ -77,7 +77,7 @@ public class DroneMonitorApp {
             DroneInterface drone = myDroneGenerator.createDrone(theRoute);
             gen.addDrone(drone);
         }
-        ArrayList<DroneInterface> drones = gen.getMyDrones(); //Get an arraylist of drones
+//        ArrayList<DroneInterface> drones = gen.getMyDrones(); //Get an arraylist of drones
 
         //Initialize AnomalyDetector
         AnomalyDetector detector = new AnomalyDetector();
@@ -87,33 +87,25 @@ public class DroneMonitorApp {
         anomalyDTBS.initialize();
         new DatabaseController(anomalyDTBS); //Initialize Database controllers
 
-        //Output to console if developer mode is enabled
-        if(MY_DEV_MODE) {
-            System.out.println("---- START ----");
-            for (DroneInterface drone : drones) {
-                printDrone(drone);
-                System.out.println();
-            }
-        }
-
-        /**
+        /*
          * A runnable task that simulates the next step of the drone monitoring system.
          * It processes telemetry for all drones, updates the view, checks for anomalies,
          * and logs reports to the database and view.
          */
         Runnable simulateNextStep = () -> {
             //Get Previous and Current telemetry of all drones.
-            ArrayList<TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
+            Map<DroneInterface, TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
             //For each drone
-            for (int i = 0; i < drones.size(); i++) {
-                DroneInterface drone = drones.get(i);
+            for (Map.Entry<DroneInterface, TelemetryRecord[]> entry : droneTelemetry.entrySet()) {
+                DroneInterface drone = entry.getKey();
+                TelemetryRecord[] recordPair = entry.getValue();
 
                 //Get previous Telemetry
-                TelemetryRecord myBeforeTelemetryRecord = droneTelemetry.get(i)[0];
+                TelemetryRecord myBeforeTelemetryRecord = recordPair[0];
 
                 //Get Current Telemetry
-                TelemetryRecord myCurrentTelemetryRecord = droneTelemetry.get(i)[1];
+                TelemetryRecord myCurrentTelemetryRecord = recordPair[1];
 
                 //Send previous and current telemetry to anomaly detector for analysis
                 AnomalyReport anomaly = detector.detect(myBeforeTelemetryRecord, myCurrentTelemetryRecord);
@@ -136,22 +128,14 @@ public class DroneMonitorApp {
                 }
 
                 //Get drone location to pass to view
-//                float[] location = {(float) myCurrentTelemetryRecord.get("longitude"),
-//                        (float) myCurrentTelemetryRecord.get("latitude")};
-                float[] location = {(float) myCurrentTelemetryRecord.longitude(),
-                        (float) myCurrentTelemetryRecord.latitude()};
+                float[] location = {myCurrentTelemetryRecord.longitude(),
+                        myCurrentTelemetryRecord.latitude()};
 
                 //Get telemetry as a String to pass to view
                 String theTelemetry = telemetryToString(myCurrentTelemetryRecord);
 
                 //Draw the drone on the view.
                 view.drawDrone(drone.getId(), location, theTelemetry);
-//FIXME: DELETE ONCE NO LONGER NEEDED
-//                //Print to console if developer mode is enabled
-//                if(MY_DEV_MODE) {
-//                    printDrone(drone);
-//                    System.out.println();
-//                }
             }
         };
 
@@ -173,33 +157,9 @@ public class DroneMonitorApp {
 
         //Clear database after each use if developer mode is enabled.
         if (MY_DEV_MODE) {
-            Runnable clearDatabase = () -> {
-                anomalyDTBS.clear();
-            };
+            Runnable clearDatabase = anomalyDTBS::clear;
             Runtime.getRuntime().addShutdownHook(new Thread(clearDatabase));
         }
-    }
-
-    /**
-     * Prints the current telemetry data of a specific drone to the console for debugging purposes.
-     * Enabled only in developer mode.
-     *
-     * @param theDrone The {@link DroneInterface} object representing the drone.
-     */
-    private static void printDrone(DroneInterface theDrone) {
-        RoutePoint target = theDrone.getNextPoint(); // the waypoint it’s heading to
-        System.out.printf(
-                "Drone %d | Lon=%.2f Lat=%.2f Alt=%.2f Vel=%.2f Battery=%f | Heading to (%.0f, %.0f, %.0f)%n",
-                theDrone.getId(),
-                theDrone.getLongitude(),
-                theDrone.getLatitude(),
-                theDrone.getAltitude(),
-                theDrone.getVelocity(),
-                theDrone.getBatteryLevel(),
-                target.getLongitude(),
-                target.getLatitude(),
-                target.getAltitude()
-        );
     }
 
     /**
