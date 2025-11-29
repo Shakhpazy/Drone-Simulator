@@ -15,6 +15,8 @@ public enum AlertPlayer {
     private static final String BATTERY_ALERT_PATH = "src/SFX/battery.wav";
     private static final String CRASH_ALERT_PATH = "src/SFX/crash.wav";
     private static final String SPOOF_ALERT_PATH = "src/SFX/spoof.wav";
+    private static final String BOUNDS_ALERT_PATH = "src/SFX/out-of-bounds.wav";
+    private static final String ACCELERATION_ALERT_PATH = "src/SFX/acceleration.wav";
 
     //Set up playback queue to make sure each sound is played in order.
     private final BlockingQueue<String> myPlaybackQueue = new LinkedBlockingQueue<String>();
@@ -26,6 +28,8 @@ public enum AlertPlayer {
         loadSound("battery", BATTERY_ALERT_PATH);
         loadSound("crash", CRASH_ALERT_PATH);
         loadSound("spoof", SPOOF_ALERT_PATH);
+        loadSound("out-of-bounds", BOUNDS_ALERT_PATH);
+        loadSound("acceleration", ACCELERATION_ALERT_PATH);
 
         // Initialize and start the dedicated playback thread to process queue
         myPlaybackThread = new Thread(this::playbackLoop, "SoundPlaybackThread");
@@ -155,6 +159,10 @@ public enum AlertPlayer {
                 return CRASH_ALERT_PATH;
             case "spoof":
                 return SPOOF_ALERT_PATH;
+            case "out-of-bounds":
+                return BOUNDS_ALERT_PATH;
+            case "acceleration":
+                return ACCELERATION_ALERT_PATH;
             default:
                 return null;
         }
