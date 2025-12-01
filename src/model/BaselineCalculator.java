@@ -6,13 +6,18 @@ import java.util.*;
 /**
  * A class to parse and calculate drone data from a CSV log of activity.
  * @author nlevin11
- * @version 11-24
+ * @version 11-26
  */
 public class BaselineCalculator {
     /**
      * A double to hold the amount of time for a drone to reach velocity.
      */
-    private static final double WARMUP_TIME = 10.0;
+    private static final double WARMUP_TIME_MS = 30000;
+
+    /**
+     * A double to hold the threshold for drone acceleration.
+     */
+    private static final double ACCELERATION_THRESHOLD = 0.01;
 
     /**
      * A list to hold all velocity data.
@@ -25,9 +30,14 @@ public class BaselineCalculator {
     private final List<Double> batteryDrainReadings;
 
     /**
-     * A list to hold all battery drain data.
+     * A list to hold all orientation change data.
      */
     private final List<Double> orientationDeltaReadings;
+
+    /**
+     * A list to hold all acceleration data.
+     */
+    private final List<Double> accelerationReadings;
 
     /**
      * A map to hold all previous battery values;
@@ -38,6 +48,11 @@ public class BaselineCalculator {
      * A map to hold all previous orientation values;
      */
     private final Map<Integer, Float> prevOrientationReadings;
+
+    /**
+     * A map to hold all previous orientation values;
+     */
+    private final Map<Integer, Double> prevVelocityReadings;
 
     /**
      * A map to hold all previous timestamp values;
@@ -55,8 +70,10 @@ public class BaselineCalculator {
         this.velocityReadings = new ArrayList<>();
         this.batteryDrainReadings = new ArrayList<>();
         this.orientationDeltaReadings = new ArrayList<>();
+        this.accelerationReadings = new ArrayList<>();
         this.prevBatteryReadings = new HashMap<>();
         this.prevOrientationReadings = new HashMap<>();
+        this.prevVelocityReadings = new HashMap<>();
         this.prevTimestampReadings = new HashMap<>();
         this.firstTimestampReadings = new HashMap<>();
     }
@@ -70,7 +87,6 @@ public class BaselineCalculator {
         try {
             // Process the file
             int lineCount = processLogFile(inputLog);
-
 
             if (velocityReadings.isEmpty()) {
                 System.err.println("No data read from log file. Cannot calculate stats.");
@@ -87,8 +103,12 @@ public class BaselineCalculator {
             double orientationDeltaMean = calculateMean(orientationDeltaReadings);
             double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, orientationDeltaMean);
 
+            double accelerationMean = calculateMean(accelerationReadings);
+            double accelerationStandardDev = calculateStandardDev(accelerationReadings, accelerationMean);
+
             saveStatsToProperties(outputProperties, lineCount, velocityMean, velocityStandardDev, batteryDrainMean,
-                    batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev);
+                    batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev,
+                    accelerationMean, accelerationStandardDev);
             System.out.println(lineCount + " data points calculated.");
         } catch (IOException e) {
             System.err.println("Error during baseline calculation: " + e.getMessage());
@@ -145,53 +165,59 @@ public class BaselineCalculator {
                     float currBattery = Float.parseFloat(values[batteryIndex].trim());
                     float currOrientation = Float.parseFloat(values[orientationIndex].trim());
                     double currTimestamp = Double.parseDouble(values[timestampIndex].trim());
-                    
+
                     if (!firstTimestampReadings.containsKey(droneID)) {
                         firstTimestampReadings.put(droneID, currTimestamp);
                     }
-                    
-                    double timeSinceStart = (currTimestamp - firstTimestampReadings.get(droneID)) / 1000.0;
-                    if (timeSinceStart < WARMUP_TIME) {
-                        prevTimestampReadings.put(droneID, currTimestamp);
-                        prevBatteryReadings.put(droneID, currBattery);
-                        prevOrientationReadings.put(droneID, currOrientation);
-                        continue;
-                    }
-                    
-                    velocityReadings.add(currVelocity);
 
-                    if (prevTimestampReadings.containsKey(droneID)) {
+                    if (prevTimestampReadings.containsKey(droneID) && prevVelocityReadings.containsKey(droneID)) {
                         double prevTimestamp = prevTimestampReadings.get(droneID);
+                        double deltaTimeSec = (currTimestamp - prevTimestamp) / 1000;
+                        double prevVelocity = prevVelocityReadings.get(droneID);
 
-                        double deltaTime = currTimestamp - prevTimestamp;
+                        double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTimeSec;
+                        if (currAcceleration > ACCELERATION_THRESHOLD) accelerationReadings.add(currAcceleration);
+                    }
 
-                        if (prevBatteryReadings.containsKey(droneID)) {
-                            float prevBattery = prevBatteryReadings.get(droneID);
-                            float drain = (prevBattery - currBattery);
-                            double normalizedDrain = drain / deltaTime;
-                            batteryDrainReadings.add(normalizedDrain);
-                        }
+                    double timeSinceStart = currTimestamp - firstTimestampReadings.get(droneID);
+                    if (timeSinceStart >= WARMUP_TIME_MS) {
+                        velocityReadings.add(currVelocity);
 
-                        if (prevOrientationReadings.containsKey(droneID)) {
-                            float prevOrientation = prevOrientationReadings.get(droneID);
+                        if (prevTimestampReadings.containsKey(droneID)) {
+                            double prevTimestamp = prevTimestampReadings.get(droneID);
 
-                            double diff = Math.abs(currOrientation - prevOrientation);
-                            if (diff > 180) {
-                                diff = 360 - diff;
+                            double deltaTime = currTimestamp - prevTimestamp;
+
+                            if (prevBatteryReadings.containsKey(droneID)) {
+                                float prevBattery = prevBatteryReadings.get(droneID);
+                                float drain = (prevBattery - currBattery);
+                                double normalizedDrain = drain / deltaTime;
+                                batteryDrainReadings.add(normalizedDrain);
                             }
-                            if (diff > 1.0) {
-                                orientationDeltaReadings.add(diff);
+
+                            if (prevOrientationReadings.containsKey(droneID)) {
+                                float prevOrientation = prevOrientationReadings.get(droneID);
+
+                                double diff = Math.abs(currOrientation - prevOrientation);
+                                if (diff > 180) {
+                                    diff = 360 - diff;
+                                }
+                                if (diff > 1.0) {
+                                    orientationDeltaReadings.add(diff);
+                                }
                             }
                         }
                     }
-
+                    prevVelocityReadings.put(droneID, currVelocity);
                     prevTimestampReadings.put(droneID, currTimestamp);
                     prevBatteryReadings.put(droneID, currBattery);
                     prevOrientationReadings.put(droneID, currOrientation);
+
                 } catch (NumberFormatException e) {
                     System.err.println("Skipping line with unparseable number: " + line);
                 }
             }
+
         }
         return lineCount;
     }
@@ -206,7 +232,8 @@ public class BaselineCalculator {
      * @throws IOException      Throws an exception when data cannot be written to the file.
      */
     private void saveStatsToProperties(String filepath, int lineCount, double vMean, double vStandardDev, double bMean,
-                                       double bStandardDev, double oMean, double oStandardDev) throws IOException {
+                                       double bStandardDev, double oMean, double oStandardDev, double aMean,
+                                       double aStandardDev) throws IOException {
         Properties props = new Properties();
 
         props.setProperty("velocity.mean", String.valueOf(vMean));
@@ -215,6 +242,8 @@ public class BaselineCalculator {
         props.setProperty("batteryDrain.standardDev", String.valueOf(bStandardDev));
         props.setProperty("orientationDelta.mean", String.valueOf(oMean));
         props.setProperty("orientationDelta.standardDev", String.valueOf(oStandardDev));
+        props.setProperty("acceleration.mean", String.valueOf(aMean));
+        props.setProperty("acceleration.standardDev", String.valueOf(aStandardDev));
 
         try (FileWriter writer = new FileWriter(filepath)) {
             props.store(writer, "Drone Anomaly Baseline Statistics\nGenerated from " +

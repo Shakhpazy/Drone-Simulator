@@ -101,6 +101,8 @@ public interface DroneInterface {
      */
     TelemetryRecord getPreviousTelemetryRecord();
 
+    public AnomalyEnum getMyLastAnomaly();
+
     void setPrevTelemetryRecord(TelemetryRecord theTelemetryRecord);
     /**
      * @return string of currentDrone state.

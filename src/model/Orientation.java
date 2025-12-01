@@ -46,6 +46,11 @@ public class Orientation {
         float dx = theNextLong - thePrevLong;
         float dy = theNextLat - thePrevLat;
 
+        //safetycheck for no movement
+        if (dx == 0 && dy == 0) {
+            return myDegree;
+        }
+
         float angleDegrees = (float) Math.toDegrees(Math.atan2(dx, dy));
 
         // Normalize to 0–360 range

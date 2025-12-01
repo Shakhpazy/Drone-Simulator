@@ -21,7 +21,7 @@ public class Drone extends AbstractDrone {
     public static final float MAX_LONGITUDE = 180.0f;
 
     /** Step size for increasing or decreasing velocity during movement. */
-    private static final float ACCELERATION_STEP = .07f;
+    private static final float ACCELERATION_STEP = .3f;
 
     private static final float ANOMALY_EXTRA_DRAIN_RATE = 0.1f;
 
@@ -113,10 +113,11 @@ public class Drone extends AbstractDrone {
         float longitude = this.getLongitude();
         float altitude = this.getAltitude();
         float velocity = this.getVelocity();
-
+        float battery = this.getBatteryLevel();
         float drained = 0f;
 
         AnomalyEnum anomaly = movementAnomalies[myRandom.nextInt(movementAnomalies.length)];
+        setMyLastAnomaly(anomaly);
 
         switch (anomaly) {
             case BATTERY_DRAIN:
@@ -124,8 +125,9 @@ public class Drone extends AbstractDrone {
                 break;
 
             case BATTERY_FAIL:
-                setAltitude(0);
-                setBatteryLevel(0);
+                altitude = 0;
+                battery = 0;
+                velocity = 0;
                 break;
 
             case ALTITUDE:
@@ -138,9 +140,8 @@ public class Drone extends AbstractDrone {
                 break;
 
             case SPOOFING: //Spoofing moves the drone to a completely random position that is in range
-                longitude = myRandom.nextFloat(MIN_LONGITUDE, MAX_LONGITUDE);
-                latitude  = myRandom.nextFloat(MIN_LATITUDE, MAX_LATITUDE);
-                altitude  = myRandom.nextFloat(MIN_ALTITUDE, MAX_ALTITUDE);  // optional: include altitude spoof
+                //Spoofing will make it so drone makes no movements however, the Telemetry Generator
+                //Decides what spoofing will do. (in our case it will give fake data)
                 break;
 
 
@@ -153,17 +154,14 @@ public class Drone extends AbstractDrone {
                 break;
         }
 
-        // distance moved due to anomaly, might not need this at all
-        float anomalyDistance = (float) Math.sqrt(
-                Math.pow(longitude - this.getLongitude(), 2) +
-                        Math.pow(latitude  - this.getLatitude(), 2) +
-                        Math.pow(altitude  - this.getAltitude(), 2)
-        );
 
-        if (anomaly != AnomalyEnum.BATTERY_FAIL && anomaly != AnomalyEnum.SPOOFING) {
-            drained += batteryDrained(theDeltaTime);
+        if (anomaly == AnomalyEnum.BATTERY_FAIL) {
+            setVelocity(velocity);
+            setAltitude(altitude);
+            setBatteryLevel(battery);
         }
 
+        drained += batteryDrained(theDeltaTime);
         float degree = getOrientation().findNextOrientation(
                 this.getLongitude(),
                 this.getLatitude(),
