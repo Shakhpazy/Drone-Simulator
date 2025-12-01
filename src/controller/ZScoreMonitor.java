@@ -11,13 +11,18 @@ import java.util.ArrayList;
 import view.MonitorDashboard;
 
 /**
- * A class to gather and calculate drone behavior data.
+ * Monitors and collects drone telemetry data, calculates baseline statistics,
+ * and logs telemetry for analysis.
+ * <p>
+ * The class initializes drones, generates telemetry, updates the UI, and exports
+ * telemetry data to persistent storage. Upon shutdown, it calculates Z-score
+ * statistics from collected telemetry.
+ * </p>
  *
  * @author nlevin11
- * @author Natan
+ * @author Natan Artemiev
  * @author Yusuf
- *
- * @version 11-24
+ * @version 11-30
  */
 public class ZScoreMonitor {
 

@@ -2,7 +2,6 @@ package controller;
 
 import model.*;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -12,13 +11,30 @@ import java.util.ArrayList;
 import view.MonitorDashboard;
 
 /**
- * The DroneMonitorApp provides the entry point for the simulator.
+ * Entry point for the Drone Monitoring Simulator.
  * <p>
- * It will initialize and update the view, as well as interact with
- * the model to drive telemetry generation and anomaly checks.
+ * This class initializes the user interface, creates drones, and continuously
+ * updates telemetry through a scheduled loop. It also runs anomaly detection
+ * logic and logs events to both the on-screen dashboard and the anomaly
+ * database.
+ * </p>
+ *
+ * <p>The simulation operates by:</p>
+ * <ul>
+ * <li>Generating drones with automatically produced flight routes.</li>
+ * <li>Processing telemetry updates at a fixed interval.</li>
+ * <li>Detecting anomalies based on changes in telemetry.</li>
+ * <li>Triggering alert sounds and logging anomaly reports.</li>
+ * <li>Updating the UI in real time to reflect drone states.</li>
+ * </ul>
+ *
+ * <p>
+ * Developer mode enables console telemetry printing and clears the database
+ * automatically on exit.
+ * </p>
  *
  * @author Natan Artemiev
- * @version 11/22/2025
+ * @version 11/30/2025
  */
 public class DroneMonitorApp {
 
@@ -26,7 +42,7 @@ public class DroneMonitorApp {
      * Flag to enable or disable developer mode, which prints telemetry to the console
      * and clears the database on exit.
      */
-    private static final boolean MY_DEV_MODE = true;
+    private static final boolean MY_DEV_MODE = false;
 
     /** The route generator used to create flight paths for the drones. */
     private static final RouteGenerator myRouteGenerator = new RouteGenerator();
@@ -84,64 +100,81 @@ public class DroneMonitorApp {
         anomalyDTBS.initialize();
         new DatabaseController(anomalyDTBS); //Initialize Database controllers
 
-        /*
-         * A runnable task that simulates the next step of the drone monitoring system.
-         * It processes telemetry for all drones, updates the view, checks for anomalies,
-         * and logs reports to the database and view.
+        /**
+         * Runnable task executed periodically to update all drones:
+         * <ul>
+         * <li>Processes telemetry changes.</li>
+         * <li>Detects anomalies.</li>
+         * <li>Logs reports and triggers UI updates.</li>
+         * <li>Removes drones in the event of critical anomalies.</li>
+         * </ul>
          */
         Runnable simulateNextStep = () -> {
-            //Get Previous and Current telemetry of all drones.
-            Map<DroneInterface, TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
+            try {
+                //Get Previous and Current telemetry of all drones.
+                Map<DroneInterface, TelemetryRecord[]> droneTelemetry = gen.processAllDrones((float) MY_DELTA_TIME);
 
-            //For each drone
-            for (Map.Entry<DroneInterface, TelemetryRecord[]> entry : droneTelemetry.entrySet()) {
-                DroneInterface drone = entry.getKey();
-                TelemetryRecord[] recordPair = entry.getValue();
+                //For each drone
+                for (Map.Entry<DroneInterface, TelemetryRecord[]> entry : droneTelemetry.entrySet()) {
+                    boolean removeDrone = false;
+                    DroneInterface drone = entry.getKey();
+                    TelemetryRecord[] recordPair = entry.getValue();
 
-                //Get previous Telemetry
-                TelemetryRecord myBeforeTelemetryRecord = recordPair[0];
+                    //Get previous Telemetry
+                    TelemetryRecord myBeforeTelemetryRecord = recordPair[0];
 
-                //Get Current Telemetry
-                TelemetryRecord myCurrentTelemetryRecord = recordPair[1];
+                    //Get Current Telemetry
+                    TelemetryRecord myCurrentTelemetryRecord = recordPair[1];
 
-                //Send previous and current telemetry to anomaly detector for analysis
-                AnomalyReport anomaly = detector.detect(myBeforeTelemetryRecord, myCurrentTelemetryRecord);
+                    //Send previous and current telemetry to anomaly detector for analysis
+                    AnomalyReport anomaly = detector.detect(myBeforeTelemetryRecord, myCurrentTelemetryRecord);
 
-                //If anomaly is not null.
-                if (anomaly != null) {
-                    String anomalyString = anomaly.anomalyType();
-                    if(anomalyString.contains("Out of Bounds")) {
-                        AlertPlayer.INSTANCE.addSoundToQueue("out-of-bounds");
+                    //If anomaly is not null.
+                    if (anomaly != null) {
+                        String anomalyString = anomaly.anomalyType();
+                        if (anomalyString.contains("Out of Bounds")) { //OUT_OF_BOUNDS and ALTITUDE anomalies (1/9)
+                            AlertPlayer.INSTANCE.addSoundToQueue("out-of-bounds");
+                        } else if (anomalyString.contains("Battery") &&
+                                !anomalyString.contains("Failure")) { //BATTERY_DRAIN  and BATTERY anomalies (2/9)
+                            AlertPlayer.INSTANCE.addSoundToQueue("battery");
+                        } else if (anomalyString.contains("Acceleration")
+                                || anomalyString.contains("Speed")
+                                || anomalyString.contains("Altitude")) { //ACCELERATION and SPEED anomalies (3/9)
+                            AlertPlayer.INSTANCE.addSoundToQueue("acceleration");
+                        } else if (anomalyString.contains("Spoof")) { //SPOOFING anomaly (1/9)
+                            AlertPlayer.INSTANCE.addSoundToQueue("spoof");
+                        } else { //BATTERY_FAIL OR HIT_GROUND (2/9)
+                            AlertPlayer.INSTANCE.addSoundToQueue("crash");
+                            view.removeDrone(drone.getId());
+                            gen.removeDrone(drone);
+                            removeDrone = true;
+                        }
+
+                        //Add anomaly to database.
+                        anomalyDTBS.insertReport(anomaly);
+
+                        //Add a log entry to view.
+                        view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
+
                     }
-                    else if(anomalyString.contains("Battery") &&
-                            !anomalyString.contains("Failure")) {
-                        AlertPlayer.INSTANCE.addSoundToQueue("battery");
+
+                    //If the drone hasn't been removed...
+                    if (!removeDrone) {
+                        //Get drone location to pass to view
+                        float[] location = {myCurrentTelemetryRecord.longitude(),
+                                myCurrentTelemetryRecord.latitude()};
+
+                        //Get telemetry as a String to pass to view
+                        String theTelemetry = telemetryToString(myCurrentTelemetryRecord);
+
+                        //Draw the drone on the view
+                        view.drawDrone(drone.getId(), location, theTelemetry);
                     }
-                    else if(anomalyString.contains("Acceleration") &&
-                            !anomalyString.contains("Speed")) {
-                        AlertPlayer.INSTANCE.addSoundToQueue("acceleration");
-                    }
-                    else if(anomalyString.contains("Spoof")) {
-                        AlertPlayer.INSTANCE.addSoundToQueue("spoof");
-                    }
-                    else {
-                        AlertPlayer.INSTANCE.addSoundToQueue("crash");
-                    }
-                    //Add anomaly to database.
-                    anomalyDTBS.insertReport(anomaly);
-                    //Add a log entry to view.
-                    view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
                 }
-
-                //Get drone location to pass to view
-                float[] location = {myCurrentTelemetryRecord.longitude(),
-                        myCurrentTelemetryRecord.latitude()};
-
-                //Get telemetry as a String to pass to view
-                String theTelemetry = telemetryToString(myCurrentTelemetryRecord);
-
-                //Draw the drone on the view.
-                view.drawDrone(drone.getId(), location, theTelemetry);
+            }
+            catch (Exception e) {
+                System.err.println("Fatal error in simulation loop (main loop will continue)");
+                e.printStackTrace();
             }
         };
 
@@ -169,10 +202,11 @@ public class DroneMonitorApp {
     }
 
     /**
-     * Converts a map of telemetry data into a formatted string for display purposes.
+     * Converts a drone's telemetry record into a formatted, multi-line string
+     * for display on the monitoring dashboard.
      *
-     * @param theTelemetryRecord A {@link HashMap} containing the drone's current telemetry data.
-     * @return A formatted {@link String} representation of the telemetry.
+     * @param theTelemetryRecord the drone's telemetry record.
+     * @return formatted text representing all telemetry fields.
      */
     private static String telemetryToString(TelemetryRecord theTelemetryRecord) {
         StringBuilder sb = new StringBuilder();
