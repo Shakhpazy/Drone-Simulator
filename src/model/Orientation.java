@@ -1,32 +1,43 @@
 package model;
 
-
+/**
+ * Represents the orientation (heading) of a drone in degrees.
+ * <p>
+ * Orientation values are always normalized to the range {@code 0–359} degrees.
+ * The orientation can be updated directly or computed based on movement
+ * between two geographic points.
+ *
+ * @author Yusuf Shakhpaz
+ */
 public class Orientation {
 
-    /** The current degree of the Drone */
+    /** Current heading of the drone, stored in degrees (0–359). */
     float myDegree;
 
     /**
-     * Creates an orientation object
+     * Constructs an Orientation object with the given initial degree.
+     * The degree is automatically normalized into the 0–359 range.
      *
-     * @param theDegree starting degree
+     * @param theDegree initial heading in degrees
      */
     public Orientation(final float theDegree) {
         myDegree = theDegree;
     }
 
     /**
-     * @return {float} of the degree
+     * Returns the drone's current orientation in degrees.
+     *
+     * @return heading angle in degrees (0–359)
      */
     public float getDegree() {
         return myDegree;
     }
 
     /**
-     * Sets the degree of the drone, also is circular
-     * so the degree range will always be between 0-359
+     * Sets the drone’s orientation to the specified degree, normalizing it
+     * such that the value always remains within the range {@code 0–359}.
      *
-     * @param theDegrees {float} of the degree the drone is facing
+     * @param theDegrees new heading angle
      */
     public void setDegrees(final float theDegrees) {
         // Normalize using modulo arithmetic
@@ -34,19 +45,26 @@ public class Orientation {
     }
 
     /**
+     * Computes the next orientation of the drone based on its motion from
+     * a previous position to a new position. If there is no movement
+     * (dx = dy = 0), the current orientation is returned unchanged.
+     * <p>
+     * Orientation is computed using {@link Math#atan2(double, double)},
+     * converting the resulting radian angle into degrees and normalizing
+     * it into the {@code 0–359} range.
      *
-     * @param thePrevLong the previous longitude of the Drone
-     * @param thePrevLat the previous latitude of the Drone
-     * @param theNextLong the next longitude of the Drone
-     * @param theNextLat the next latitude of the Drone
+     * @param thePrevLong previous longitude of the drone
+     * @param thePrevLat  previous latitude of the drone
+     * @param theNextLong next longitude of the drone
+     * @param theNextLat  next latitude of the drone
      *
-     * @return {float} degree of the next orientation
+     * @return computed orientation angle (0–359 degrees)
      */
     public float findNextOrientation(final float thePrevLong, final float thePrevLat, final float theNextLong, final float theNextLat) {
         float dx = theNextLong - thePrevLong;
         float dy = theNextLat - thePrevLat;
 
-        //safetycheck for no movement
+        //safety check for no movement
         if (dx == 0 && dy == 0) {
             return myDegree;
         }
@@ -57,6 +75,12 @@ public class Orientation {
         return ((angleDegrees % 360) + 360) % 360;
     }
 
+    /**
+     * Returns a formatted string representation of this orientation,
+     * displaying the degree with two decimal places.
+     *
+     * @return string like "123.45°"
+     */
     @Override
     public String toString() {
         return String.format("%.2f°", myDegree);
