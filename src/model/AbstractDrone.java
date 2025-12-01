@@ -1,35 +1,56 @@
 package model;
 
+/**
+ * An abstract base implementation of {@link DroneInterface} that provides
+ * shared functionality for all drone models in the system.
+ * <p>
+ * This class manages the internal physics state of a drone (position, velocity,
+ * altitude, battery, orientation) along with global drone metadata (unique ID,
+ * creation count). Concrete subclasses are responsible for defining how the
+ * drone moves under normal and anomalous conditions.
+ * <p>
+ * Responsibilities:
+ * <ul>
+ *     <li>Maintains drone state and physical properties.</li>
+ *     <li>Provides shared update logic (battery drain, setting fields safely,
+ *         orientation normalization, etc.).</li>
+ *     <li>Constructs telemetry records for logging and UI consumption.</li>
+ *     <li>Tracks anomaly history and last recorded telemetry.</li>
+ *     <li>Handles “crash” logic when a drone collides.</li>
+ * </ul>
+ *
+ * @author Yusuf Shakhpaz
+ */
 public abstract class AbstractDrone implements DroneInterface{
 
-    /** Base battery drain per second (hovering + electronics). */
+    /** Base energy consumption per second (hovering + electronics). */
     private static final float BASE_DRAIN_RATE = 0.01f;
 
-    /** Additional battery drain per unit of speed per second. */
+    /** Additional energy consumption per unit of velocity per second. */
     private static final float SPEED_DRAIN_RATE = 0.003f;
 
-    /** The altitude of the Drone */
+    /** Current altitude. */
     protected float myAltitude;
 
-    /** The longitude of the Drone */
+    /** Current longitude. */
     protected float myLongitude;
 
-    /** The Latitude of the Drone */
+    /** Current latitude. */
     protected float myLatitude;
 
-    /** The velocity of the Drone */
+    /** Current velocity. */
     protected float myVelocity;
 
-    /* The battery level of the Drone */
+    /** Current remaining battery level. */
     protected float myBatteryLevel;
 
-    /* The Orientation of the Drone */
+    /** Current orientation object (heading in degrees). */
     protected Orientation myOrientation;
 
-    /* The unique ID of the Drone */
+    /** Unique drone identifier. */
     protected final int myID;
 
-    /* The number of drones created */
+    /** Total number of drones created so far (global counter). */
     protected static int totalDrones = 0;
 
     /* The Max Velocity of the Drone */
@@ -237,10 +258,6 @@ public abstract class AbstractDrone implements DroneInterface{
         setBatteryLevel(Math.max(myBatteryLevel - theBatteryDrained, 0));
     }
 
-    /**
-     * When a drone collides with another drone the Altitude will be set to
-     * 0, meaning the Drone is now dead.
-     */
     public void collided() {
         setAltitude(0);
         setIsAlive(false);
@@ -287,6 +304,11 @@ public abstract class AbstractDrone implements DroneInterface{
         );
     }
 
+    /**
+     * Records which anomaly was last applied to this drone.
+     *
+     * @param theAnomaly anomaly type
+     */
     protected void setMyLastAnomaly(AnomalyEnum theAnomaly) {
         myLastAnomaly = theAnomaly;
     }

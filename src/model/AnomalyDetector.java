@@ -207,8 +207,8 @@ public class AnomalyDetector {
         }
 
         // Battery check
-        double currBattery = myCurrTelemetry.batterLevel();
-        double prevBattery = myPrevTelemetry.batterLevel();
+        double currBattery = myCurrTelemetry.batteryLevel();
+        double prevBattery = myPrevTelemetry.batteryLevel();
 
         double batteryNormDelta = ((prevBattery - currBattery) / deltaTime);
         double batteryZScore = (batteryNormDelta - BATTERY_DRAIN_MEAN_BASELINE) / BATTERY_DRAIN_STANDARD_DEV_BASELINE;
@@ -263,7 +263,7 @@ public class AnomalyDetector {
      * @return Returns an AnomalyEnum representing whether the battery level is 0.
      */
     private AnomalyEnum powerAnomaly() {
-        float currBatteryLevel = myCurrTelemetry.batterLevel();
+        float currBatteryLevel = myCurrTelemetry.batteryLevel();
         if (currBatteryLevel <= 0.0F) {
             return AnomalyEnum.BATTERY_FAIL;
         } else if (currBatteryLevel <= 15){

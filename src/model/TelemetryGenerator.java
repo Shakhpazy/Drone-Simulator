@@ -3,36 +3,66 @@ package model;
 import java.util.*;
 
 /**
- * TelemetryGenerator is responsible for simulating drone telemetry data.
- * It processes a list of drones, generating either normal movements
- * (towards route waypoints) or anomaly movements (sudden altitude, velocity,
- * or positional deviations).
+ * TelemetryGenerator manages the simulation of multiple drones by producing
+ * normal and anomalous movement updates and converting those updates into
+ * {@link TelemetryRecord} objects.
+ * <p>
+ * Each update cycle:
+ * <ul>
+ *     <li>Skips dead drones.</li>
+ *     <li>For each alive drone, decides whether to execute a normal movement
+ *         or an anomaly based on a configured probability.</li>
+ *     <li>Generates spoofed telemetry if the anomaly type was SPOOFING.</li>
+ *     <li>Produces a mapping of each drone to its previous and current
+ *         telemetry records.</li>
+ *     <li>Checks for collisions between drones.</li>
+ * </ul>
+ * <p>
+ * This class follows the Singleton pattern—only one generator instance may exist.
  *
- * Normal moves respect waypoint routes and physical constraints such as
- * min/max velocity and altitude. Random moves simulate anomalies which
- * can deviate from expected behavior.
+ * @author Yusuf Shakhpaz
  */
 public class TelemetryGenerator {
 
+    /** Singleton instance of the TelemetryGenerator. */
     public static TelemetryGenerator instance;
 
-    /** List of drones being simulated. */
+    /** List of all drones being simulated. */
     ArrayList<DroneInterface> myDrones;
 
-    /** Random generator used for movement and anomaly decisions. */
+    /** Random generator used for determining anomaly occurrence and spoof offsets. */
     private final Random myRandom = new Random();
 
-    /** Chance (0–100%) of generating a random anomaly instead of a normal move. */
-    private final float RANDOM_PERCENT; //Should be set from 0-100
+    /**
+     * Percentage chance (0–100+) that a drone will generate an anomalous update
+     * instead of a normal movement.
+     * <p>
+     * Example: If {@code RANDOM_PERCENT = 5}, then on each update there is a
+     * ~0.5% chance (5/1000) of anomaly.
+     */
+    private final float RANDOM_PERCENT;
 
+    /** Maximum spoofing offset applied to lat/lon/alt when SPOOFING is triggered. */
     private final float SPOOFING_CHANGE = 50;
 
 
+    /**
+     * Private constructor for singleton access.
+     *
+     * @param theRandomPercent probability of generating an anomaly (0–100).
+     */
     private TelemetryGenerator(float theRandomPercent) {
         myDrones = new ArrayList<>();
         RANDOM_PERCENT = theRandomPercent;
     }
 
+    /**
+     * Retrieves the singleton instance of the TelemetryGenerator.
+     * Creates a new instance if one does not already exist.
+     *
+     * @param theRandomPercent anomaly probability for new instance creation.
+     * @return the global TelemetryGenerator instance.
+     */
     public static synchronized TelemetryGenerator getInstance(float theRandomPercent) {
         if (instance == null) {
             instance = new TelemetryGenerator(theRandomPercent);
@@ -40,28 +70,49 @@ public class TelemetryGenerator {
         return instance;
     }
 
+    /**
+     * Returns the list of drones currently registered to the generator.
+     *
+     * @return list of simulated drones.
+     */
     public ArrayList<DroneInterface> getMyDrones() {
         return myDrones;
     }
 
     /**
-     * Adds a new drone to the simulation.
+     * Adds a drone to the simulation.
      *
-     * @param theDrone drone to be added
+     * @param theDrone drone to be added.
      */
     public void addDrone(final DroneInterface theDrone) {
         myDrones.add(theDrone);
     }
 
+    /**
+     * Removes a drone from the simulation.
+     *
+     * @param theDrone drone to remove.
+     */
     public void removeDrone(final DroneInterface theDrone) {
         myDrones.remove((theDrone));
     }
 
     /**
-     * Iterates through all drones in the simulation. For each drone:
-     * - Skips processing if the drone is not alive.
-     * - Otherwise decides (based on RANDOM_PERCENT) whether to generate
-     *   a random anomaly move or a normal route-following move.
+     * Processes movement updates for all drones in the system.
+     * <p>
+     * For each drone:
+     * <ul>
+     *     <li>If the drone is dead, it is skipped.</li>
+     *     <li>Randomly chooses normal or anomalous movement.</li>
+     *     <li>Generates spoofed telemetry if the anomaly was SPOOFING.</li>
+     *     <li>Produces a mapping of the drone to its previous and current
+     *         telemetry records.</li>
+     * </ul>
+     * After all drones are updated, collision detection is performed.
+     *
+     * @param deltaTime elapsed simulation time since the last update step.
+     * @return a map associating each drone with its previous and current
+     *         {@link TelemetryRecord}.
      */
     public Map<DroneInterface, TelemetryRecord[]> processAllDrones(final float deltaTime) {
 
@@ -75,7 +126,7 @@ public class TelemetryGenerator {
             TelemetryRecord prev = drone.getPreviousTelemetryRecord();
             boolean spoofed = false;
 
-            if (myRandom.nextInt(100) < RANDOM_PERCENT) {
+            if (myRandom.nextInt(1000) < RANDOM_PERCENT) {
                 getRandomMove(drone, deltaTime);
                 if (drone.getMyLastAnomaly() == AnomalyEnum.SPOOFING) {
                     spoofed = true;
@@ -112,38 +163,44 @@ public class TelemetryGenerator {
         return map;
     }
 
+
     /**
-     * Generates an anomalous move for the given drone. Types of anomalies include:
-     * - Sudden altitude drop or climb
-     * - Sudden velocity increase or decrease
-     * - Sudden latitude/longitude drift
+     * Applies a random anomaly movement to the specified drone.
+     * <p>
+     * Types of anomalies include:
+     * <ul>
+     *     <li>Battery drain increase</li>
+     *     <li>Battery failure</li>
+     *     <li>Sudden altitude changes</li>
+     *     <li>Velocity spikes/drops</li>
+     *     <li>Spoofing (fake telemetry coordinates)</li>
+     * </ul>
      *
-     * @param theDrone the drone to update with an anomaly
+     * @param theDrone  drone to update.
+     * @param deltaTime elapsed simulation time.
      */
     public void getRandomMove(DroneInterface theDrone, final float deltaTime) {
         theDrone.getNextRandomMove(deltaTime);
     }
 
     /**
-     * Generates a normal move for the given drone.
-     * The drone moves toward its next waypoint, adjusting position and altitude
-     * proportionally to velocity. Velocity is increased or decreased depending
-     * on distance to the waypoint.
+     * Applies a normal route-following movement update to the specified drone.
+     * The drone adjusts velocity based on proximity to its next waypoint and
+     * then moves proportionally along the route.
      *
-     * @param theDrone the drone to update with a normal move
+     * @param theDrone  drone to update.
+     * @param deltaTime elapsed simulation time.
      */
     public void getMove(final DroneInterface theDrone, final float deltaTime) {
         theDrone.getNextMove(deltaTime);
     }
 
     /**
-     * Checks for collisions between drones in O(n) time using a HashMap.
-     * Each drone's size is accounted by casting its longitude, latitude,
-     * and altitude to Int, effectively giving the drone a "size" of 1 unit
-     * in each dimension. If two drones fall into the same integer cell, they are
-     * considered to have collided.
-     * On collision, both drones are marked as crashed by setting their altitude
-     * to 0. Dead drones (already not alive) are skipped.
+     * Detects collisions between drones by testing proximity in 3D space.
+     * <p>
+     * Two drones are considered collided if the squared distance between them
+     * is less than a fixed threshold. A collision marks both drones as crashed.
+     * <p>
      */
     private void checkCollisions() {
         for (int i = 0; i < myDrones.size(); i++) {
