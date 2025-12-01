@@ -313,5 +313,20 @@ public abstract class AbstractDrone implements DroneInterface{
         myLastAnomaly = theAnomaly;
     }
 
+    @Override
+    public String toString() {
+        return String.format(
+                "Drone{id=%d, alive=%s, lon=%.2f, lat=%.2f, alt=%.2f, vel=%.2f, battery=%.2f, orientation=%.2f°}",
+                myID,
+                myDroneIsAlive,
+                myLongitude,
+                myLatitude,
+                myAltitude,
+                myVelocity,
+                myBatteryLevel,
+                myOrientation.getDegree()
+        );
+    }
+
 
 }
