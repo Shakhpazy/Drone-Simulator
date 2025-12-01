@@ -29,7 +29,6 @@ public class PdfExporter implements ReportExporter {
             // Define Fonts and Layout
             PDType1Font font = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
             PDType1Font fontBold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
-
             float fontSize = 10;
             float leading = 15; // Line spacing (1.5x font size)
 
@@ -38,81 +37,108 @@ public class PdfExporter implements ReportExporter {
             float startX = mediaBox.getLowerLeftX() + margin;
             float startY = mediaBox.getUpperRightY() - margin;
 
-            float currentY = startY;
+            PdfContext ctx = new PdfContext(document, page, contentStream, startX, startY, margin, leading, font,
+                    fontSize);
 
             // Start Writing
             contentStream.beginText();
-            contentStream.newLineAtOffset(startX, startY);
+            contentStream.newLineAtOffset(ctx.startX, ctx.startY);
 
             // Write a Title
             contentStream.setFont(fontBold, 16);
             contentStream.showText("Anomaly Report Export");
             contentStream.newLineAtOffset(0, -leading * 1.5f); // Move down
-            currentY -= (leading * 1.5f);
-
+            ctx.currentY -= (leading * 1.5f);
             contentStream.setFont(font, fontSize);
 
             // --- Loop Through Reports ---
             for (AnomalyReport report : reports) {
-                // Check if there is enough space for this report (~6 lines)
-                if (currentY < (margin + (leading * 7))) {
-                    contentStream.endText();
-                    contentStream.close();
 
-                    // Add a new blank page
-                    page = new PDPage(PDRectangle.A4);
-                    document.addPage(page);
+                checkPageBreak(ctx, 4);
 
-                    // Start a new content stream for the new page
-                    contentStream = new PDPageContentStream(document, page);
-                    contentStream.beginText();
-                    contentStream.setFont(font, fontSize);
+                writeLine(ctx, "Anomaly ID: " + report.id().toString());
+                writeLine(ctx, "Timestamp: " + report.timestamp().toString());
+                writeLine(ctx, "Type: " + report.anomalyType());
+                writeLine(ctx, "Drone ID: " + report.droneId());
 
-                    // Reset Y position to the top margin
-                    currentY = startY;
-                    contentStream.newLineAtOffset(startX, currentY);
-                }
+                writeMultiLine(ctx, "Simple Report: ", report.simpleReport());
+                writeMultiLine(ctx, "Detailed Report: ", report.detailedReport());
 
-                // Write the report data
-                contentStream.showText("Anomaly ID: " + report.id().toString());
-                contentStream.newLineAtOffset(0, -leading);
-                currentY -= leading;
-
-                contentStream.showText("Timestamp: " + report.timestamp().toString());
-                contentStream.newLineAtOffset(0, -leading);
-                currentY -= leading;
-
-                contentStream.showText("Type: " + report.anomalyType());
-                contentStream.newLineAtOffset(0, -leading);
-                currentY -= leading;
-
-                contentStream.showText("Drone ID: " + (report.droneId()));
-                contentStream.newLineAtOffset(0, -leading);
-                currentY -= leading;
-
-                contentStream.showText("Simple Report: " + report.simpleReport()
-                        .replaceAll("[\n\r]", " "));
-                contentStream.newLineAtOffset(0, -leading);
-                currentY -= leading;
-
-                contentStream.showText("Detailed Report: " + report.detailedReport()
-                        .replaceAll("[\n\r]", " "));
-                contentStream.newLineAtOffset(0, -leading);
-                currentY -= leading;
-
-                contentStream.showText("-------------------------------------------------------------------");
-                contentStream.newLineAtOffset(0, -leading);
-                currentY -= leading;
+                writeLine(ctx, "--------------------------------------------------------------------------------");
             }
 
-            // Finish and Save
-            contentStream.endText();
-            contentStream.close();
-
+            ctx.contentStream.endText();
+            ctx.contentStream.close();
             document.save(filePath);
             System.out.println("Successfully exported " + reports.size() + " reports to " + filePath);
+
         } catch (IOException e) {
             System.err.println("Error writing to PDF file: " +e.getMessage());
+        }
+    }
+
+    private void checkPageBreak(PdfContext ctx, int linesNeeded) throws IOException {
+        float spaceNeeded = linesNeeded * ctx.leading;
+
+        if (ctx.currentY - spaceNeeded < ctx.margin) {
+            ctx.contentStream.endText();
+            ctx.contentStream.close();
+
+            PDPage newPage = new PDPage(PDRectangle.A4);
+            ctx.document.addPage(newPage);
+            ctx.page = newPage;
+            ctx.contentStream = new PDPageContentStream(ctx.document, newPage);
+            ctx.contentStream.beginText();
+            ctx.contentStream.setFont(ctx.font, ctx.fontSize);
+
+            ctx.currentY = ctx.startY;
+            ctx.contentStream.newLineAtOffset(ctx.startX, ctx.currentY);
+        }
+    }
+
+    private void writeLine(PdfContext ctx, String text) throws IOException {
+        checkPageBreak(ctx, 1);
+        ctx.contentStream.showText(text);
+        ctx.contentStream.newLineAtOffset(0, -ctx.leading);
+        ctx.currentY -= ctx.leading;
+    }
+
+    private void writeMultiLine(PdfContext ctx, String label, String text) throws IOException{
+        checkPageBreak(ctx, 1);
+        ctx.contentStream.showText(label);
+        ctx.contentStream.newLineAtOffset(0, -ctx.leading);
+        ctx.currentY -= ctx.leading;
+
+        String[] lines = text.replace("\r", "").split("\n");
+        for (String line : lines) {
+            checkPageBreak(ctx, 1);
+            ctx.contentStream.showText(line);
+            ctx.contentStream.newLineAtOffset(0, -ctx.leading);
+            ctx.currentY -= ctx.leading;
+        }
+    }
+
+    private static class PdfContext {
+        PDDocument document;
+        PDPage page;
+        PDPageContentStream contentStream;
+        float currentY;
+
+        final float startX, startY, margin, leading, fontSize;
+
+        final PDType1Font font;
+
+        public PdfContext(PDDocument doc, PDPage page, PDPageContentStream stream, float startX, float startY, float margin, float leading, PDType1Font font, float fontSize) {
+            this.document = doc;
+            this.page = page;
+            this.contentStream = stream;
+            this.currentY = startY;
+            this.startX = startX;
+            this.startY = startY;
+            this.margin = margin;
+            this.leading = leading;
+            this.font = font;
+            this.fontSize = fontSize;
         }
     }
 }

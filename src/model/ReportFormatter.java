@@ -7,7 +7,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * A class to aid the AnomalyDetector class in AnomalyReport composition.
  * @author nlevin11
- * @version 11-24
+ * @version 11-26
  */
 public class ReportFormatter {
 
@@ -55,8 +55,8 @@ public class ReportFormatter {
      */
     public static String createDescDetailed(String theAnomalyType, TelemetryRecord theCurrTelemetry, TelemetryRecord thePrevTelemetry) {
 
-        return "\nDrone Number: " + theCurrTelemetry.id() +
-                " Has experienced an anomaly at time: " + getFormattedTime(theCurrTelemetry) +
+        return "\nDrone number " + theCurrTelemetry.id() +
+                " has experienced an anomaly at time: " + getFormattedTime(theCurrTelemetry) +
                 "\nDetails:\n" +
                 theAnomalyType + " anomaly detected\n" +
 
