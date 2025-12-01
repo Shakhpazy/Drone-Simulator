@@ -8,22 +8,50 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.sound.sampled.*;
 
+/**
+ * Singleton enum that manages and plays alert sounds for the drone monitoring system.
+ * <p>
+ * Features:
+ * <ul>
+ *     <li>Preloads alert sounds on startup.</li>
+ *     <li>Queues sounds for sequential, synchronous playback.</li>
+ *     <li>Supports per-alert cooldowns to prevent rapid repeats.</li>
+ *     <li>Runs a dedicated daemon thread for playback and allows safe shutdown.</li>
+ * </ul>
+ * </p>
+ *
+ * Usage:
+ * <pre>{@code
+ * AlertPlayer.INSTANCE.addSoundToQueue("battery");
+ * AlertPlayer.INSTANCE.closeAllAlerts();
+ * }</pre>
+ *
+ * @author Natan Artemiev
+ * @version 11/30/25
+ */
 public enum AlertPlayer {
     INSTANCE;
 
+    /** Loaded audio clips keyed by alert name. */
     private final Map<String, Clip> myAlerts = new HashMap<>();
+
+    /** File paths for each alert sound. */
     private static final String BATTERY_ALERT_PATH = "src/SFX/battery.wav";
     private static final String CRASH_ALERT_PATH = "src/SFX/crash.wav";
     private static final String SPOOF_ALERT_PATH = "src/SFX/spoof.wav";
     private static final String BOUNDS_ALERT_PATH = "src/SFX/out-of-bounds.wav";
     private static final String ACCELERATION_ALERT_PATH = "src/SFX/acceleration.wav";
 
-    //Set up playback queue to make sure each sound is played in order.
+    /** Playback queue ensuring sequential sound playback. */
     private final BlockingQueue<String> myPlaybackQueue = new LinkedBlockingQueue<>();
+
+    /** Dedicated thread that processes the playback queue. */
     private final Thread myPlaybackThread;
+
+    /** Flag indicating if the playback thread is running. */
     private volatile boolean isRunning = true;
 
-    //Track when each sound has been queued
+    /** Cooldown durations (ms) for each alert type to prevent repeated alerts in a short time. */
     private final Map<String, Long> myCooldowns = Map.of(
             "out-of-bounds", 500L,
             "crash", 0L,
@@ -32,8 +60,16 @@ public enum AlertPlayer {
             "battery", 2000L
     );
 
+    /** Tracks the last time each alert type was queued (timestamp in ms). */
     private final Map<String, Long> myLastQueued = new HashMap<>();
 
+    /**
+     * Constructor initializes the alert system:
+     * <ul>
+     *     <li>Loads all sound files into memory.</li>
+     *     <li>Starts the playback thread.</li>
+     * </ul>
+     */
     AlertPlayer() {
         //Load sounds on startup and store in myAlerts
         loadSound("battery", BATTERY_ALERT_PATH);
@@ -48,6 +84,11 @@ public enum AlertPlayer {
         myPlaybackThread.start();
     }
 
+    /**
+     * Continuously processes the playback queue.
+     * Waits for sound names to appear in the queue and plays them synchronously.
+     * Terminates when {@link #isRunning} is set to false.
+     */
     private void playbackLoop() {
         while (isRunning) {
             try {
@@ -72,6 +113,13 @@ public enum AlertPlayer {
         }
     }
 
+    /**
+     * Plays the given clip synchronously, blocking until playback completes.
+     * Adds a temporary {@link LineListener} to detect when the clip stops.
+     *
+     * @param theAlert the {@link Clip} to play
+     * @param theSoundName the name of the sound
+     */
     private synchronized void playClipSynchronously(Clip theAlert, String theSoundName) {
         final Object lock = new Object(); //Make a lock for synchronization
 
@@ -113,6 +161,12 @@ public enum AlertPlayer {
         }
     }
 
+    /**
+     * Loads a sound from the specified file path and stores it in the internal alert map.
+     *
+     * @param theName the name of the sound
+     * @param theFilePath the file path to the audio file
+     */
     private void loadSound(String theName, String theFilePath) {
         try {
             File file = new File(theFilePath); //Try to get the file
@@ -134,6 +188,12 @@ public enum AlertPlayer {
         }
     }
 
+    /**
+     * Queues a sound for playback, respecting the cooldown configured for the sound type.
+     * If the same sound was queued within its cooldown period, the request is ignored.
+     *
+     * @param theSoundName the name of the sound to queue
+     */
     public void addSoundToQueue(String theSoundName) {
         if(myAlerts.containsKey(theSoundName)) {
             long now = System.currentTimeMillis();
@@ -157,6 +217,10 @@ public enum AlertPlayer {
         }
     }
 
+    /**
+     * Stops the playback thread and releases all audio resources.
+     * Ensures all {@link Clip} instances are closed.
+     */
     public void closeAllAlerts() {
         isRunning = false; //Stop Running queue
         myPlaybackThread.interrupt(); //Interrupt thread if it gets stuck waiting for queue (even though we're done).
@@ -172,6 +236,12 @@ public enum AlertPlayer {
         System.out.println("All alerts closed");
     }
 
+    /**
+     * Returns the file path for a given alert name.
+     *
+     * @param theSoundName the alert name
+     * @return the corresponding file path, or {@code null} if unknown
+     */
     private String getPathForSound(String theSoundName) { //Helper method to return sound paths based on sound name
         return switch (theSoundName) {
             case "battery" -> BATTERY_ALERT_PATH;
