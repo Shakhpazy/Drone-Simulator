@@ -74,12 +74,10 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * @param theTelData the drone's telemetry data as a string.
      */
     public void drawDrone(final int theID, final float[] theLoc, final String theTelData) {
-        SwingUtilities.invokeLater(() -> {
-            MAP_PANEL.setDroneMapping(theID, theLoc);
-            TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
-            revalidate();
-            repaint();
-        });
+        MAP_PANEL.setDroneMapping(theID, theLoc);
+        TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
+        revalidate();
+        repaint();
     }
 
     /**

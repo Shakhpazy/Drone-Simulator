@@ -66,8 +66,6 @@ class TelemetryPanel extends JPanel {
 
     void removeTelemetryEntry(final int theID) {
         remove(ID_ENTRY_MAP.get(theID));
-        revalidate();
-        repaint();
     }
 
     /**
