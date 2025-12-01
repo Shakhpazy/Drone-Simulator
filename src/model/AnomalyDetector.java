@@ -202,7 +202,6 @@ public class AnomalyDetector {
             double accelerationZScore = (currAcceleration - ACCELERATION_MEAN_BASELINE)
                     / effectiveStandardDev;
             if (Math.abs(accelerationZScore) > MAX_Z_SCORE && currTime != firstTimestamp) {
-                System.out.println(currAcceleration);
                 return AnomalyEnum.ACCELERATION;
             }
         }
@@ -243,9 +242,11 @@ public class AnomalyDetector {
 
         // Check in bounds
         if (currLatitude < LATITUDE_MAX * -1 || currLatitude > LATITUDE_MAX ||
-                currLongitude < LONGITUDE_MAX * -1 || currLongitude > LONGITUDE_MAX ||
-                currAltitude < 0 || currAltitude > ALTITUDE_MAX) {
+                currLongitude < LONGITUDE_MAX * -1 || currLongitude > LONGITUDE_MAX) {
             return AnomalyEnum.OUT_OF_BOUNDS;
+        }
+        if (currAltitude < 0 || currAltitude > ALTITUDE_MAX) {
+            return AnomalyEnum.HIT_GROUND;
         }
 
         // Check z-axis velocity

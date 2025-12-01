@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * A class to hold all methods for interacting with the drone_anomalies database.
  * @author nlevin11
- * @version 11-6
+ * @version 11-30
  */
 public class AnomalyDatabase {
     /**
@@ -140,12 +140,12 @@ public class AnomalyDatabase {
      */
     public List<AnomalyReport> findReportsByAnomalyType(String theAnomalyType){
         List<AnomalyReport> reports = new ArrayList<>();
-        String sql = "SELECT * FROM anomaly_reports WHERE anomaly_type = ?";
+        String sql = "SELECT * FROM anomaly_reports WHERE anomaly_type LIKE ?";
 
         try {
             PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
 
-            preparedStatement.setString(1, theAnomalyType);
+            preparedStatement.setString(1, "%" + theAnomalyType + "%");
             ResultSet rs = preparedStatement.executeQuery();
 
             while(rs.next()) {

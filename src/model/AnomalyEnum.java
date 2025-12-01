@@ -11,7 +11,8 @@ public enum AnomalyEnum {
     SPOOFING("GPS Spoofing"),
     SPEED("Dangerous Change in Speed"),
     OUT_OF_BOUNDS("Out of Bounds"),
-    ACCELERATION("Abnormal Acceleration/Deceleration");
+    ACCELERATION("Abnormal Acceleration/Deceleration"),
+    HIT_GROUND("Ground Collision");
 
     /**
      * A String to hold the String representation of an AnomalyEnum.
