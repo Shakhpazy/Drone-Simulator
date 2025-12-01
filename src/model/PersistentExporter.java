@@ -68,7 +68,7 @@ public class PersistentExporter {
                     case "latitude" -> String.valueOf(theTelemetryData.latitude());
                     case "altitude" -> String.valueOf(theTelemetryData.altitude());
                     case "velocity" -> String.valueOf(theTelemetryData.velocity());
-                    case "batteryLevel" -> String.valueOf(theTelemetryData.batterLevel());
+                    case "batteryLevel" -> String.valueOf(theTelemetryData.batteryLevel());
                     case "orientation" -> String.valueOf(theTelemetryData.orientation());
                     case "timestamp" -> String.valueOf(theTelemetryData.timeStamp());
                     default -> throw new IllegalStateException("Unexpected value: " + header);
