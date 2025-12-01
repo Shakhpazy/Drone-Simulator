@@ -164,7 +164,7 @@ public class ZScoreMonitor {
                 "longitude: " + theTelemetry.longitude() + "\n" +
                 "latitude: " + theTelemetry.latitude() + "\n" +
                 "velocity: " + theTelemetry.velocity() + "\n" +
-                "batteryLevel: " + theTelemetry.batterLevel() + "\n" +
+                "batteryLevel: " + theTelemetry.batteryLevel() + "\n" +
                 "orientation: " + theTelemetry.orientation() + "\n";
     }
 }

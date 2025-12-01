@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Drone extends AbstractDrone {
-    //This might change if  I want each Drone to have its own
-    //max based on a range of those numbers.
 
     /** Minimum allowed altitude in normal moves. */
     private static final float MIN_ALTITUDE = 0;
@@ -33,7 +31,7 @@ public class Drone extends AbstractDrone {
     private static final float MAX_VELOCITY = 10;
 
     /** Minimum allowed velocity in normal moves. */
-    private static final float MIN_VELOCITY = 1;
+    private static final float MIN_VELOCITY = 0;
 
     private static final AnomalyEnum[] movementAnomalies = {
             AnomalyEnum.BATTERY_DRAIN,
@@ -156,6 +154,7 @@ public class Drone extends AbstractDrone {
 
 
         if (anomaly == AnomalyEnum.BATTERY_FAIL) {
+            System.out.println(velocity);
             setVelocity(velocity);
             setAltitude(altitude);
             setBatteryLevel(battery);
@@ -185,16 +184,21 @@ public class Drone extends AbstractDrone {
         float dz = next.getAltitude() - altitude;
 
         float distance = (float) Math.sqrt(dx*dx + dy*dy + dz*dz);
-        
-        // Adjust velocity slightly (acceleration/deceleration) BEFORE calculating movement
+
+        // Prevent freeze when drone is exactly on the waypoint
+        if (distance < 0.0001f) {
+            this.setNextRoute();
+            return;
+        }
+
+        // Adjust velocity (slow near waypoint / speed up otherwise)
         if (distance < 30.0f) {
             velocity = Math.max(this.getVelocity() - this.getAccelerationStep(), this.getMinVelocity());
         } else {
             velocity = Math.min(this.getVelocity() + this.getAccelerationStep(), this.getMaxVelocity());
         }
-        
-        // Use the updated velocity for movement calculation
-        float moveDist = velocity * theDeltaTime; // movement this frame
+
+        float moveDist = velocity * theDeltaTime;
 
         if (distance <= moveDist) {
             longitude = next.getLongitude();
