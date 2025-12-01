@@ -8,12 +8,15 @@ import java.awt.*;
  * system.
  *
  * @author Evin Roen
- * @version 11/19/2025
+ * @version 11/30/2025
  */
 public class MonitorDashboard extends PropertyEnabledJFrame {
 
     /** This constant determines the size of the window. */
     private static final Dimension SIZE = new Dimension(1100, 700);
+
+    /** This is the size of the instructions window. */
+    private static final Dimension HELP_SIZE = new Dimension(500, 510);
 
     /** This constant contains a reference to the map panel. */
     private static final MapPanel MAP_PANEL = new MapPanel();
@@ -126,15 +129,11 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         JMenuBar bar = new JMenuBar();
 
         // File
-        JMenu fileMenu = initFileMenu();
+        JMenu fileMenu = new JMenu("File");
+        JMenuItem saveAs = new JMenuItem("Save all reports as...");
+        saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
+        fileMenu.add(saveAs);
         bar.add(fileMenu);
-
-        // Help
-        JMenu helpMenu = new JMenu("Help");
-        JMenuItem inst = new JMenuItem("Instructions...");
-        inst.addActionListener(_ -> openInstructions());
-        helpMenu.add(inst);
-        bar.add(helpMenu);
 
         // Data
         JMenu dataMenu = new JMenu("Data");
@@ -143,42 +142,53 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         dataMenu.add(openDB);
         bar.add(dataMenu);
 
-        // Debug
-        JMenu debugMenu = new JMenu("Debug");
-        JSlider tickSpdSlider = new JSlider(1, 5, 1);
-        tickSpdSlider.addChangeListener(
-                _ -> myPCS.firePropertyChange(
-                        PROPERTY_TICK_SPEED,
-                        null,
-                        tickSpdSlider.getValue()));
-        tickSpdSlider.setLabelTable(tickSpdSlider.createStandardLabels(1));
-        tickSpdSlider.setPaintLabels(true);
-        debugMenu.add(new JLabel("Tick Speed"));
-        debugMenu.add(tickSpdSlider);
-        bar.add(debugMenu);
+        // Help
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem inst = new JMenuItem("Instructions...");
+        inst.addActionListener(_ -> openInstructions());
+        helpMenu.add(inst);
+        bar.add(helpMenu);
 
         setJMenuBar(bar);
         bar.setVisible(true);
     }
 
     /**
-     * Sets up the file portion of the menu bar.
-     *
-     * @return the JMenu for 'file' to add to the menu bar.
-     */
-    private JMenu initFileMenu() {
-        JMenu fileMenu = new JMenu("File");
-        JMenuItem saveAs = new JMenuItem("Save all reports as...");
-        saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
-        fileMenu.add(saveAs);
-        return fileMenu;
-    }
-
-    /**
      * Opens a window that instructs users on how to navigate this app.
      */
     private void openInstructions() {
-        System.out.println("eventually, this will open instructions");
+        String[] instructions = {
+                "Menu Bar",
+                "---------------",
+                "> File: Save the entire stored anomaly data to a separate file.",
+                "        Supported file types: pdf, csv, json.",
+                "> Help: Here you can open the instructions for the dashboard.",
+                "> Data: Here you can open and query the anomaly database.",
+                "        For database window instructions, open the window and go",
+                "        to \"Help -> Instructions...\"",
+                "",
+                "Map Panel",
+                "---------------",
+                "> This panel shows the locations of the drones on a latitude / longitude grid.",
+                "",
+                "Telemetry Data",
+                "---------------",
+                "> Each drone's telemetry data (location, velocity, etc.) is displayed below the",
+                "  map panel. To see a specific drone's location on the map, click on the data entry",
+                "  for the desired drone.",
+                "",
+                "Anomaly Log",
+                "---------------",
+                "> This panel displays the most recent anomalies since starting the simulation.",
+                "  To view the entire database, go to \"Data -> Open database...\"",
+                "> To view the details of a recent anomaly, click on the desired entry and the",
+                "  details will appear on the panel below the log.",
+                "",
+                "Anomaly Details Panel",
+                "---------------",
+                "> This panel displays the details for the last clicked anomaly log entry."
+        };
+        new InstructionWindow("Monitor Dashboard Instructions", instructions, HELP_SIZE);
     }
 
     /**

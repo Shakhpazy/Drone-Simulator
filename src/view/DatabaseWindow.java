@@ -12,7 +12,7 @@ import java.util.ArrayList;
  * the anomaly reports database.
  *
  * @author Evin Roen
- * @version 11/19/2025
+ * @version 11/30/2025
  */
 public class DatabaseWindow extends PropertyEnabledJFrame {
 
@@ -42,6 +42,11 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
      * Size of the GUI window.
      */
     private static final Dimension SIZE = new Dimension(1100, 700);
+
+    /**
+     * Size of the instructions window.
+     */
+    private static final Dimension HELP_SIZE = new Dimension(400, 100);
 
     /**
      * List of database entries for storing and modifying the displayed reports.
@@ -119,12 +124,34 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
      */
     private void initMenuBar() {
         JMenuBar bar = new JMenuBar();
+
+        // File
         JMenu fileMenu = new JMenu("File");
         JMenuItem saveAs = new JMenuItem("Save current selection as...");
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
         bar.add(fileMenu);
+
+        // Help
+        JMenu helpMenu = new JMenu("Help");
+        JMenuItem inst = new JMenuItem("Instructions...");
+        inst.addActionListener(_ -> openInstructions());
+        helpMenu.add(inst);
+        bar.add(helpMenu);
+
         setJMenuBar(bar);
+    }
+
+    /**
+     * Opens the instruction window.
+     */
+    private void openInstructions() {
+        String[] instructions = {
+                "1) Use the filters to specify which reports you would like to see.",
+                "2) Click GO to query the database.",
+                "3) Go to \"File -> Save current selection...\" to save the results."
+        };
+        new InstructionWindow("Database Window Instructions", instructions, HELP_SIZE);
     }
 
     /**

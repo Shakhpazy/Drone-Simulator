@@ -22,10 +22,13 @@ import java.util.List;
  * the DatabaseWindow class.
  *
  * @author Evin Roen
- * @version 11/19/2025
+ * @version 11/30/2025
  */
 public class DatabaseController implements PropertyChangeListener {
 
+    /**
+     * The default file name for saving the data.
+     */
     private final String FILENAME = "anomaly_report";
 
     /**
@@ -38,6 +41,9 @@ public class DatabaseController implements PropertyChangeListener {
      */
     private final DatabaseWindow myWindow;
 
+    /**
+     * The results of the last query, or all reports if no has been query fired yet.
+     */
     private List<AnomalyReport> myFilteredReports;
 
     /**
@@ -145,7 +151,7 @@ public class DatabaseController implements PropertyChangeListener {
                 }
                 break;
 
-            // Exporting options for entire anomaly database.
+            // Determine data to export via source of the event
             case MonitorDashboard.PROPERTY_SAVE_AS:
                 if (theEvent.getSource() instanceof MonitorDashboard) {
                     exportData(myDTBS.findAllReports());
@@ -167,6 +173,7 @@ public class DatabaseController implements PropertyChangeListener {
         // Listener for when user changes file extension filter
         choose.addPropertyChangeListener(fileTypeChanged());
 
+        // Save the file if approved
         if (choose.showSaveDialog(null) == JFileChooser.APPROVE_OPTION) {
 
             File selected = choose.getSelectedFile();
@@ -193,8 +200,33 @@ public class DatabaseController implements PropertyChangeListener {
 
     private JFileChooser initChooser() {
 
-        // Create file chooser
-        JFileChooser choose = new JFileChooser();
+        // Create file chooser with overridden approveSelection()
+        // method to warn user of overwriting the file with the same name.
+        JFileChooser choose = new JFileChooser() {
+            @Override
+            public void approveSelection() {
+                File f = getSelectedFile();
+                if (f.exists()) {
+                    int result = JOptionPane.showConfirmDialog(
+                            this,
+                            "Do you want to overwrite the existing file?",
+                            "File already exists",
+                            JOptionPane.YES_NO_CANCEL_OPTION);
+                    switch (result) {
+                        case JOptionPane.YES_OPTION:
+                            super.approveSelection();
+                            break;
+                        case JOptionPane.NO_OPTION:
+                        case JOptionPane.CANCEL_OPTION:
+                        case JOptionPane.CLOSED_OPTION:
+                            cancelSelection();
+                            break;
+                    }
+                } else {
+                    super.approveSelection();
+                }
+            }
+        };
         choose.setDialogTitle("Save Anomaly Report");
         choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
