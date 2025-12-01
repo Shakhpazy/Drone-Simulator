@@ -30,6 +30,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     /** This constant contains a reference to the map panel. */
     private static final TelemetryPanel TELEMETRY_PANEL = new TelemetryPanel();
 
+    /** This constant holds the singleton instance of the dashboard. */
     private static final MonitorDashboard INSTANCE = new MonitorDashboard();
 
     /** Constructor to initialize the window. */
@@ -58,9 +59,11 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         if (theSimpleReport == null || theDetailedReport == null) {
             throw new IllegalArgumentException("Report strings must not be null.");
         }
-        LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
-        revalidate();
-        repaint();
+        SwingUtilities.invokeLater(() -> {
+            LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+            revalidate();
+            repaint();
+        });
     }
 
     /**
@@ -71,10 +74,12 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * @param theTelData the drone's telemetry data as a string.
      */
     public void drawDrone(final int theID, final float[] theLoc, final String theTelData) {
-        MAP_PANEL.setDroneMapping(theID, theLoc);
-        TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
-        revalidate();
-        repaint();
+        SwingUtilities.invokeLater(() -> {
+            MAP_PANEL.setDroneMapping(theID, theLoc);
+            TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
+            revalidate();
+            repaint();
+        });
     }
 
     /**
