@@ -23,6 +23,17 @@ public enum AlertPlayer {
     private final Thread myPlaybackThread;
     private volatile boolean isRunning = true;
 
+    //Track when each sound has been queued
+    private final Map<String, Long> myCooldowns = Map.of(
+            "out-of-bounds", 500L,
+            "crash", 0L,
+            "spoof", 500L,
+            "acceleration", 3000L,
+            "battery", 2000L
+    );
+
+    private final Map<String, Long> myLastQueued = new HashMap<>();
+
     AlertPlayer() {
         //Load sounds on startup and store in myAlerts
         loadSound("battery", BATTERY_ALERT_PATH);
@@ -125,13 +136,23 @@ public enum AlertPlayer {
 
     public void addSoundToQueue(String theSoundName) {
         if(myAlerts.containsKey(theSoundName)) {
-            try {
-                myPlaybackQueue.put(theSoundName);
-                System.out.println("Added " + theSoundName + " to the queue");
+            long now = System.currentTimeMillis();
+            Long cooldown =  myCooldowns.getOrDefault(theSoundName, 2000L);
+            Long lastTime = myLastQueued.get(theSoundName);
+
+            if(lastTime == null || now - lastTime >= cooldown) {
+                try {
+                    myPlaybackQueue.put(theSoundName);
+                    myLastQueued.put(theSoundName, now);
+                    System.out.println("Added " + theSoundName + " to the queue");
+                }
+                catch(InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    System.out.println("Failed to add " + theSoundName + " to the queue");
+                }
             }
-            catch(InterruptedException e) {
-                Thread.currentThread().interrupt();
-                System.out.println("Failed to add " + theSoundName + " to the queue");
+            else {
+                System.out.println("Skipped " + theSoundName + " due to cooldown");
             }
         }
     }

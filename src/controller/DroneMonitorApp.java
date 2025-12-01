@@ -2,7 +2,6 @@ package controller;
 
 import model.*;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -35,7 +34,7 @@ import view.MonitorDashboard;
  * </p>
  *
  * @author Natan Artemiev
- * @version 11/22/2025
+ * @version 11/30/2025
  */
 public class DroneMonitorApp {
 
@@ -133,18 +132,18 @@ public class DroneMonitorApp {
                     //If anomaly is not null.
                     if (anomaly != null) {
                         String anomalyString = anomaly.anomalyType();
-                        if (anomalyString.contains("Out of Bounds") ||
-                                anomalyString.contains("Altitude")) { //OUT_OF_BOUNDS and ALTITUDE anomalies (2/8)
+                        if (anomalyString.contains("Out of Bounds")) { //OUT_OF_BOUNDS and ALTITUDE anomalies (1/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("out-of-bounds");
                         } else if (anomalyString.contains("Battery") &&
-                                !anomalyString.contains("Failure")) { //BATTERY_DRAIN  and BATTERY anomalies (4/8)
+                                !anomalyString.contains("Failure")) { //BATTERY_DRAIN  and BATTERY anomalies (2/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("battery");
-                        } else if (anomalyString.contains("Acceleration") ||
-                                anomalyString.contains("Speed")) { //ACCELERATION and SPEED anomalies (6/8)
+                        } else if (anomalyString.contains("Acceleration")
+                                || anomalyString.contains("Speed")
+                                || anomalyString.contains("Altitude")) { //ACCELERATION and SPEED anomalies (3/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("acceleration");
-                        } else if (anomalyString.contains("Spoof")) { //SPOOFING anomaly(7/8)
+                        } else if (anomalyString.contains("Spoof")) { //SPOOFING anomaly (1/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("spoof");
-                        } else { //BATTERY_FAIL
+                        } else { //BATTERY_FAIL OR HIT_GROUND (2/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("crash");
                             view.removeDrone(drone.getId());
                             gen.removeDrone(drone);
