@@ -215,7 +215,7 @@ public class DroneMonitorApp {
         sb.append("Longitude: ").append(theTelemetryRecord.longitude()).append("\n");
         sb.append("Latitude: ").append(theTelemetryRecord.latitude()).append("\n");
         sb.append("Velocity: ").append(theTelemetryRecord.velocity()).append("\n");
-        sb.append("Battery Level: ").append(theTelemetryRecord.batterLevel()).append("\n");
+        sb.append("Battery Level: ").append(theTelemetryRecord.batteryLevel()).append("\n");
         sb.append("Orientation: ").append(theTelemetryRecord.orientation()).append("\n");
         return sb.toString();
     }

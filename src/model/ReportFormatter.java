@@ -67,7 +67,7 @@ public class ReportFormatter {
                 " z: " + theCurrTelemetry.altitude() + "\n" +
                 "Velocity: " + theCurrTelemetry.velocity() + " units/second(cycle)\n" +
                 "Orientation: " + theCurrTelemetry.orientation() + "\n" +
-                "Battery (%): " + theCurrTelemetry.batterLevel() +
+                "Battery (%): " + theCurrTelemetry.batteryLevel() +
 
                 //Previous state
                 "\nPrevious State: \n" +
@@ -76,7 +76,7 @@ public class ReportFormatter {
                 " z: " + thePrevTelemetry.altitude() + "\n" +
                 "Velocity: " + thePrevTelemetry.velocity() + " units/cycle\n" +
                 "Orientation (Deg from North): " + thePrevTelemetry.orientation() + "\n" +
-                "Battery (%): " + thePrevTelemetry.batterLevel() + "\n";
+                "Battery (%): " + thePrevTelemetry.batteryLevel() + "\n";
     }
 
 }
