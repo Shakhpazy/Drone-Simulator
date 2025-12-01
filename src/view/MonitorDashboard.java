@@ -90,6 +90,8 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     public void removeDrone(final int theID) {
         MAP_PANEL.removeDrone(theID);
         TELEMETRY_PANEL.removeTelemetryEntry(theID);
+        revalidate();
+        repaint();
     }
 
     /**
