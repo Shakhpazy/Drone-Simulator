@@ -91,6 +91,9 @@ public abstract class AbstractDrone implements DroneInterface{
      */
     public AbstractDrone(final float theLong, final float theLat, final float theAlt, final float theVel, final float theBat, final float theMaxVel,
                          final float theMinVel, final float theMaxAlt, final float theMinAlt, final float theAccStep) {
+        if (theAlt < theMinAlt || theAlt > theMaxAlt || theVel < theMinVel || theVel > theMaxVel) {
+            throw new IllegalArgumentException("Arguments passed are not valid theAltitude or the Velocity is not in bound");
+        }
         myLongitude = theLong;
         myLatitude = theLat;
         myAltitude = theAlt;
@@ -173,7 +176,7 @@ public abstract class AbstractDrone implements DroneInterface{
     }
 
     /**
-     * Sets the Altitude of the Drone
+     * Sets the Altitude of the Drone protects if negative altitude is received
      *
      * @param theAltitude float of the altitude
      */
@@ -222,6 +225,9 @@ public abstract class AbstractDrone implements DroneInterface{
      * @param theVelocity float of the velocity
      */
     public void setVelocity(final float theVelocity) {
+        if (theVelocity > myMaxVelocity || theVelocity < myMinVelocity) {
+            throw  new IllegalArgumentException("velocity must be inbound");
+        }
         myVelocity = theVelocity;
     }
 
@@ -311,6 +317,21 @@ public abstract class AbstractDrone implements DroneInterface{
      */
     protected void setMyLastAnomaly(AnomalyEnum theAnomaly) {
         myLastAnomaly = theAnomaly;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "Drone{id=%d, alive=%s, lon=%.2f, lat=%.2f, alt=%.2f, vel=%.2f, battery=%.2f, orientation=%.2f°}",
+                myID,
+                myDroneIsAlive,
+                myLongitude,
+                myLatitude,
+                myAltitude,
+                myVelocity,
+                myBatteryLevel,
+                myOrientation.getDegree()
+        );
     }
 
 
