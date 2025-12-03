@@ -25,6 +25,11 @@ class LogPanel extends JPanel {
     private static final JPanel SCROLL_VIEW = new JPanel();
 
     /**
+     * Adjust scroll panel increment (default too slow)
+     */
+    private static final int SCROLL_INC = 10;
+
+    /**
      * Constructor to initialize the panel.
      */
     LogPanel() {
@@ -62,6 +67,7 @@ class LogPanel extends JPanel {
     private void initScroll() {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
         JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
+        scroll.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scroll);

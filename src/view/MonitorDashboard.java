@@ -59,11 +59,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         if (theSimpleReport == null || theDetailedReport == null) {
             throw new IllegalArgumentException("Report strings must not be null.");
         }
-        SwingUtilities.invokeLater(() -> {
-            LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
-            revalidate();
-            repaint();
-        });
+        LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -86,12 +84,10 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * @param theID the id of the drone to remove from the sim.
      */
     public void removeDrone(final int theID) {
-        SwingUtilities.invokeLater(() -> {
-            MAP_PANEL.removeDrone(theID);
-            TELEMETRY_PANEL.removeTelemetryEntry(theID);
-            revalidate();
-            repaint();
-        });
+        MAP_PANEL.removeDrone(theID);
+        TELEMETRY_PANEL.removeTelemetryEntry(theID);
+        revalidate();
+        repaint();
     }
 
     /**

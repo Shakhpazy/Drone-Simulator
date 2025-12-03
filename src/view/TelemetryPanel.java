@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 
 /**
  * This class displays the telemetry data for the mapped drones under the map.
@@ -26,6 +26,11 @@ class TelemetryPanel extends JPanel {
      * This constant is a mapping between drone IDs and their associated entries.
      */
     private static final Map<Integer, TelemetryEntry> ID_ENTRY_MAP = new HashMap<>();
+
+    /**
+     * Adjust scroll panel increment (default too slow)
+     */
+    private static final int SCROLL_INC = 5;
 
     /**
      * Constructor to initialize the panel and its components.
@@ -58,14 +63,25 @@ class TelemetryPanel extends JPanel {
             ID_ENTRY_MAP.get(theID).setText(theData);
         } else {
             // add new entry
-            TelemetryEntry e = new TelemetryEntry(theID, theData);
-            ID_ENTRY_MAP.put(theID, e);
-            SCROLL_VIEW.add(e);
+            ID_ENTRY_MAP.put(theID, new TelemetryEntry(theID, theData));
+            sortEntries();
         }
     }
 
     void removeTelemetryEntry(final int theID) {
         remove(ID_ENTRY_MAP.get(theID));
+        sortEntries();
+    }
+
+    private void sortEntries() {
+        for (TelemetryEntry e : ID_ENTRY_MAP.values()) {
+            SCROLL_VIEW.remove(e);
+        }
+        List<TelemetryEntry> entries = new ArrayList<>(List.copyOf(ID_ENTRY_MAP.values()));
+        entries.sort((a, b) -> {return a.myID - b.myID;});
+        for (TelemetryEntry e : entries) {
+            SCROLL_VIEW.add(e);
+        }
     }
 
     /**
@@ -85,6 +101,7 @@ class TelemetryPanel extends JPanel {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.X_AXIS));
         SCROLL_VIEW.setAlignmentX(LEFT_ALIGNMENT);
         JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
+        scroll.getHorizontalScrollBar().setUnitIncrement(SCROLL_INC);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         scroll.setAlignmentX(LEFT_ALIGNMENT);
