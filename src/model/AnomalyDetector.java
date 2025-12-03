@@ -81,12 +81,12 @@ public class AnomalyDetector {
     /**
      * A double to represent the mean expected orientation change of a drone.
      */
-    private static double ORIENTATION_DELTA_MEAN_BASELINE;
+    private static double ORIENTATION_STEADY_MAX_DELTA;
 
     /**
      * A double to represent the standard deviation of the expected orientation change of a drone.
      */
-    private static double ORIENTATION_DELTA_STANDARD_DEV_BASELINE;
+    private static double ORIENTATION_TURN_MIN_DELTA;
 
     /**
      * A double to represent the mean expected acceleration of a drone.
@@ -121,9 +121,9 @@ public class AnomalyDetector {
             BATTERY_DRAIN_MEAN_BASELINE = Double.parseDouble(props.getProperty("batteryDrain.mean"));
             BATTERY_DRAIN_STANDARD_DEV_BASELINE = Double.parseDouble(props.getProperty("batteryDrain.standardDev"));
 
-            ORIENTATION_DELTA_MEAN_BASELINE = Double.parseDouble(props.getProperty("orientationDelta.mean"));
-            ORIENTATION_DELTA_STANDARD_DEV_BASELINE = Double.parseDouble(props.
-                    getProperty("orientationDelta.standardDev"));
+            ORIENTATION_STEADY_MAX_DELTA = Double.parseDouble(props.getProperty("orientationSteady.max"));
+            ORIENTATION_TURN_MIN_DELTA = Double.parseDouble(props.getProperty("orientationTurn.min"));
+            ORIENTATION_STEADY_MAX_DELTA *= 1.1;
 
             ACCELERATION_MEAN_BASELINE = Double.parseDouble(props.getProperty("acceleration.mean"));
             ACCELERATION_STANDARD_DEV_BASELINE = Double.parseDouble(props.
@@ -232,9 +232,7 @@ public class AnomalyDetector {
 
         double orientationDelta = Math.abs(currOrientation - prevOrientation);
         if (orientationDelta > 180) orientationDelta = 360 - orientationDelta;
-        double orientationZScore = (orientationDelta - ORIENTATION_DELTA_MEAN_BASELINE)
-                / ORIENTATION_DELTA_STANDARD_DEV_BASELINE;
-        if (orientationZScore >= 3) {
+        if (orientationDelta < ORIENTATION_TURN_MIN_DELTA && orientationDelta > ORIENTATION_STEADY_MAX_DELTA) {
             return AnomalyEnum.OFF_COURSE;
         }
         return null;

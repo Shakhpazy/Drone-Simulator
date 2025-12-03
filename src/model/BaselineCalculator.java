@@ -20,6 +20,11 @@ public class BaselineCalculator {
     private static final double ACCELERATION_THRESHOLD = 0.01;
 
     /**
+     * A double to roughly delineate steady vs turning drone orientation deltas.
+     */
+    private static final double SPLIT_THRESHOLD = 10.0;
+
+    /**
      * A list to hold all velocity data.
      */
     private final List<Double> velocityReadings;
@@ -100,14 +105,24 @@ public class BaselineCalculator {
             double batteryDrainMean = calculateMean(batteryDrainReadings);
             double batteryDrainStandardDev = calculateStandardDev(batteryDrainReadings, batteryDrainMean);
 
-            double orientationDeltaMean = calculateMean(orientationDeltaReadings);
-            double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, orientationDeltaMean);
+            double maxStableJitter = 0.0;
+            double minTurnDelta = 180;
+
+            for(double delta : orientationDeltaReadings) {
+                if (delta < SPLIT_THRESHOLD) {
+                    if (delta > maxStableJitter) maxStableJitter = delta;
+                } else {
+                    if (delta < minTurnDelta) minTurnDelta = delta;
+                }
+            }
+//            double orientationDeltaMean = calculateMean(orientationDeltaReadings);
+//            double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, orientationDeltaMean);
 
             double accelerationMean = calculateMean(accelerationReadings);
             double accelerationStandardDev = calculateStandardDev(accelerationReadings, accelerationMean);
 
             saveStatsToProperties(outputProperties, lineCount, velocityMean, velocityStandardDev, batteryDrainMean,
-                    batteryDrainStandardDev, orientationDeltaMean, orientationDeltaStandardDev,
+                    batteryDrainStandardDev, maxStableJitter, minTurnDelta,
                     accelerationMean, accelerationStandardDev);
             System.out.println(lineCount + " data points calculated.");
         } catch (IOException e) {
@@ -170,20 +185,19 @@ public class BaselineCalculator {
                         firstTimestampReadings.put(droneID, currTimestamp);
                     }
 
-                    if (prevTimestampReadings.containsKey(droneID) && prevVelocityReadings.containsKey(droneID)) {
-                        double prevTimestamp = prevTimestampReadings.get(droneID);
-                        double deltaTimeSec = (currTimestamp - prevTimestamp) / 1000;
-                        double prevVelocity = prevVelocityReadings.get(droneID);
+                    if (prevTimestampReadings.containsKey(droneID)) {
+                        if (prevVelocityReadings.containsKey(droneID)) {
+                            double prevTimestamp = prevTimestampReadings.get(droneID);
+                            double deltaTimeSec = (currTimestamp - prevTimestamp) / 1000;
+                            double prevVelocity = prevVelocityReadings.get(droneID);
 
-                        double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTimeSec;
-                        if (currAcceleration > ACCELERATION_THRESHOLD) accelerationReadings.add(currAcceleration);
-                    }
+                            double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTimeSec;
+                            if (currAcceleration > ACCELERATION_THRESHOLD) accelerationReadings.add(currAcceleration);
+                        }
+                        double timeSinceStart = currTimestamp - firstTimestampReadings.get(droneID);
+                        if (timeSinceStart >= WARMUP_TIME_MS) {
+                            velocityReadings.add(currVelocity);
 
-                    double timeSinceStart = currTimestamp - firstTimestampReadings.get(droneID);
-                    if (timeSinceStart >= WARMUP_TIME_MS) {
-                        velocityReadings.add(currVelocity);
-
-                        if (prevTimestampReadings.containsKey(droneID)) {
                             double prevTimestamp = prevTimestampReadings.get(droneID);
 
                             double deltaTime = (currTimestamp - prevTimestamp) / 1000;
@@ -202,9 +216,7 @@ public class BaselineCalculator {
                                 if (diff > 180) {
                                     diff = 360 - diff;
                                 }
-                                if (diff > 1.0) {
-                                    orientationDeltaReadings.add(diff);
-                                }
+                                orientationDeltaReadings.add(diff);
                             }
                         }
                     }
@@ -232,7 +244,7 @@ public class BaselineCalculator {
      * @throws IOException      Throws an exception when data cannot be written to the file.
      */
     private void saveStatsToProperties(String filepath, int lineCount, double vMean, double vStandardDev, double bMean,
-                                       double bStandardDev, double oMean, double oStandardDev, double aMean,
+                                       double bStandardDev, double oSteadyMax, double oTurnMin, double aMean,
                                        double aStandardDev) throws IOException {
         Properties props = new Properties();
 
@@ -240,8 +252,8 @@ public class BaselineCalculator {
         props.setProperty("velocity.standardDev", String.valueOf(vStandardDev));
         props.setProperty("batteryDrain.mean", String.valueOf(bMean));
         props.setProperty("batteryDrain.standardDev", String.valueOf(bStandardDev));
-        props.setProperty("orientationDelta.mean", String.valueOf(oMean));
-        props.setProperty("orientationDelta.standardDev", String.valueOf(oStandardDev));
+        props.setProperty("orientationSteady.max", String.valueOf(oSteadyMax));
+        props.setProperty("orientationTurn.min", String.valueOf(oTurnMin));
         props.setProperty("acceleration.mean", String.valueOf(aMean));
         props.setProperty("acceleration.standardDev", String.valueOf(aStandardDev));
 
