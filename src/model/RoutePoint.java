@@ -70,7 +70,15 @@ public class RoutePoint {
      */
     @Override
     public String toString() {
-        return STR."(\{myLongitude}, \{myLatitude}, \{myAltitude})";
+        StringBuilder sb = new StringBuilder();
+        sb.append("(")
+                .append(myLongitude)
+                .append(", ")
+                .append(myLatitude)
+                .append(", ")
+                .append(myAltitude)
+                .append(")");
+        return sb.toString();
     }
 
 }
