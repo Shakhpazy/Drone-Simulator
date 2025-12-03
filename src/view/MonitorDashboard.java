@@ -2,6 +2,7 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDateTime;
 
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
@@ -33,10 +34,21 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     /** This constant holds the singleton instance of the dashboard. */
     private static final MonitorDashboard INSTANCE = new MonitorDashboard();
 
+    /** the number of milliseconds in one second for the clock timer. */
+    private static final int MILLI_IN_SEC = 1000;
+
+    /**
+     * Clock for displaying the current time.
+     */
+    private static JMenuItem myClock;
+
     /** Constructor to initialize the window. */
     private MonitorDashboard() {
         super();
+        myClock = new JMenuItem(LocalDateTime.now().toString());
+        Timer t = new Timer(MILLI_IN_SEC, (_) -> myClock.setText(LocalDateTime.now().toString()));
         initWindow();
+        t.start();
     }
 
     /**
@@ -151,6 +163,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
+
+        // Clock
+        bar.add(myClock);
 
         setJMenuBar(bar);
         bar.setVisible(true);
