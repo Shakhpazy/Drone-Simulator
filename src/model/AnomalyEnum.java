@@ -2,6 +2,8 @@ package model;
 
 /**
  * A class to encompass drone anomaly enumerations and their string representations.
+ * @author nlevin11
+ * @version 12-2
  */
 public enum AnomalyEnum {
     BATTERY_DRAIN("Abnormal Battery Drain Rate"),
@@ -12,7 +14,8 @@ public enum AnomalyEnum {
     SPEED("Dangerous Change in Speed"),
     OUT_OF_BOUNDS("Out of Bounds"),
     ACCELERATION("Abnormal Acceleration/Deceleration"),
-    HIT_GROUND("Ground Collision");
+    HIT_GROUND("Ground Collision"),
+    OFF_COURSE("Knocked Off Course");
 
     /**
      * A String to hold the String representation of an AnomalyEnum.
