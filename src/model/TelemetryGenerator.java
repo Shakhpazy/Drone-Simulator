@@ -33,6 +33,12 @@ public class TelemetryGenerator {
     /** Random generator used for determining anomaly occurrence and spoof offsets. */
     private final Random myRandom = new Random();
 
+    /** Maximum spoofing offset applied to lat/lon/alt when SPOOFING is triggered. */
+    private final float SPOOFING_CHANGE = 50;
+
+    /** Drone Collision Threshold **/
+    private final float COLLISION_THRESHOLD = 4;
+
     /**
      * Percentage chance (0–100+) that a drone will generate an anomalous update
      * instead of a normal movement.
@@ -41,9 +47,6 @@ public class TelemetryGenerator {
      * ~0.5% chance (5/1000) of anomaly.
      */
     private final float RANDOM_PERCENT;
-
-    /** Maximum spoofing offset applied to lat/lon/alt when SPOOFING is triggered. */
-    private final float SPOOFING_CHANGE = 50;
 
 
     /**
@@ -218,7 +221,7 @@ public class TelemetryGenerator {
                 float distanceSq = dx*dx + dy*dy + dz*dz;
 
                 // collision threshold (adjust if needed)
-                if (distanceSq < 4.0f) {  // radius of 2 units
+                if (distanceSq < COLLISION_THRESHOLD) {
                     a.collided();
                     b.collided();
                 }
