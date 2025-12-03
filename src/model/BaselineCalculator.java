@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * A class to parse and calculate drone data from a CSV log of activity.
  * @author nlevin11
- * @version 11-26
+ * @version 12-2
  */
 public class BaselineCalculator {
     /**
@@ -186,7 +186,7 @@ public class BaselineCalculator {
                         if (prevTimestampReadings.containsKey(droneID)) {
                             double prevTimestamp = prevTimestampReadings.get(droneID);
 
-                            double deltaTime = currTimestamp - prevTimestamp;
+                            double deltaTime = (currTimestamp - prevTimestamp) / 1000;
 
                             if (prevBatteryReadings.containsKey(droneID)) {
                                 float prevBattery = prevBatteryReadings.get(droneID);
