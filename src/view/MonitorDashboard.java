@@ -157,37 +157,41 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     private void initMenuBar() {
         JMenuBar bar = new JMenuBar();
         bar.setBackground(ColorScheme.BACKGROUND_PANEL);
-        bar.setForeground(ColorScheme.TEXT_MENU);
+        bar.setForeground(ColorScheme.TEXT_SECONDARY);
 
         // File
         JMenu fileMenu = new JMenu("File");
-        fileMenu.setForeground(ColorScheme.TEXT_MENU);
+        fileMenu.setForeground(ColorScheme.TEXT_PRIMARY);
         JMenuItem saveAs = new JMenuItem("Save all reports as...");
-        saveAs.setForeground(ColorScheme.TEXT_MENU);
+        saveAs.setBackground(ColorScheme.BACKGROUND_SECONDARY);
+        saveAs.setForeground(ColorScheme.TEXT_PRIMARY);
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
         bar.add(fileMenu);
 
         // Data
         JMenu dataMenu = new JMenu("Data");
-        dataMenu.setForeground(ColorScheme.TEXT_MENU);
+        dataMenu.setForeground(ColorScheme.TEXT_PRIMARY);
         JMenuItem openDB = new JMenuItem("Open Database...");
-        openDB.setForeground(ColorScheme.TEXT_MENU);
+        openDB.setBackground(ColorScheme.BACKGROUND_SECONDARY);
+        openDB.setForeground(ColorScheme.TEXT_PRIMARY);
         openDB.addActionListener(_ -> openDatabase());
         dataMenu.add(openDB);
         bar.add(dataMenu);
 
         // Help
         JMenu helpMenu = new JMenu("Help");
-        helpMenu.setForeground(ColorScheme.TEXT_MENU);
+        helpMenu.setForeground(ColorScheme.TEXT_PRIMARY);
         JMenuItem inst = new JMenuItem("Instructions...");
-        inst.setForeground(ColorScheme.TEXT_MENU);
+        inst.setBackground(ColorScheme.BACKGROUND_SECONDARY);
+        inst.setForeground(ColorScheme.TEXT_PRIMARY);
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
 
         // Clock
-        myClock.setForeground(ColorScheme.TEXT_MENU);
+        myClock.setForeground(ColorScheme.TEXT_SECONDARY);
+        myClock.setBackground(ColorScheme.BACKGROUND_SECONDARY);
         bar.add(myClock);
 
         setJMenuBar(bar);

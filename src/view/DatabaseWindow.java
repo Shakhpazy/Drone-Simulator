@@ -132,23 +132,23 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
      */
     private void initMenuBar() {
         JMenuBar bar = new JMenuBar();
-        bar.setBackground(ColorScheme.BACKGROUND_PANEL);
+        bar.setBackground(ColorScheme.BACKGROUND_MAIN);
         bar.setForeground(ColorScheme.TEXT_MENU);
 
         // File
         JMenu fileMenu = new JMenu("File");
-        fileMenu.setForeground(ColorScheme.TEXT_MENU);
+        fileMenu.setForeground(ColorScheme.TEXT_PRIMARY);
         JMenuItem saveAs = new JMenuItem("Save current selection as...");
-        saveAs.setForeground(ColorScheme.TEXT_MENU);
+        saveAs.setForeground(ColorScheme.TEXT_PRIMARY);
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
         bar.add(fileMenu);
 
         // Help
         JMenu helpMenu = new JMenu("Help");
-        helpMenu.setForeground(ColorScheme.TEXT_MENU);
+        helpMenu.setForeground(ColorScheme.TEXT_PRIMARY);
         JMenuItem inst = new JMenuItem("Instructions...");
-        inst.setForeground(ColorScheme.TEXT_MENU);
+        inst.setForeground(ColorScheme.TEXT_PRIMARY);
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
@@ -177,9 +177,10 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         RESULT_PANEL.setLayout(new BoxLayout(RESULT_PANEL, BoxLayout.Y_AXIS));
         RESULT_PANEL.setBackground(ColorScheme.BACKGROUND_PANEL);
         JScrollPane sp = new JScrollPane(RESULT_PANEL);
+        sp.getVerticalScrollBar().setUI(new ColorScheme.DarkScrollBarUI());
         sp.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
-        sp.setBackground(ColorScheme.BACKGROUND_PANEL);
-        sp.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
+//        sp.setBackground(ColorScheme.BACKGROUND_PANEL);
+//        sp.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
         add(sp, BorderLayout.CENTER);
 
         // Query Panel Setup
@@ -205,7 +206,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         });
 
         QUERY_PANEL.setLayout(new GridLayout(1, 0));
-        QUERY_PANEL.setBackground(ColorScheme.BACKGROUND_PANEL);
+        QUERY_PANEL.setBackground(ColorScheme.BACKGROUND_SECONDARY);
         QUERY_PANEL.add(new FieldPanel("Anomaly Type", typeField));
         QUERY_PANEL.add(new FieldPanel("DroneID", idField));
         QUERY_PANEL.add(new FieldPanel("Begin Date", fromDate));
@@ -217,18 +218,24 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
 
     private static JComboBox<String> getTypeField() {
         JComboBox<String> typeField = new JComboBox<>();
-        typeField.setBackground(Color.WHITE); // Dark background
-        typeField.setForeground(Color.BLACK); // Light text
+        typeField.setBackground(ColorScheme.BACKGROUND_SECONDARY);
+        typeField.setForeground(ColorScheme.TEXT_PRIMARY);
+        // This sets the popup list color
+        Object child = typeField.getAccessibleContext().getAccessibleChild(0);
+        if (child instanceof JComponent) {
+            ((JComponent) child).setBackground(ColorScheme.BACKGROUND_SECONDARY);
+            ((JComponent) child).setForeground(ColorScheme.TEXT_PRIMARY);
+        }
         typeField.addItem("");
         typeField.addItem("Abnormal Battery Drain Rate");
         typeField.addItem("Battery Failure");
         typeField.addItem("Battery Close to Depletion");
         typeField.addItem("Dangerous Change in Altitude");
         typeField.addItem("GPS Spoofing");
-        typeField.addItem("Dangerous Change in Speed");
         typeField.addItem("Out of Bounds");
         typeField.addItem("Abnormal Acceleration/Deceleration");
         typeField.addItem("Ground Collision");
+        typeField.addItem("Knocked Off Course");
         return typeField;
     }
 
@@ -331,7 +338,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
             }
             setLayout(new GridLayout(0, 1, GAP, GAP));
             setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-            setBackground(ColorScheme.BACKGROUND_PANEL);
+            setBackground(ColorScheme.BACKGROUND_SECONDARY);
             JLabel lbl = new JLabel(theLabel, JLabel.LEFT);
             lbl.setForeground(ColorScheme.TEXT_PRIMARY);
             lbl.setAlignmentX(LEFT_ALIGNMENT);

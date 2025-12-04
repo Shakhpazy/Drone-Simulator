@@ -69,6 +69,7 @@ class LogPanel extends JPanel {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
         SCROLL_VIEW.setBackground(ColorScheme.BACKGROUND_PANEL);
         JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
+        scroll.getVerticalScrollBar().setUI(new ColorScheme.DarkScrollBarUI());
         scroll.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

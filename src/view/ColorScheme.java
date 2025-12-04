@@ -1,6 +1,8 @@
 package view;
 
-import java.awt.Color;
+import javax.swing.*;
+import javax.swing.plaf.basic.BasicScrollBarUI;
+import java.awt.*;
 
 /**
  * Centralized color scheme for the dark theme UI.
@@ -69,4 +71,33 @@ public final class ColorScheme {
     
     /** Invisible caret color */
     public static final Color CARET_INVISIBLE = new Color(0, 0, 0, 0);
+
+
+    public static class DarkScrollBarUI extends BasicScrollBarUI {
+        @Override
+        protected void configureScrollBarColors() {
+            this.thumbColor = ColorScheme.GRID_LINE; // The moving part
+            this.trackColor = ColorScheme.BACKGROUND_MAIN; // The track
+        }
+
+        @Override
+        protected JButton createDecreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
+        @Override
+        protected JButton createIncreaseButton(int orientation) {
+            return createZeroButton();
+        }
+
+        private JButton createZeroButton() {
+            JButton jbutton = new JButton();
+            jbutton.setPreferredSize(new Dimension(0, 0)); // Hide arrows to look modern
+            jbutton.setMinimumSize(new Dimension(0, 0));
+            jbutton.setMaximumSize(new Dimension(0, 0));
+            return jbutton;
+        }
+    }
 }
+
+
