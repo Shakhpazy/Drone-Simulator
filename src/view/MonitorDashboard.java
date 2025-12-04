@@ -77,8 +77,10 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         SwingUtilities.invokeLater(() -> {
             MAP_PANEL.setDroneMapping(theID, theLoc);
             TELEMETRY_PANEL.addTelemetryEntry(theID, theTelData);
-            revalidate();
-            repaint();
+            // Only revalidate the panels that changed, not the entire frame
+            MAP_PANEL.revalidate();
+            MAP_PANEL.repaint();
+            // TelemetryPanel handles its own revalidation now
         });
     }
 
