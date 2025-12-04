@@ -147,38 +147,38 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      */
     private void initMenuBar() {
         JMenuBar bar = new JMenuBar();
-        bar.setBackground(new Color(0x2D2D2D)); // Dark menu bar
-        bar.setForeground(new Color(0xE0E0E0)); // Light text
+        bar.setBackground(new Color(0x2D2D2D)); // Try dark, but may not work on macOS
+        bar.setForeground(new Color(0x1E1E1E)); // Dark text for white background fallback
 
         // File
         JMenu fileMenu = new JMenu("File");
-        fileMenu.setForeground(new Color(0xE0E0E0));
+        fileMenu.setForeground(new Color(0x1E1E1E)); // Dark text
         JMenuItem saveAs = new JMenuItem("Save all reports as...");
-        saveAs.setForeground(new Color(0xE0E0E0));
+        saveAs.setForeground(new Color(0x1E1E1E)); // Dark text
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
         bar.add(fileMenu);
 
         // Data
         JMenu dataMenu = new JMenu("Data");
-        dataMenu.setForeground(new Color(0xE0E0E0));
+        dataMenu.setForeground(new Color(0x1E1E1E)); // Dark text
         JMenuItem openDB = new JMenuItem("Open Database...");
-        openDB.setForeground(new Color(0xE0E0E0));
+        openDB.setForeground(new Color(0x1E1E1E)); // Dark text
         openDB.addActionListener(_ -> openDatabase());
         dataMenu.add(openDB);
         bar.add(dataMenu);
 
         // Help
         JMenu helpMenu = new JMenu("Help");
-        helpMenu.setForeground(new Color(0xE0E0E0));
+        helpMenu.setForeground(new Color(0x1E1E1E)); // Dark text
         JMenuItem inst = new JMenuItem("Instructions...");
-        inst.setForeground(new Color(0xE0E0E0));
+        inst.setForeground(new Color(0x1E1E1E)); // Dark text
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
 
         // Clock
-        myClock.setForeground(new Color(0xE0E0E0));
+        myClock.setForeground(new Color(0x1E1E1E)); // Dark text
         bar.add(myClock);
 
         setJMenuBar(bar);
