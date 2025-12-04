@@ -15,7 +15,7 @@ class TelemetryPanel extends JPanel {
     /**
      * This constant determines the size of the panel.
      */
-    private static final Dimension SIZE = new Dimension(930, 170);
+    private static final Dimension SIZE = new Dimension(150, 150);
 
     /**
      * This constant is the viewport of the scroll pane.
@@ -28,9 +28,9 @@ class TelemetryPanel extends JPanel {
     private static final Map<Integer, TelemetryEntry> ID_ENTRY_MAP = new HashMap<>();
 
     /**
-     * Adjust scroll panel increment (default too slow)
+     * This constant is the scroll pane for the telemetry entries.
      */
-    private static final int SCROLL_INC = 5;
+    private static JScrollPane scrollPane;
 
     /**
      * Constructor to initialize the panel and its components.
@@ -58,13 +58,45 @@ class TelemetryPanel extends JPanel {
             throw new IllegalArgumentException("Data string must not be null.");
         }
 
+        // Preserve scroll position
+        int scrollPosition;
+        if (scrollPane != null) {
+            scrollPosition = scrollPane.getHorizontalScrollBar().getValue();
+        } else {
+            scrollPosition = 0;
+        }
+
         if (ID_ENTRY_MAP.containsKey(theID)) {
             // update existing entry
             ID_ENTRY_MAP.get(theID).setText(theData);
         } else {
-            // add new entry
-            ID_ENTRY_MAP.put(theID, new TelemetryEntry(theID, theData));
-            sortEntries();
+            // add new entry in sorted order by ID
+            TelemetryEntry e = new TelemetryEntry(theID, theData);
+            ID_ENTRY_MAP.put(theID, e);
+            
+            // Find the correct insertion index to maintain sorted order
+            int insertIndex = 0;
+            Component[] components = SCROLL_VIEW.getComponents();
+            for (Component comp : components) {
+                if (comp instanceof TelemetryEntry) {
+                    TelemetryEntry entry = (TelemetryEntry) comp;
+                    if (entry.myID < theID) {
+                        insertIndex++;
+                    } else {
+                        break;
+                    }
+                }
+            }
+            
+            SCROLL_VIEW.add(e, insertIndex);
+            SCROLL_VIEW.revalidate();
+        }
+        
+        // Restore scroll position
+        if (scrollPane != null) {
+            SwingUtilities.invokeLater(() -> {
+                scrollPane.getHorizontalScrollBar().setValue(scrollPosition);
+            });
         }
     }
 
@@ -100,12 +132,11 @@ class TelemetryPanel extends JPanel {
     private void initScroll() {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.X_AXIS));
         SCROLL_VIEW.setAlignmentX(LEFT_ALIGNMENT);
-        JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
-        scroll.getHorizontalScrollBar().setUnitIncrement(SCROLL_INC);
-        scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-        scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
-        scroll.setAlignmentX(LEFT_ALIGNMENT);
-        add(scroll);
+        scrollPane = new JScrollPane(SCROLL_VIEW);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setAlignmentX(LEFT_ALIGNMENT);
+        add(scrollPane);
     }
 
     /**
@@ -114,7 +145,7 @@ class TelemetryPanel extends JPanel {
      * @author Evin Roen
      * @version 11/19/2025
      */
-    private static class TelemetryEntry extends JTextArea {
+    private static class TelemetryEntry extends JPanel {
 
         /**
          * This constant determines the size of the panel.
@@ -125,13 +156,23 @@ class TelemetryPanel extends JPanel {
          * This field will hold the ID value of the drone that this
          * entry is about.
          */
-        private final int myID;
+        final int myID;
+
+        /**
+         * Label for the drone title.
+         */
+        private final JLabel titleLabel;
+
+        /**
+         * Text area for the telemetry data.
+         */
+        private final JTextArea dataArea;
 
         /**
          * Constructor to initialize entry text area.
          *
          * @param theID the drone's id number.
-         * @param theData the telemetry data to display.
+         * @param theData the drone's telemetry data to display.
          * @throws IllegalArgumentException if drone ID is negative or data is null.
          */
         private TelemetryEntry(final int theID, final String theData) {
@@ -143,35 +184,112 @@ class TelemetryPanel extends JPanel {
                 throw new IllegalArgumentException("Data string must not be null.");
             }
             myID = theID;
+            
+            // Create title label and data area BEFORE init()
+            titleLabel = new JLabel("Drone " + myID, JLabel.CENTER);
+            dataArea = new JTextArea();
+            
             init();
-            setText(theData);
+            setTelemetryData(theData);
 
-            // Mouse listener to select specific drones in the GUI.
-            addMouseListener(new MouseAdapter() {
+            // Create a shared mouse listener for all components
+            MouseAdapter clickListener = new MouseAdapter() {
                 @Override
                 public void mouseClicked(final MouseEvent theE) {
                     boolean isSelected = MonitorDashboard.setSelectedDrone(myID);
-                    ID_ENTRY_MAP.values().forEach(e -> e.setBackground(Color.LIGHT_GRAY));
+                    // Reset all entries to default colors
+                    ID_ENTRY_MAP.values().forEach(e -> e.setSelected(false));
+                    // Set this entry as selected if it wasn't already
                     if (!isSelected) {
-                        setBackground(Color.GREEN);
+                        setSelected(true);
                     }
                 }
-            });
+            };
+
+            // Add mouse listener to the panel and all child components
+            addMouseListener(clickListener);
+            titleLabel.addMouseListener(clickListener);
+            dataArea.addMouseListener(clickListener);
         }
 
         /**
-         * Initializes the text area.
+         * Sets the selection state and updates all component colors accordingly.
+         *
+         * @param selected true if this entry should be selected, false otherwise.
+         */
+        private void setSelected(boolean selected) {
+            if (selected) {
+                setBackground(Color.GREEN);
+                titleLabel.setBackground(new Color(0, 200, 0)); // Darker green for title
+                dataArea.setBackground(Color.GREEN);
+            } else {
+                setBackground(Color.LIGHT_GRAY);
+                titleLabel.setBackground(new Color(220, 220, 220)); // Default title color
+                dataArea.setBackground(Color.LIGHT_GRAY);
+            }
+            repaint();
+        }
+
+        /**
+         * Initializes the panel with title and data area.
          */
         private void init() {
             setPreferredSize(SIZE);
             setMaximumSize(SIZE);
-            setEditable(false);
+            setLayout(new BorderLayout());
             setBackground(Color.LIGHT_GRAY);
+            setOpaque(true); // Make sure panel is opaque so background shows
             setBorder(BorderFactory.createLineBorder(Color.BLACK));
             setAlignmentX(LEFT_ALIGNMENT);
-            setCaretColor(new Color(0, 0, 0, 0)); // invisible
+
+            // Create title label with larger font
+            titleLabel.setFont(new Font(titleLabel.getFont().getName(), Font.BOLD, 16));
+            titleLabel.setOpaque(true);
+            titleLabel.setBackground(new Color(220, 220, 220)); // Slightly darker background for title
+            titleLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
+            
+            // Create data text area
+            dataArea.setEditable(false);
+            dataArea.setOpaque(true); // Make sure text area is opaque
+            dataArea.setBackground(Color.LIGHT_GRAY);
+            dataArea.setFont(new Font(dataArea.getFont().getName(), Font.PLAIN, 11));
+            dataArea.setCaretColor(new Color(0, 0, 0, 0)); // invisible
+            dataArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+            dataArea.setLineWrap(true);
+            dataArea.setWrapStyleWord(true);
+
+            // Create scroll pane for data area
+            JScrollPane dataScrollPane = new JScrollPane(dataArea);
+            dataScrollPane.setBorder(null);
+            dataScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            dataScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            dataScrollPane.setOpaque(false); // Make scroll pane transparent so panel background shows
+
+            // Add components
+            add(titleLabel, BorderLayout.NORTH);
+            add(dataScrollPane, BorderLayout.CENTER);
         }
 
+        /**
+         * Sets the telemetry data, removing the ID line since it's in the title.
+         *
+         * @param theData the telemetry data string.
+         */
+        private void setTelemetryData(final String theData) {
+            // Remove the ID line from the data since it's shown in the title
+            String dataWithoutID = theData.replaceFirst("(?i)ID:\\s*\\d+\\s*\n", "")
+                                          .replaceFirst("(?i)id:\\s*\\d+\\s*\n", "");
+            dataArea.setText(dataWithoutID.trim());
+        }
+
+        /**
+         * Updates the text content of the telemetry data.
+         *
+         * @param theData the new telemetry data.
+         */
+        void setText(final String theData) {
+            setTelemetryData(theData);
+        }
     }
 
 
