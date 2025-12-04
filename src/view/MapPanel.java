@@ -116,8 +116,8 @@ class MapPanel extends JPanel {
      */
     private void initPanel() {
         setPreferredSize(SIZE);
-        setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
-        setBackground(new Color(0x1E1E1E)); // Dark background
+        setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
+        setBackground(ColorScheme.BACKGROUND_MAIN);
         setLayout(new BorderLayout());
         add(GRID, BorderLayout.CENTER);
     }
@@ -223,7 +223,7 @@ class MapPanel extends JPanel {
          */
         private void initPanel() {
             setPreferredSize(SIZE);
-            setBackground(new Color(0x1E1E1E)); // Dark background
+            setBackground(ColorScheme.BACKGROUND_MAIN);
 
             // Center the grid initially
             myDelta = new Point(
@@ -272,7 +272,7 @@ class MapPanel extends JPanel {
             final Graphics2D g2D = (Graphics2D) theGraphics;
 
             g2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            g2D.setColor(new Color(0x404040)); // Dark gray grid lines
+            g2D.setColor(ColorScheme.GRID_LINE);
 
             drawGrid(g2D);
             drawDrones(g2D);
@@ -290,13 +290,13 @@ class MapPanel extends JPanel {
             }
 
             FontMetrics fm = theG2D.getFontMetrics();
-            theG2D.setColor(new Color(0xE0E0E0)); // Light text for labels
+            theG2D.setColor(ColorScheme.TEXT_PRIMARY);
 
             // Horizontal lines
             int yOffset = (myDelta.y % myCellSize + myCellSize) % myCellSize + BUFFER.height;
             for (int i = 0; i * myCellSize + yOffset <= getHeight() - BUFFER.height; i++) {
                 int y = i * myCellSize + yOffset;
-                theG2D.setColor(new Color(0x404040)); // Dark gray grid lines
+                theG2D.setColor(ColorScheme.GRID_LINE);
                 theG2D.drawLine(BUFFER.width, y, getWidth() - BUFFER.width, y);
 
                 // label centered vertically on the line, in right buffer
@@ -304,7 +304,7 @@ class MapPanel extends JPanel {
                 String label = String.format("%d", -worldY * LABEL_STEP);
                 int labelWidth = fm.stringWidth(label);
                 int labelHeight = fm.getAscent();
-                theG2D.setColor(new Color(0xE0E0E0)); // Light text
+                theG2D.setColor(ColorScheme.TEXT_PRIMARY);
                 theG2D.drawString(
                         label,
                         getWidth() - BUFFER.width + (BUFFER.width - labelWidth) / 2,
@@ -316,14 +316,14 @@ class MapPanel extends JPanel {
             int xOffset = (myDelta.x % myCellSize + myCellSize) % myCellSize + BUFFER.width;
             for (int i = 0; i * myCellSize + xOffset <= getWidth() - BUFFER.width; i++) {
                 int x = i * myCellSize + xOffset;
-                theG2D.setColor(new Color(0x404040)); // Dark gray grid lines
+                theG2D.setColor(ColorScheme.GRID_LINE);
                 theG2D.drawLine(x, BUFFER.height, x, getHeight() - BUFFER.height);
 
                 // label centered horizontally on the line, in bottom buffer
                 int worldX = (-(myDelta.x) + x - BUFFER.width) / myCellSize;
                 String label = String.format("%d", worldX * LABEL_STEP);
                 int labelWidth = fm.stringWidth(label);
-                theG2D.setColor(new Color(0xE0E0E0)); // Light text
+                theG2D.setColor(ColorScheme.TEXT_PRIMARY);
                 theG2D.drawString(
                         label,
                         x - labelWidth / 2,
@@ -348,12 +348,12 @@ class MapPanel extends JPanel {
                 int d = (int) Math.floor(DIAMETER * scale);
                 int x = (int) Math.floor(loc[LON] * scale + myDelta.x - d / 2.0 + BUFFER.height);
                 int y = (int) Math.floor(loc[LAT] * scale + myDelta.y - d / 2.0 + BUFFER.width);
-                theG2D.setColor(new Color(0xFF5252)); // Bright red for drones
+                theG2D.setColor(ColorScheme.DRONE);
                 if (id == mySelectedID) {
-                    theG2D.setColor(new Color(0x4CAF50)); // Muted green for selected
+                    theG2D.setColor(ColorScheme.DRONE_SELECTED);
                 }
                 theG2D.fillOval(x, y, d, d);
-                theG2D.setColor(new Color(0x1A1A1A)); // Very dark border
+                theG2D.setColor(ColorScheme.BORDER_DARK);
                 theG2D.drawOval(x, y, d, d);
             }
         }

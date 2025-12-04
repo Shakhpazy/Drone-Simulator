@@ -57,8 +57,8 @@ class LogPanel extends JPanel {
      */
     private void initPanel() {
         setPreferredSize(SIZE);
-        setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
-        setBackground(new Color(0x2D2D2D)); // Dark background
+        setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
+        setBackground(ColorScheme.BACKGROUND_PANEL);
         setLayout(new GridLayout());
     }
 
@@ -67,13 +67,13 @@ class LogPanel extends JPanel {
      */
     private void initScroll() {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
-        SCROLL_VIEW.setBackground(new Color(0x2D2D2D)); // Dark background
+        SCROLL_VIEW.setBackground(ColorScheme.BACKGROUND_PANEL);
         JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
         scroll.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scroll.setBackground(new Color(0x2D2D2D));
-        scroll.getViewport().setBackground(new Color(0x2D2D2D));
+        scroll.setBackground(ColorScheme.BACKGROUND_PANEL);
+        scroll.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
         add(scroll);
     }
 
@@ -122,11 +122,11 @@ class LogPanel extends JPanel {
                     MonitorDashboard.setDetailReport(theDetailedReport);
                     selected = (LogEntry) theEvent.getSource();
                     ENTRIES.forEach(theEntry -> {
-                        theEntry.setBackground(new Color(0x2D2D2D)); // Dark background
-                        theEntry.setForeground(new Color(0xE0E0E0)); // Light text
+                        theEntry.setBackground(ColorScheme.BACKGROUND_PANEL);
+                        theEntry.setForeground(ColorScheme.TEXT_PRIMARY);
                     });
-                    selected.setBackground(new Color(0x4CAF50)); // Muted green
-                    selected.setForeground(Color.WHITE); // White text when selected
+                    selected.setBackground(ColorScheme.ACCENT_SELECTED);
+                    selected.setForeground(ColorScheme.WHITE);
                 }
             });
         }
@@ -139,11 +139,11 @@ class LogPanel extends JPanel {
             setLineWrap(true);
             setWrapStyleWord(true);
             setEditable(false);
-            setBackground(new Color(0x2D2D2D)); // Dark background
-            setForeground(new Color(0xE0E0E0)); // Light text
-            setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
+            setBackground(ColorScheme.BACKGROUND_PANEL);
+            setForeground(ColorScheme.TEXT_PRIMARY);
+            setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
             setAlignmentX(LEFT_ALIGNMENT);
-            setCaretColor(new Color(0, 0, 0, 0)); // invisible
+            setCaretColor(ColorScheme.CARET_INVISIBLE);
         }
     }
 }

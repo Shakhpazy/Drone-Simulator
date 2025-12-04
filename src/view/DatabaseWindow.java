@@ -86,10 +86,10 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
             throw new IllegalArgumentException("Report cannot be null.");
         }
         JTextArea rep = new JTextArea(theReport);
-        rep.setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
+        rep.setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
         rep.setEditable(false);
-        rep.setBackground(new Color(0x2D2D2D)); // Dark background
-        rep.setForeground(new Color(0xE0E0E0)); // Light text
+        rep.setBackground(ColorScheme.BACKGROUND_PANEL);
+        rep.setForeground(ColorScheme.TEXT_PRIMARY);
         rep.setMaximumSize(new Dimension(RESULT_PANEL.getWidth(), rep.getPreferredSize().height));
         RESULT_PANEL.add(rep);
         ENTRIES.add(rep);
@@ -118,7 +118,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         setVisible(false);
         setLayout(new BorderLayout());
-        getContentPane().setBackground(new Color(0x1E1E1E)); // Dark background
+        getContentPane().setBackground(ColorScheme.BACKGROUND_MAIN);
         initMenuBar();
         initPanels();
         pack();
@@ -132,23 +132,23 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
      */
     private void initMenuBar() {
         JMenuBar bar = new JMenuBar();
-        bar.setBackground(new Color(0x2D2D2D)); // Dark menu bar
-        bar.setForeground(new Color(0x1E1E1E)); // Dark text for white background fallback
+        bar.setBackground(ColorScheme.BACKGROUND_PANEL);
+        bar.setForeground(ColorScheme.TEXT_MENU);
 
         // File
         JMenu fileMenu = new JMenu("File");
-        fileMenu.setForeground(new Color(0x1E1E1E)); // Dark text
+        fileMenu.setForeground(ColorScheme.TEXT_MENU);
         JMenuItem saveAs = new JMenuItem("Save current selection as...");
-        saveAs.setForeground(new Color(0x1E1E1E)); // Dark text
+        saveAs.setForeground(ColorScheme.TEXT_MENU);
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
         bar.add(fileMenu);
 
         // Help
         JMenu helpMenu = new JMenu("Help");
-        helpMenu.setForeground(new Color(0x1E1E1E)); // Dark text
+        helpMenu.setForeground(ColorScheme.TEXT_MENU);
         JMenuItem inst = new JMenuItem("Instructions...");
-        inst.setForeground(new Color(0x1E1E1E)); // Dark text
+        inst.setForeground(ColorScheme.TEXT_MENU);
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
@@ -175,11 +175,11 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
     private void initPanels() {
         // Results Panel Setup
         RESULT_PANEL.setLayout(new BoxLayout(RESULT_PANEL, BoxLayout.Y_AXIS));
-        RESULT_PANEL.setBackground(new Color(0x2D2D2D)); // Dark background
+        RESULT_PANEL.setBackground(ColorScheme.BACKGROUND_PANEL);
         JScrollPane sp = new JScrollPane(RESULT_PANEL);
         sp.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
-        sp.setBackground(new Color(0x2D2D2D));
-        sp.getViewport().setBackground(new Color(0x2D2D2D));
+        sp.setBackground(ColorScheme.BACKGROUND_PANEL);
+        sp.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
         add(sp, BorderLayout.CENTER);
 
         // Query Panel Setup
@@ -191,8 +191,8 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         QueryTextField fromDate = new QueryTextField("MM/DD/YYYY");
         QueryTextField toDate = new QueryTextField("MM/DD/YYYY");
         JButton goButt = new JButton("GO");
-        goButt.setBackground(new Color(0x4CAF50)); // Muted green
-        goButt.setForeground(Color.WHITE);
+        goButt.setBackground(ColorScheme.ACCENT_SELECTED);
+        goButt.setForeground(ColorScheme.WHITE);
         goButt.setOpaque(true);
         goButt.setBorderPainted(false);
         goButt.addActionListener(_ -> {
@@ -205,7 +205,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         });
 
         QUERY_PANEL.setLayout(new GridLayout(1, 0));
-        QUERY_PANEL.setBackground(new Color(0x2D2D2D)); // Dark background
+        QUERY_PANEL.setBackground(ColorScheme.BACKGROUND_PANEL);
         QUERY_PANEL.add(new FieldPanel("Anomaly Type", typeField));
         QUERY_PANEL.add(new FieldPanel("DroneID", idField));
         QUERY_PANEL.add(new FieldPanel("Begin Date", fromDate));
@@ -258,11 +258,11 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
                 throw new IllegalArgumentException("Default text cannot be null.");
             }
             myDef = theDefault;
-            setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
-            setBackground(new Color(0x2D2D2D)); // Dark background
-            setForeground(new Color(0xB0B0B0)); // Medium gray for placeholder text
-            setCaretColor(new Color(0xE0E0E0)); // Light caret
-            setOpaque(true); // Make sure background shows
+            setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
+            setBackground(ColorScheme.BACKGROUND_PANEL);
+            setForeground(ColorScheme.TEXT_SECONDARY);
+            setCaretColor(ColorScheme.TEXT_PRIMARY);
+            setOpaque(true);
 
             // Focus Listener updates text when focus changes.
             addFocusListener(new FocusAdapter() {
@@ -273,7 +273,7 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
                 public void focusGained(final FocusEvent theE) {
                     if (theDefault.equals(getText())) {
                         setText("");
-                        setForeground(new Color(0xE0E0E0)); // Light text when typing
+                        setForeground(ColorScheme.TEXT_PRIMARY);
                     }
                 }
                 // Set text back to default if user clicked out
@@ -282,10 +282,10 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
                 public void focusLost(final FocusEvent theE) {
                     if ("".equals(getText())) {
                         setText(theDefault);
-                        setForeground(new Color(0xB0B0B0)); // Medium gray for placeholder
+                        setForeground(ColorScheme.TEXT_SECONDARY);
                     } else {
                         // Keep light text if user entered something
-                        setForeground(new Color(0xE0E0E0));
+                        setForeground(ColorScheme.TEXT_PRIMARY);
                     }
                 }
             });
@@ -331,9 +331,9 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
             }
             setLayout(new GridLayout(0, 1, GAP, GAP));
             setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-            setBackground(new Color(0x2D2D2D)); // Dark background
+            setBackground(ColorScheme.BACKGROUND_PANEL);
             JLabel lbl = new JLabel(theLabel, JLabel.LEFT);
-            lbl.setForeground(new Color(0xE0E0E0)); // Light text
+            lbl.setForeground(ColorScheme.TEXT_PRIMARY);
             lbl.setAlignmentX(LEFT_ALIGNMENT);
             setAlignmentX(LEFT_ALIGNMENT);
             theField.setAlignmentX(LEFT_ALIGNMENT);
