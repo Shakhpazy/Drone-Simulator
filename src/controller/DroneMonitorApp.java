@@ -145,7 +145,7 @@ public class DroneMonitorApp {
                             AlertPlayer.INSTANCE.addSoundToQueue("spoof");
                         } else { //BATTERY_FAIL OR HIT_GROUND (2/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("crash");
-                            view.removeDrone(drone.getId());
+                            view.markDroneDead(drone.getId());
                             gen.removeDrone(drone);
                             removeDrone = true;
                         }
@@ -156,6 +156,11 @@ public class DroneMonitorApp {
                         //Add a log entry to view.
                         view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
 
+                    }
+
+                    // Check if drone died naturally (battery = 0)
+                    if (!removeDrone && !drone.isAlive()) {
+                        view.markDroneDead(drone.getId());
                     }
 
                     //If the drone hasn't been removed...
