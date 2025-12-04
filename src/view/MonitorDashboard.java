@@ -126,6 +126,15 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     }
 
     /**
+     * Marks a drone as dead so it displays with a different color.
+     *
+     * @param theID the id of the dead drone.
+     */
+    public void markDroneDead(final int theID) {
+        MAP_PANEL.markDroneDead(theID);
+    }
+
+    /**
      * JFrame setup.
      */
     private void initWindow() {

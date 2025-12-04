@@ -192,8 +192,14 @@ public class Drone extends AbstractDrone {
         }
 
         // Adjust velocity (slow near waypoint / speed up otherwise)
+        // But ensure minimum velocity to prevent getting stuck (ran into the issue of 0 velocity)
+        float minVelocityToMove = 0.5f; // Minimum velocity needed to make progress
         if (distance < 30.0f) {
             velocity = Math.max(this.getVelocity() - this.getAccelerationStep(), this.getMinVelocity());
+            // If we're still far enough that we need to move, ensure minimum velocity
+            if (distance > 0.001f && velocity < minVelocityToMove) {
+                velocity = minVelocityToMove;
+            }
         } else {
             velocity = Math.min(this.getVelocity() + this.getAccelerationStep(), this.getMaxVelocity());
         }

@@ -6,6 +6,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.Map;
 
 /**
@@ -49,6 +50,11 @@ class MapPanel extends JPanel {
     private static final Map<Integer, int[]> ID_LOC_MAP = new HashMap<>();
 
     /**
+     * Set of dead drone IDs.
+     */
+    private static final Set<Integer> DEAD_DRONES = new java.util.HashSet<>();
+
+    /**
      * This constant is a reference to the GridPanel that draws the grid and drones.
      */
     private static final GridPanel GRID = new GridPanel();
@@ -85,8 +91,19 @@ class MapPanel extends JPanel {
         repaint();
     }
 
+    /**
+     * Marks a drone as dead, so it displays with a different color.
+     *
+     * @param theID the id of the dead drone.
+     */
+    void markDroneDead(final int theID) {
+        DEAD_DRONES.add(theID);
+        repaint();
+    }
+
     void removeDrone(final int theID) {
         ID_LOC_MAP.remove(theID);
+        DEAD_DRONES.remove(theID);
     }
 
     /**
@@ -348,10 +365,16 @@ class MapPanel extends JPanel {
                 int d = (int) Math.floor(DIAMETER * scale);
                 int x = (int) Math.floor(loc[LON] * scale + myDelta.x - d / 2.0 + BUFFER.height);
                 int y = (int) Math.floor(loc[LAT] * scale + myDelta.y - d / 2.0 + BUFFER.width);
-                theG2D.setColor(ColorScheme.DRONE);
-                if (id == mySelectedID) {
+                
+                // Set color: dead > selected > normal
+                if (DEAD_DRONES.contains(id)) {
+                    theG2D.setColor(ColorScheme.DRONE_DEAD);
+                } else if (id == mySelectedID) {
                     theG2D.setColor(ColorScheme.DRONE_SELECTED);
+                } else {
+                    theG2D.setColor(ColorScheme.DRONE);
                 }
+                
                 theG2D.fillOval(x, y, d, d);
                 theG2D.setColor(ColorScheme.BORDER_DARK);
                 theG2D.drawOval(x, y, d, d);

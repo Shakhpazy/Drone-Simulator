@@ -59,6 +59,9 @@ public final class ColorScheme {
     /** Selected drone color on map (green) */
     public static final Color DRONE_SELECTED = new Color(0x4CAF50);
     
+    /** Dead drone color on map (gray) */
+    public static final Color DRONE_DEAD = new Color(0x757575);
+    
     /** Grid lines color */
     public static final Color GRID_LINE = new Color(0x404040);
 
