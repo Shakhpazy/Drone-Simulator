@@ -121,7 +121,7 @@ public class AnomalyDatabase {
             PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
 
             preparedStatement.setLong(1, theBeginTime);
-            preparedStatement.setLong(2, theEndTime);
+            preparedStatement.setLong(2, theEndTime + 86400000L);
             ResultSet rs = preparedStatement.executeQuery();
 
             while(rs.next()) {

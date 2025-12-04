@@ -135,11 +135,10 @@ class TelemetryPanel extends JPanel {
         SCROLL_VIEW.setAlignmentX(LEFT_ALIGNMENT);
         SCROLL_VIEW.setBackground(ColorScheme.BACKGROUND_PANEL);
         scrollPane = new JScrollPane(SCROLL_VIEW);
+        scrollPane.getHorizontalScrollBar().setUI(new ColorScheme.DarkScrollBarUI());
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         scrollPane.setAlignmentX(LEFT_ALIGNMENT);
-        scrollPane.setBackground(ColorScheme.BACKGROUND_PANEL);
-        scrollPane.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
         add(scrollPane);
     }
 
