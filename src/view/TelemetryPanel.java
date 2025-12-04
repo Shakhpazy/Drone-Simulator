@@ -4,8 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.List;
 
 /**
  * This class displays the telemetry data for the mapped drones under the map.
@@ -102,8 +102,18 @@ class TelemetryPanel extends JPanel {
 
     void removeTelemetryEntry(final int theID) {
         remove(ID_ENTRY_MAP.get(theID));
-        revalidate();
-        repaint();
+        sortEntries();
+    }
+
+    private void sortEntries() {
+        for (TelemetryEntry e : ID_ENTRY_MAP.values()) {
+            SCROLL_VIEW.remove(e);
+        }
+        List<TelemetryEntry> entries = new ArrayList<>(List.copyOf(ID_ENTRY_MAP.values()));
+        entries.sort((a, b) -> {return a.myID - b.myID;});
+        for (TelemetryEntry e : entries) {
+            SCROLL_VIEW.add(e);
+        }
     }
 
     /**

@@ -39,6 +39,11 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
     public static final int IDX_TO_DATE = 3;
 
     /**
+     * Adjust scroll panel increment (default too slow)
+     */
+    private static final int SCROLL_INC = 10;
+
+    /**
      * Size of the GUI window.
      */
     private static final Dimension SIZE = new Dimension(1100, 700);
@@ -162,19 +167,14 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         // Results Panel Setup
         RESULT_PANEL.setLayout(new BoxLayout(RESULT_PANEL, BoxLayout.Y_AXIS));
         JScrollPane sp = new JScrollPane(RESULT_PANEL);
-        sp.getVerticalScrollBar().setUnitIncrement(10);
+        sp.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
         add(sp, BorderLayout.CENTER);
 
         // Query Panel Setup
         QueryTextField idField = new QueryTextField("(e.g. 1, 2, ...)");
 
-        JComboBox<String> typeField = new JComboBox<>();
-        typeField.addItem("");
-        typeField.addItem("Abnormal Battery Drain Rate");
-        typeField.addItem("Battery Failure");
-        typeField.addItem("Dangerous Change in Altitude");
-        typeField.addItem("GPS Spoofing");
-        typeField.addItem("Out of Bounds");
+        // Dropdown with anomaly types
+        JComboBox<String> typeField = getTypeField();
 
         QueryTextField fromDate = new QueryTextField("MM/DD/YYYY");
         QueryTextField toDate = new QueryTextField("MM/DD/YYYY");
@@ -196,6 +196,21 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         QUERY_PANEL.add(goButt);
 
         add(QUERY_PANEL, BorderLayout.NORTH);
+    }
+
+    private static JComboBox<String> getTypeField() {
+        JComboBox<String> typeField = new JComboBox<>();
+        typeField.addItem("");
+        typeField.addItem("Abnormal Battery Drain Rate");
+        typeField.addItem("Battery Failure");
+        typeField.addItem("Battery Close to Depletion");
+        typeField.addItem("Dangerous Change in Altitude");
+        typeField.addItem("GPS Spoofing");
+        typeField.addItem("Dangerous Change in Speed");
+        typeField.addItem("Out of Bounds");
+        typeField.addItem("Abnormal Acceleration/Deceleration");
+        typeField.addItem("Ground Collision");
+        return typeField;
     }
 
     /**

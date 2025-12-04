@@ -2,6 +2,7 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.time.LocalDateTime;
 
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
@@ -33,10 +34,21 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     /** This constant holds the singleton instance of the dashboard. */
     private static final MonitorDashboard INSTANCE = new MonitorDashboard();
 
+    /** the number of milliseconds in one second for the clock timer. */
+    private static final int MILLI_IN_SEC = 1000;
+
+    /**
+     * Clock for displaying the current time.
+     */
+    private static JMenuItem myClock;
+
     /** Constructor to initialize the window. */
     private MonitorDashboard() {
         super();
+        myClock = new JMenuItem(LocalDateTime.now().toString());
+        Timer t = new Timer(MILLI_IN_SEC, (_) -> myClock.setText(LocalDateTime.now().toString()));
         initWindow();
+        t.start();
     }
 
     /**
@@ -59,11 +71,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         if (theSimpleReport == null || theDetailedReport == null) {
             throw new IllegalArgumentException("Report strings must not be null.");
         }
-        SwingUtilities.invokeLater(() -> {
-            LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
-            revalidate();
-            repaint();
-        });
+        LOG_PANEL.addLogEntry(theSimpleReport, theDetailedReport);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -90,12 +100,10 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      * @param theID the id of the drone to remove from the sim.
      */
     public void removeDrone(final int theID) {
-        SwingUtilities.invokeLater(() -> {
-            MAP_PANEL.removeDrone(theID);
-            TELEMETRY_PANEL.removeTelemetryEntry(theID);
-            revalidate();
-            repaint();
-        });
+        MAP_PANEL.removeDrone(theID);
+        TELEMETRY_PANEL.removeTelemetryEntry(theID);
+        revalidate();
+        repaint();
     }
 
     /**
@@ -159,6 +167,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
+
+        // Clock
+        bar.add(myClock);
 
         setJMenuBar(bar);
         bar.setVisible(true);

@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * A class to detect anomalies with drone behavior.
  * @author nlevin11
- * @version 11-26
+ * @version 12-2
  */
 public class AnomalyDetector {
 
@@ -54,6 +54,11 @@ public class AnomalyDetector {
     private static final float ORTHOGONAL_VELOCITY_MAX = 10F;
 
     /**
+     * A double to hold the threshold for drone acceleration.
+     */
+    private static final double ACCELERATION_THRESHOLD = 0.01;
+
+    /**
      * A double to represent the mean expected velocity of a drone.
      */
     private static double VELOCITY_MEAN_BASELINE;
@@ -76,12 +81,12 @@ public class AnomalyDetector {
     /**
      * A double to represent the mean expected orientation change of a drone.
      */
-    private static double ORIENTATION_DELTA_MEAN_BASELINE;
+    private static double ORIENTATION_STEADY_MAX_DELTA;
 
     /**
      * A double to represent the standard deviation of the expected orientation change of a drone.
      */
-    private static double ORIENTATION_DELTA_STANDARD_DEV_BASELINE;
+    private static double ORIENTATION_TURN_MIN_DELTA;
 
     /**
      * A double to represent the mean expected acceleration of a drone.
@@ -116,9 +121,9 @@ public class AnomalyDetector {
             BATTERY_DRAIN_MEAN_BASELINE = Double.parseDouble(props.getProperty("batteryDrain.mean"));
             BATTERY_DRAIN_STANDARD_DEV_BASELINE = Double.parseDouble(props.getProperty("batteryDrain.standardDev"));
 
-            ORIENTATION_DELTA_MEAN_BASELINE = Double.parseDouble(props.getProperty("orientationDelta.mean"));
-            ORIENTATION_DELTA_STANDARD_DEV_BASELINE = Double.parseDouble(props.
-                    getProperty("orientationDelta.standardDev"));
+            ORIENTATION_STEADY_MAX_DELTA = Double.parseDouble(props.getProperty("orientationSteady.max"));
+            ORIENTATION_TURN_MIN_DELTA = Double.parseDouble(props.getProperty("orientationTurn.min"));
+            ORIENTATION_STEADY_MAX_DELTA *= 1.1;
 
             ACCELERATION_MEAN_BASELINE = Double.parseDouble(props.getProperty("acceleration.mean"));
             ACCELERATION_STANDARD_DEV_BASELINE = Double.parseDouble(props.
@@ -185,25 +190,30 @@ public class AnomalyDetector {
         myPrevTelemetry = thePrevTelemetry;
         long currTime = myCurrTelemetry.timeStamp();
         long prevTime = myPrevTelemetry.timeStamp();
-        double deltaTime = (double) (currTime - prevTime);
+        double deltaTime = (double) (currTime - prevTime) / 1000;
 
         if (firstTimestamp == -1) firstTimestamp = currTime;
 
         // Velocity + Acceleration check
+        // Gather Data
         double currVelocity = myCurrTelemetry.velocity();
         double prevVelocity = myPrevTelemetry.velocity();
-        double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE) / VELOCITY_STANDARD_DEV_BASELINE;
-        if (velocityZScore > MAX_Z_SCORE) {
-            return AnomalyEnum.SPOOFING;
-        } else if (Math.abs(velocityZScore) > MAX_Z_SCORE) {
-            double currAcceleration = Math.abs(prevVelocity - currVelocity) / (deltaTime / 1000);
+        double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTime;
 
-            double effectiveStandardDev = Math.max(ACCELERATION_STANDARD_DEV_BASELINE, 0.05);
-            double accelerationZScore = (currAcceleration - ACCELERATION_MEAN_BASELINE)
-                    / effectiveStandardDev;
-            if (Math.abs(accelerationZScore) > MAX_Z_SCORE && currTime != firstTimestamp) {
-                return AnomalyEnum.ACCELERATION;
-            }
+        // Calc Z-Scores
+        double effectiveStandardDev = Math.max(ACCELERATION_STANDARD_DEV_BASELINE, 0.05);
+        double accelerationZScore = (currAcceleration - ACCELERATION_MEAN_BASELINE)
+                / effectiveStandardDev;
+
+        boolean accelFlag = Math.abs(accelerationZScore) > MAX_Z_SCORE
+                && currAcceleration > ACCELERATION_THRESHOLD && currTime != firstTimestamp;
+
+        double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE) / VELOCITY_STANDARD_DEV_BASELINE;
+        boolean velFlag = Math.abs(velocityZScore) > MAX_Z_SCORE;
+
+
+        if (velFlag && accelFlag) {
+            return AnomalyEnum.ACCELERATION;
         }
 
         // Battery check
@@ -222,10 +232,8 @@ public class AnomalyDetector {
 
         double orientationDelta = Math.abs(currOrientation - prevOrientation);
         if (orientationDelta > 180) orientationDelta = 360 - orientationDelta;
-        double orientationZScore = (orientationDelta - ORIENTATION_DELTA_MEAN_BASELINE)
-                / ORIENTATION_DELTA_STANDARD_DEV_BASELINE;
-        if (orientationZScore >= 3) {
-            return AnomalyEnum.SPOOFING;
+        if (orientationDelta < ORIENTATION_TURN_MIN_DELTA && orientationDelta > ORIENTATION_STEADY_MAX_DELTA) {
+            return AnomalyEnum.OFF_COURSE;
         }
         return null;
     }
@@ -242,18 +250,25 @@ public class AnomalyDetector {
 
         // Check in bounds
         if (currLatitude < LATITUDE_MAX * -1 || currLatitude > LATITUDE_MAX ||
-                currLongitude < LONGITUDE_MAX * -1 || currLongitude > LONGITUDE_MAX) {
+                currLongitude < LONGITUDE_MAX * -1 || currLongitude > LONGITUDE_MAX || currAltitude > ALTITUDE_MAX) {
             return AnomalyEnum.OUT_OF_BOUNDS;
         }
-        if (currAltitude < 0 || currAltitude > ALTITUDE_MAX) {
+        if (currAltitude < 0 ) {
             return AnomalyEnum.HIT_GROUND;
         }
 
         // Check z-axis velocity
         float prevAltitude = myPrevTelemetry.altitude();
+        double displacement = Math.sqrt(Math.pow(myPrevTelemetry.longitude() - myCurrTelemetry.longitude(), 2)
+                + Math.pow(myPrevTelemetry.latitude() - myCurrTelemetry.latitude(), 2)
+                + Math.pow(myPrevTelemetry.altitude() - myCurrTelemetry.altitude(), 2));
+
         if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX) {
             return AnomalyEnum.ALTITUDE;
+        } else if (displacement > ORTHOGONAL_VELOCITY_MAX) {
+            return AnomalyEnum.SPOOFING;
         }
+
         return null;
     }
 
