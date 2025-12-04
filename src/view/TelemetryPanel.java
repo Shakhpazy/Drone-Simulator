@@ -121,7 +121,8 @@ class TelemetryPanel extends JPanel {
      */
     private void initPanel() {
         setPreferredSize(SIZE);
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
+        setBackground(new Color(0x2D2D2D)); // Dark panel background
         setLayout(new GridLayout());
         setAlignmentX(LEFT_ALIGNMENT);
     }
@@ -132,10 +133,13 @@ class TelemetryPanel extends JPanel {
     private void initScroll() {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.X_AXIS));
         SCROLL_VIEW.setAlignmentX(LEFT_ALIGNMENT);
+        SCROLL_VIEW.setBackground(new Color(0x2D2D2D)); // Dark background
         scrollPane = new JScrollPane(SCROLL_VIEW);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         scrollPane.setAlignmentX(LEFT_ALIGNMENT);
+        scrollPane.setBackground(new Color(0x2D2D2D));
+        scrollPane.getViewport().setBackground(new Color(0x2D2D2D));
         add(scrollPane);
     }
 
@@ -219,13 +223,17 @@ class TelemetryPanel extends JPanel {
          */
         private void setSelected(boolean selected) {
             if (selected) {
-                setBackground(Color.GREEN);
-                titleLabel.setBackground(new Color(0, 200, 0)); // Darker green for title
-                dataArea.setBackground(Color.GREEN);
+                setBackground(new Color(0x4CAF50)); // Muted green
+                titleLabel.setBackground(new Color(0x66BB6A)); // Lighter green for title
+                titleLabel.setForeground(Color.WHITE);
+                dataArea.setBackground(new Color(0x4CAF50));
+                dataArea.setForeground(Color.WHITE);
             } else {
-                setBackground(Color.LIGHT_GRAY);
-                titleLabel.setBackground(new Color(220, 220, 220)); // Default title color
-                dataArea.setBackground(Color.LIGHT_GRAY);
+                setBackground(new Color(0x2D2D2D)); // Dark gray
+                titleLabel.setBackground(new Color(0x3C3C3C)); // Slightly lighter for title
+                titleLabel.setForeground(new Color(0xE0E0E0)); // Light text
+                dataArea.setBackground(new Color(0x2D2D2D));
+                dataArea.setForeground(new Color(0xE0E0E0)); // Light text
             }
             repaint();
         }
@@ -237,21 +245,23 @@ class TelemetryPanel extends JPanel {
             setPreferredSize(SIZE);
             setMaximumSize(SIZE);
             setLayout(new BorderLayout());
-            setBackground(Color.LIGHT_GRAY);
+            setBackground(new Color(0x2D2D2D)); // Dark background
             setOpaque(true); // Make sure panel is opaque so background shows
-            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
             setAlignmentX(LEFT_ALIGNMENT);
 
             // Create title label with larger font
             titleLabel.setFont(new Font(titleLabel.getFont().getName(), Font.BOLD, 16));
             titleLabel.setOpaque(true);
-            titleLabel.setBackground(new Color(220, 220, 220)); // Slightly darker background for title
-            titleLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, Color.BLACK));
+            titleLabel.setBackground(new Color(0x3C3C3C)); // Darker title background
+            titleLabel.setForeground(new Color(0xE0E0E0)); // Light text
+            titleLabel.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0x4A4A4A)));
             
             // Create data text area
             dataArea.setEditable(false);
             dataArea.setOpaque(true); // Make sure text area is opaque
-            dataArea.setBackground(Color.LIGHT_GRAY);
+            dataArea.setBackground(new Color(0x2D2D2D)); // Dark background
+            dataArea.setForeground(new Color(0xE0E0E0)); // Light text
             dataArea.setFont(new Font(dataArea.getFont().getName(), Font.PLAIN, 11));
             dataArea.setCaretColor(new Color(0, 0, 0, 0)); // invisible
             dataArea.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -264,6 +274,7 @@ class TelemetryPanel extends JPanel {
             dataScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
             dataScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             dataScrollPane.setOpaque(false); // Make scroll pane transparent so panel background shows
+            dataScrollPane.getViewport().setBackground(new Color(0x2D2D2D));
 
             // Add components
             add(titleLabel, BorderLayout.NORTH);

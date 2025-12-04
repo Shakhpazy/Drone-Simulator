@@ -57,7 +57,8 @@ class LogPanel extends JPanel {
      */
     private void initPanel() {
         setPreferredSize(SIZE);
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
+        setBackground(new Color(0x2D2D2D)); // Dark background
         setLayout(new GridLayout());
     }
 
@@ -66,10 +67,13 @@ class LogPanel extends JPanel {
      */
     private void initScroll() {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
+        SCROLL_VIEW.setBackground(new Color(0x2D2D2D)); // Dark background
         JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
         scroll.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBackground(new Color(0x2D2D2D));
+        scroll.getViewport().setBackground(new Color(0x2D2D2D));
         add(scroll);
     }
 
@@ -117,8 +121,12 @@ class LogPanel extends JPanel {
                 public void mouseClicked(final MouseEvent theEvent) {
                     MonitorDashboard.setDetailReport(theDetailedReport);
                     selected = (LogEntry) theEvent.getSource();
-                    ENTRIES.forEach(theEntry -> theEntry.setBackground(Color.LIGHT_GRAY));
-                    selected.setBackground(Color.GREEN);
+                    ENTRIES.forEach(theEntry -> {
+                        theEntry.setBackground(new Color(0x2D2D2D)); // Dark background
+                        theEntry.setForeground(new Color(0xE0E0E0)); // Light text
+                    });
+                    selected.setBackground(new Color(0x4CAF50)); // Muted green
+                    selected.setForeground(Color.WHITE); // White text when selected
                 }
             });
         }
@@ -131,8 +139,9 @@ class LogPanel extends JPanel {
             setLineWrap(true);
             setWrapStyleWord(true);
             setEditable(false);
-            setBackground(Color.LIGHT_GRAY);
-            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            setBackground(new Color(0x2D2D2D)); // Dark background
+            setForeground(new Color(0xE0E0E0)); // Light text
+            setBorder(BorderFactory.createLineBorder(new Color(0x4A4A4A))); // Dark border
             setAlignmentX(LEFT_ALIGNMENT);
             setCaretColor(new Color(0, 0, 0, 0)); // invisible
         }
