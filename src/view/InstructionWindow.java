@@ -23,6 +23,7 @@ class InstructionWindow extends JFrame {
         super();
         setLayout(new GridLayout(1, 1));
         setPreferredSize(theSize);
+        getContentPane().setBackground(ColorScheme.BACKGROUND_MAIN);
         setVisible(true);
         setDefaultCloseOperation(HIDE_ON_CLOSE);
         setTitle(theTitle);
@@ -38,9 +39,12 @@ class InstructionWindow extends JFrame {
     private void initText(final String[] theLines) {
         JTextArea txt = new JTextArea();
         txt.setEditable(false);
-        txt.setCaretColor(new Color(0, 0, 0, 0)); // invisible
+        txt.setBackground(ColorScheme.BACKGROUND_PANEL);
+        txt.setForeground(ColorScheme.TEXT_PRIMARY);
+        txt.setCaretColor(ColorScheme.CARET_INVISIBLE);
         txt.setLineWrap(true);
         txt.setWrapStyleWord(true);
+        txt.setOpaque(true);
 
         for (String line : theLines) {
             txt.append(line + "\n");

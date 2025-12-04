@@ -57,7 +57,8 @@ class LogPanel extends JPanel {
      */
     private void initPanel() {
         setPreferredSize(SIZE);
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
+        setBackground(ColorScheme.BACKGROUND_PANEL);
         setLayout(new GridLayout());
     }
 
@@ -66,10 +67,13 @@ class LogPanel extends JPanel {
      */
     private void initScroll() {
         SCROLL_VIEW.setLayout(new BoxLayout(SCROLL_VIEW, BoxLayout.Y_AXIS));
+        SCROLL_VIEW.setBackground(ColorScheme.BACKGROUND_PANEL);
         JScrollPane scroll = new JScrollPane(SCROLL_VIEW);
         scroll.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
         scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
         scroll.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBackground(ColorScheme.BACKGROUND_PANEL);
+        scroll.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
         add(scroll);
     }
 
@@ -117,8 +121,12 @@ class LogPanel extends JPanel {
                 public void mouseClicked(final MouseEvent theEvent) {
                     MonitorDashboard.setDetailReport(theDetailedReport);
                     selected = (LogEntry) theEvent.getSource();
-                    ENTRIES.forEach(theEntry -> theEntry.setBackground(Color.LIGHT_GRAY));
-                    selected.setBackground(Color.GREEN);
+                    ENTRIES.forEach(theEntry -> {
+                        theEntry.setBackground(ColorScheme.BACKGROUND_PANEL);
+                        theEntry.setForeground(ColorScheme.TEXT_PRIMARY);
+                    });
+                    selected.setBackground(ColorScheme.ACCENT_SELECTED);
+                    selected.setForeground(ColorScheme.WHITE);
                 }
             });
         }
@@ -131,10 +139,11 @@ class LogPanel extends JPanel {
             setLineWrap(true);
             setWrapStyleWord(true);
             setEditable(false);
-            setBackground(Color.LIGHT_GRAY);
-            setBorder(BorderFactory.createLineBorder(Color.BLACK));
+            setBackground(ColorScheme.BACKGROUND_PANEL);
+            setForeground(ColorScheme.TEXT_PRIMARY);
+            setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
             setAlignmentX(LEFT_ALIGNMENT);
-            setCaretColor(new Color(0, 0, 0, 0)); // invisible
+            setCaretColor(ColorScheme.CARET_INVISIBLE);
         }
     }
 }

@@ -34,7 +34,8 @@ class DetailsPanel extends JPanel {
      */
     private void initPanel() {
         setPreferredSize(SIZE);
-        setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        setBorder(BorderFactory.createLineBorder(ColorScheme.BORDER));
+        setBackground(ColorScheme.BACKGROUND_PANEL);
         setLayout(new GridLayout(1, 1));
     }
 
@@ -46,8 +47,13 @@ class DetailsPanel extends JPanel {
         myTextArea.setEditable(false);
         myTextArea.setLineWrap(true);
         myTextArea.setWrapStyleWord(true);
-        myTextArea.setCaretColor(new Color(0, 0, 0, 0));
-        add(new JScrollPane(myTextArea));
+        myTextArea.setBackground(ColorScheme.BACKGROUND_PANEL);
+        myTextArea.setForeground(ColorScheme.TEXT_PRIMARY);
+        myTextArea.setCaretColor(ColorScheme.CARET_INVISIBLE);
+        JScrollPane scrollPane = new JScrollPane(myTextArea);
+        scrollPane.setBackground(ColorScheme.BACKGROUND_PANEL);
+        scrollPane.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
+        add(scrollPane);
     }
 
     /**

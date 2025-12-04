@@ -132,6 +132,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         setPreferredSize(SIZE);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
+        getContentPane().setBackground(ColorScheme.BACKGROUND_MAIN);
         setVisible(true);
         initMenuBar();
         addPanels();
@@ -146,29 +147,38 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
      */
     private void initMenuBar() {
         JMenuBar bar = new JMenuBar();
+        bar.setBackground(ColorScheme.BACKGROUND_PANEL);
+        bar.setForeground(ColorScheme.TEXT_MENU);
 
         // File
         JMenu fileMenu = new JMenu("File");
+        fileMenu.setForeground(ColorScheme.TEXT_MENU);
         JMenuItem saveAs = new JMenuItem("Save all reports as...");
+        saveAs.setForeground(ColorScheme.TEXT_MENU);
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
         bar.add(fileMenu);
 
         // Data
         JMenu dataMenu = new JMenu("Data");
+        dataMenu.setForeground(ColorScheme.TEXT_MENU);
         JMenuItem openDB = new JMenuItem("Open Database...");
+        openDB.setForeground(ColorScheme.TEXT_MENU);
         openDB.addActionListener(_ -> openDatabase());
         dataMenu.add(openDB);
         bar.add(dataMenu);
 
         // Help
         JMenu helpMenu = new JMenu("Help");
+        helpMenu.setForeground(ColorScheme.TEXT_MENU);
         JMenuItem inst = new JMenuItem("Instructions...");
+        inst.setForeground(ColorScheme.TEXT_MENU);
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
 
         // Clock
+        myClock.setForeground(ColorScheme.TEXT_MENU);
         bar.add(myClock);
 
         setJMenuBar(bar);
@@ -230,6 +240,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         add(MAP_PANEL, BorderLayout.CENTER);
         add(LOG_PANEL, BorderLayout.EAST);
         JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.setBackground(ColorScheme.BACKGROUND_MAIN);
         bottomPanel.add(TELEMETRY_PANEL, BorderLayout.CENTER);
         bottomPanel.add(DETAILS_PANEL, BorderLayout.EAST);
         add(bottomPanel, BorderLayout.SOUTH);
