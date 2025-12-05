@@ -4,9 +4,13 @@ import org.junit.jupiter.api.Test;
 import model.RoutePoint;
 import model.Drone;
 import java.util.ArrayList;
-
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * A class to test Drone
+ * @author Yusuf
+ * @version 12-05
+ */
 public class DroneTest {
     private ArrayList<RoutePoint> buildSimpleRoute() {
         ArrayList<RoutePoint> route = new ArrayList<>();
@@ -22,6 +26,18 @@ public class DroneTest {
     }
 
     @Test
+    void constructorStartsAtFirstRoutePoint() {
+        ArrayList<RoutePoint> route = buildSimpleRoute();
+        Drone d = new Drone(5f, 100, route);
+
+        RoutePoint start = route.get(0);
+
+        assertEquals(start.getLongitude(), d.getLongitude(), 0.0001);
+        assertEquals(start.getLatitude(),  d.getLatitude(),  0.0001);
+        assertEquals(start.getAltitude(),  d.getAltitude(),  0.0001);
+    }
+
+    @Test
     void getNextPointCyclesThroughRoute() {
         ArrayList<RoutePoint> route = buildSimpleRoute();
         Drone d = new Drone(5f, 100, route);
@@ -33,6 +49,22 @@ public class DroneTest {
         RoutePoint p2 = d.getNextPoint();
         assertEquals(route.get(0), p2);
     }
+
+    @Test
+    void setNextRouteCyclesMultipleTimes() {
+        ArrayList<RoutePoint> route = buildSimpleRoute();
+        Drone d = new Drone(5f, 100, route);
+
+        d.setNextRoute(); // now 0
+        assertEquals(route.get(0), d.getNextPoint());
+
+        d.setNextRoute(); // now 1
+        assertEquals(route.get(1), d.getNextPoint());
+
+        d.setNextRoute(); // now 0 again
+        assertEquals(route.get(0), d.getNextPoint());
+    }
+
 
     @Test
     void setVelocityRejectsOutOfBounds() {
@@ -74,4 +106,62 @@ public class DroneTest {
             assertTrue(d.getVelocity() <= 10f);
         }
     }
+
+    @Test
+    void getNextMoveHandlesBeingExactlyOnWaypoint() {
+        ArrayList<RoutePoint> route = buildSimpleRoute();
+        Drone d = new Drone(5f, 100, route);
+
+        // Move drone exactly onto waypoint 1
+        d.updateDrone(
+                route.get(1).getLongitude(),
+                route.get(1).getLatitude(),
+                route.get(1).getAltitude(),
+                0,
+                5f,
+                0
+        );
+
+        int before = d.getNextPoint().hashCode();
+        d.getNextMove(1f); // should skip point instead of freezing
+        int after = d.getNextPoint().hashCode();
+
+        assertNotEquals(before, after);
+    }
+
+    @Test
+    void getNextMoveIncreasesVelocityWhenFar() {
+        ArrayList<RoutePoint> route = buildSimpleRoute();
+        Drone d = new Drone(1f, 100, route); // deliberately slow
+
+        d.getNextMove(1f);
+
+        assertTrue(d.getVelocity() > 1f);
+    }
+
+    @Test
+    void getNextMoveDecreasesVelocityNearWaypointButNotBelowMin() {
+        ArrayList<RoutePoint> route = new ArrayList<>();
+        route.add(new RoutePoint(0f, 0f, 0f));
+        route.add(new RoutePoint(0.01f, 0.01f, 0.01f)); // very close
+
+        Drone d = new Drone(1f, 100, route);
+
+        d.getNextMove(1f);
+
+        assertTrue(d.getVelocity() >= 0.5f);  // minVelocityToMove
+    }
+
+    @Test
+    void randomMoveUpdatesLastAnomaly() {
+        ArrayList<RoutePoint> route = buildSimpleRoute();
+        Drone d = new Drone(5f, 100, route);
+
+        d.getNextRandomMove(1f);
+
+        assertNotNull(d.getMyLastAnomaly());
+    }
+
+
+
 }
