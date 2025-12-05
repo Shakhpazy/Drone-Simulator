@@ -3,6 +3,7 @@ package view;
 import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * This class is the main window / dashboard for the autonomous drone monitoring
@@ -43,8 +44,9 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     /** Constructor to initialize the window. */
     private MonitorDashboard() {
         super();
-        myClock = new JMenuItem(LocalDateTime.now().toString());
-        Timer t = new Timer(MILLI_IN_SEC, (_) -> myClock.setText(LocalDateTime.now().toString()));
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyy | hh:mm:ss");
+        myClock = new JMenuItem(dtf.format(LocalDateTime.now()));
+        Timer t = new Timer(MILLI_IN_SEC, (_) -> myClock.setText(dtf.format(LocalDateTime.now())));
         initWindow();
         t.start();
     }
