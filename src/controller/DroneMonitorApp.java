@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 import view.MonitorDashboard;
 
+import javax.swing.*;
+
 /**
  * Entry point for the Drone Monitoring Simulator.
  * <p>
@@ -62,9 +64,9 @@ public class DroneMonitorApp {
    private static final double MY_DELTA_TIME = MY_UPDATE_TIME / 1000.0;
 
     /**
-     * A constant to define the drone count for the simulation.
+     * Maximum amount of supported drones.
      */
-    private static final float MY_DRONE_COUNT = 10;
+   private static final int MAX_DRONE_COUNT = 200;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -73,6 +75,10 @@ public class DroneMonitorApp {
      * @param theArgs - The command line arguments passed into the program.
      */
     public static void main(String[] theArgs) {
+        String input = JOptionPane.showInputDialog("Enter the number of drones for the simulation.");
+
+        int myDroneCount = validateInput(input);
+
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
@@ -84,13 +90,13 @@ public class DroneMonitorApp {
          *  % = 100 (percentage steps) / [15 (seconds) * 2 (updates/sec) * MY_DRONE_COUNT]
          *  % = 10 / (3.0 * MY_DRONE_COUNT)
          */
-        float MY_ANOMALY_PERCENT = 10.0f / (3.0f * MY_DRONE_COUNT);
+        float MY_ANOMALY_PERCENT = 10.0f / (3.0f * myDroneCount);
 
         //Initialize telemetry generator
         TelemetryGenerator gen = TelemetryGenerator.getInstance(MY_ANOMALY_PERCENT);
 
         //Generate Drones
-        for (int i = 0; i < MY_DRONE_COUNT; i++) {
+        for (int i = 0; i < myDroneCount; i++) {
             ArrayList<RoutePoint> theRoute = myRouteGenerator.generateRoute();
             DroneInterface drone = myDroneGenerator.createDrone(theRoute);
             gen.addDrone(drone);
@@ -211,6 +217,23 @@ public class DroneMonitorApp {
             Runnable clearDatabase = anomalyDTBS::clear;
             Runtime.getRuntime().addShutdownHook(new Thread(clearDatabase));
         }
+    }
+
+    private static int validateInput(final String theInput) {
+        if (theInput == null) {
+            throw new IllegalArgumentException("Input cannot be null.");
+        }
+        int res = 1;
+        try  {
+            res = Integer.parseInt(theInput);
+        } catch (NumberFormatException e) {
+            System.out.println("Trouble parsing integer from input: " + e);
+        }
+        if (res < 1) {
+            throw new IllegalArgumentException("Input too small (<1)");
+        }
+        res = Math.min(res, MAX_DRONE_COUNT);
+        return res;
     }
 
     /**
