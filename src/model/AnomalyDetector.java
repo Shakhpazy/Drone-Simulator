@@ -196,11 +196,12 @@ public class AnomalyDetector {
         double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE) / VELOCITY_STANDARD_DEV_BASELINE;
         boolean velFlag = Math.abs(velocityZScore) > MAX_Z_SCORE;
 
-
-        if (velFlag && !isAccel) {
-            return AnomalyEnum.OFF_COURSE;
-        } else if (accelerationZScore > MAX_Z_SCORE && currTime != firstTimestamp){
-            return AnomalyEnum.ACCELERATION;
+        if (currTime > firstTimestamp + 1000) {
+            if (velFlag && !isAccel) {
+                return AnomalyEnum.OFF_COURSE;
+            } else if (accelerationZScore > MAX_Z_SCORE){
+                return AnomalyEnum.ACCELERATION;
+            }
         }
 
         // Battery check
