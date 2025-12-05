@@ -72,6 +72,21 @@ public final class ColorScheme {
     /** Invisible caret color */
     public static final Color CARET_INVISIBLE = new Color(0, 0, 0, 0);
 
+    public static void initUI() {
+        UIManager.put("OptionPane.background", BACKGROUND_MAIN);
+        UIManager.put("OptionPane.foreground", TEXT_PRIMARY);
+        UIManager.put("OptionPane.messageForeground", TEXT_SECONDARY);
+        UIManager.put("Button.background", BACKGROUND_SECONDARY);
+        UIManager.put("Button.foreground", TEXT_PRIMARY);
+        UIManager.put("Panel.background", BACKGROUND_PANEL);
+        UIManager.put("Panel.foreground", BACKGROUND_PANEL);
+        UIManager.put("TextField.background", TEXT_MENU);
+        UIManager.put("TextField.foreground", TEXT_PRIMARY);
+        UIManager.put("TextField.border", BORDER);
+        UIManager.put("TextField.caretForeground", TEXT_PRIMARY);
+        UIManager.put("FormattedTextField.foreground", TEXT_PRIMARY);
+        UIManager.put("Frame.background", BACKGROUND_MAIN);
+    }
 
     public static class DarkScrollBarUI extends BasicScrollBarUI {
         @Override

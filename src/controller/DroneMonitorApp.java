@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.ArrayList;
 
+import view.ColorScheme;
 import view.MonitorDashboard;
 
 import javax.swing.*;
@@ -52,7 +53,7 @@ public class DroneMonitorApp {
     /** The drone generator used to instantiate drone objects. */
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
-    /*
+    /**
      * How long the program waits between updates (in milliseconds)
      */
     private static final long MY_UPDATE_TIME = 500;
@@ -75,8 +76,8 @@ public class DroneMonitorApp {
      * @param theArgs - The command line arguments passed into the program.
      */
     public static void main(String[] theArgs) {
-        String input = JOptionPane.showInputDialog("Enter the number of drones for the simulation.");
-
+        ColorScheme.initUI();
+        String input = JOptionPane.showInputDialog("Enter the number of drones for the simulation.\nMust be between 1 and 200.");
         int myDroneCount = validateInput(input);
 
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
