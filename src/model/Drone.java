@@ -10,14 +10,6 @@ public class Drone extends AbstractDrone {
 
     private static final float MAX_ALTITUDE = 1000;
 
-    public static final float MIN_LATITUDE = -90.0f;
-
-    public static final float MAX_LATITUDE = 90.0f;
-
-    public static final float MIN_LONGITUDE = -180.0f;
-
-    public static final float MAX_LONGITUDE = 180.0f;
-
     /** Step size for increasing or decreasing velocity during movement. */
     private static final float ACCELERATION_STEP = .3f;
 
