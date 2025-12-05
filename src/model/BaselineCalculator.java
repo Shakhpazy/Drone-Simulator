@@ -20,11 +20,6 @@ public class BaselineCalculator {
     private static final double ACCELERATION_THRESHOLD = 0.01;
 
     /**
-     * A double to roughly delineate steady vs turning drone orientation deltas.
-     */
-    private static final double SPLIT_THRESHOLD = 10.0;
-
-    /**
      * A list to hold all velocity data.
      */
     private final List<Double> velocityReadings;
@@ -105,18 +100,17 @@ public class BaselineCalculator {
             double batteryDrainMean = calculateMean(batteryDrainReadings);
             double batteryDrainStandardDev = calculateStandardDev(batteryDrainReadings, batteryDrainMean);
 
+            double dynamicSplitThreshold = calculateDynamicSplit(orientationDeltaReadings);
             double maxStableJitter = 0.0;
             double minTurnDelta = 180;
 
             for(double delta : orientationDeltaReadings) {
-                if (delta < SPLIT_THRESHOLD) {
+                if (delta < dynamicSplitThreshold) {
                     if (delta > maxStableJitter) maxStableJitter = delta;
                 } else {
                     if (delta < minTurnDelta) minTurnDelta = delta;
                 }
             }
-//            double orientationDeltaMean = calculateMean(orientationDeltaReadings);
-//            double orientationDeltaStandardDev = calculateStandardDev(orientationDeltaReadings, orientationDeltaMean);
 
             double accelerationMean = calculateMean(accelerationReadings);
             double accelerationStandardDev = calculateStandardDev(accelerationReadings, accelerationMean);
@@ -294,5 +288,35 @@ public class BaselineCalculator {
         }
 
         return Math.sqrt(sumOfSquares / (data.size() - 1));
+    }
+
+    /**
+     * A private method to dynamically calculate the spit point for bimodal data like orientation deltas.
+     * @param deltas        A list of orientation deltas with multimodal distribution.
+     * @return              The double representation of the midpoint between modes of the data.
+     */
+    private double calculateDynamicSplit(List<Double> deltas) {
+        if (deltas.isEmpty()) return 10.0;
+
+        List<Double> sorted = new ArrayList<>(deltas);
+        Collections.sort(sorted);
+
+        double maxGap = 0.0;
+        double splitPoint = 10.0;
+        double searchCeiling = 45.0;
+
+        for (int i = 0; i < sorted.size() - 1; i++) {
+            double curr = sorted.get(i);
+            double next = sorted.get(i + 1);
+
+            if (curr > searchCeiling) break;
+
+            double gap = next - curr;
+            if (gap > maxGap) {
+                maxGap = gap;
+                splitPoint = curr + (gap / 2.0);
+            }
+        }
+        return splitPoint;
     }
 }

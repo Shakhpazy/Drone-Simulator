@@ -77,9 +77,12 @@ public class DroneMonitorApp {
 
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
 
-        /**
+        /*
          * The anomaly percentage that Telemetry Generator should use
          * to determine frequency of anomalous movement.
+         *
+         *  % = 100 (percentage steps) / [15 (seconds) * 2 (updates/sec) * MY_DRONE_COUNT]
+         *  % = 10 / (3.0 * MY_DRONE_COUNT)
          */
         float MY_ANOMALY_PERCENT = 10.0f / (3.0f * MY_DRONE_COUNT);
 
