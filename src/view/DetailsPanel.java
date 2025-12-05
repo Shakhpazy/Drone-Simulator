@@ -51,6 +51,7 @@ class DetailsPanel extends JPanel {
         myTextArea.setForeground(ColorScheme.TEXT_PRIMARY);
         myTextArea.setCaretColor(ColorScheme.CARET_INVISIBLE);
         JScrollPane scrollPane = new JScrollPane(myTextArea);
+        scrollPane.getVerticalScrollBar().setUI(new ColorScheme.DarkScrollBarUI());
         scrollPane.setBackground(ColorScheme.BACKGROUND_PANEL);
         scrollPane.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
         add(scrollPane);

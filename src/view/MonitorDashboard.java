@@ -190,7 +190,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         bar.add(helpMenu);
 
         // Clock
-        myClock.setForeground(ColorScheme.TEXT_SECONDARY);
+        myClock.setForeground(ColorScheme.TEXT_PRIMARY);
         myClock.setBackground(ColorScheme.BACKGROUND_SECONDARY);
         bar.add(myClock);
 

@@ -154,7 +154,10 @@ public class DroneMonitorApp {
                         anomalyDTBS.insertReport(anomaly);
 
                         //Add a log entry to view.
-                        view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
+                        javax.swing.SwingUtilities.invokeLater(() -> {
+                                view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
+                        });
+//                        view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
 
                     }
 

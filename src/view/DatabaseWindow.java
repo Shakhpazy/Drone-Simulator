@@ -179,8 +179,6 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         JScrollPane sp = new JScrollPane(RESULT_PANEL);
         sp.getVerticalScrollBar().setUI(new ColorScheme.DarkScrollBarUI());
         sp.getVerticalScrollBar().setUnitIncrement(SCROLL_INC);
-//        sp.setBackground(ColorScheme.BACKGROUND_PANEL);
-//        sp.getViewport().setBackground(ColorScheme.BACKGROUND_PANEL);
         add(sp, BorderLayout.CENTER);
 
         // Query Panel Setup

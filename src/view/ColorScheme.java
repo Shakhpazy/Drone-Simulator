@@ -76,7 +76,7 @@ public final class ColorScheme {
     public static class DarkScrollBarUI extends BasicScrollBarUI {
         @Override
         protected void configureScrollBarColors() {
-            this.thumbColor = ColorScheme.GRID_LINE; // The moving part
+            this.thumbColor = ColorScheme.BORDER; // The moving part
             this.trackColor = ColorScheme.BACKGROUND_MAIN; // The track
         }
 

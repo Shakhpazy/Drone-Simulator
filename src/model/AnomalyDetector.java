@@ -22,18 +22,6 @@ public class AnomalyDetector {
     private static final double MAX_Z_SCORE = 3.0;
 
     /**
-     * A private telemetry field for use in the Anomaly Detector class.
-     * Represents the most recent telemetry data.
-     */
-    private TelemetryRecord myCurrTelemetry;
-
-    /**
-     * A private telemetry field for use in the Anomaly Detector class.
-     * Represents the telemetry data of a drone prior to the current cycle.
-     */
-    private TelemetryRecord myPrevTelemetry;
-
-    /**
      * A float to represent the x-axis size of the drone flight area.
      */
     private static final float LATITUDE_MAX = 90;
@@ -147,12 +135,10 @@ public class AnomalyDetector {
      * @return Returns the AnomalyReport object when created, null if not created.
      */
     public AnomalyReport detect(TelemetryRecord thePrevTelemetry, TelemetryRecord theCurrTelemetry) {
-        myCurrTelemetry = theCurrTelemetry;
-        myPrevTelemetry = thePrevTelemetry;
         StringBuilder sb = new StringBuilder();
 
         // Position + Velocity check
-        AnomalyEnum error = positionAnomaly();
+        AnomalyEnum error = positionAnomaly(theCurrTelemetry, thePrevTelemetry);
         boolean altitudeErr = false;
         if (error != null) {
             sb.append(error);
@@ -160,7 +146,7 @@ public class AnomalyDetector {
         }
 
         // Battery check
-        error = powerAnomaly();
+        error = powerAnomaly(theCurrTelemetry);
         if (error != null) {
             if (!sb.isEmpty()) sb.append(", ");
             sb.append(error);
@@ -174,7 +160,7 @@ public class AnomalyDetector {
         }
 
         if (!sb.isEmpty()) {
-            return createAnomalyReport(sb.toString());
+            return createAnomalyReport(sb.toString(), theCurrTelemetry, thePrevTelemetry);
         }
         return null;
     }
@@ -186,18 +172,18 @@ public class AnomalyDetector {
      * @return                      Returns an AnomalyEnum representing the anomaly found.
      */
     private AnomalyEnum statisticalDetect(TelemetryRecord theCurrTelemetry, TelemetryRecord thePrevTelemetry) {
-        myCurrTelemetry = theCurrTelemetry;
-        myPrevTelemetry = thePrevTelemetry;
-        long currTime = myCurrTelemetry.timeStamp();
-        long prevTime = myPrevTelemetry.timeStamp();
+        long currTime = theCurrTelemetry.timeStamp();
+        long prevTime = thePrevTelemetry.timeStamp();
         double deltaTime = (double) (currTime - prevTime) / 1000;
 
         if (firstTimestamp == -1) firstTimestamp = currTime;
 
+        if (firstTimestamp == currTime || deltaTime == 0.0) return null;
+
         // Velocity + Acceleration check
         // Gather Data
-        double currVelocity = myCurrTelemetry.velocity();
-        double prevVelocity = myPrevTelemetry.velocity();
+        double currVelocity = theCurrTelemetry.velocity();
+        double prevVelocity = thePrevTelemetry.velocity();
         double currAcceleration = Math.abs(prevVelocity - currVelocity) / deltaTime;
 
         // Calc Z-Scores
@@ -205,20 +191,21 @@ public class AnomalyDetector {
         double accelerationZScore = (currAcceleration - ACCELERATION_MEAN_BASELINE)
                 / effectiveStandardDev;
 
-        boolean accelFlag = Math.abs(accelerationZScore) > MAX_Z_SCORE
-                && currAcceleration > ACCELERATION_THRESHOLD && currTime != firstTimestamp;
+        boolean isAccel = currAcceleration > ACCELERATION_THRESHOLD;
 
         double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE) / VELOCITY_STANDARD_DEV_BASELINE;
         boolean velFlag = Math.abs(velocityZScore) > MAX_Z_SCORE;
 
 
-        if (velFlag && accelFlag) {
+        if (velFlag && !isAccel) {
+            return AnomalyEnum.OFF_COURSE;
+        } else if (accelerationZScore > MAX_Z_SCORE && currTime != firstTimestamp){
             return AnomalyEnum.ACCELERATION;
         }
 
         // Battery check
-        double currBattery = myCurrTelemetry.batteryLevel();
-        double prevBattery = myPrevTelemetry.batteryLevel();
+        double currBattery = theCurrTelemetry.batteryLevel();
+        double prevBattery = thePrevTelemetry.batteryLevel();
 
         double batteryNormDelta = ((prevBattery - currBattery) / deltaTime);
         double batteryZScore = (batteryNormDelta - BATTERY_DRAIN_MEAN_BASELINE) / BATTERY_DRAIN_STANDARD_DEV_BASELINE;
@@ -227,8 +214,8 @@ public class AnomalyDetector {
         }
 
         // Orientation check
-        double currOrientation = myCurrTelemetry.orientation();
-        double prevOrientation = myPrevTelemetry.orientation();
+        double currOrientation = theCurrTelemetry.orientation();
+        double prevOrientation = thePrevTelemetry.orientation();
 
         double orientationDelta = Math.abs(currOrientation - prevOrientation);
         if (orientationDelta > 180) orientationDelta = 360 - orientationDelta;
@@ -243,10 +230,10 @@ public class AnomalyDetector {
      *
      * @return Returns an AnomalyEnum representing the anomaly found.
      */
-    private AnomalyEnum positionAnomaly() {
-        float currLatitude = myCurrTelemetry.latitude();
-        float currLongitude = myCurrTelemetry.longitude();
-        float currAltitude = myCurrTelemetry.altitude();
+    private AnomalyEnum positionAnomaly(TelemetryRecord theCurrentTelemetry, TelemetryRecord thePrevTelemetry) {
+        float currLatitude = theCurrentTelemetry.latitude();
+        float currLongitude = theCurrentTelemetry.longitude();
+        float currAltitude = theCurrentTelemetry.altitude();
 
         // Check in bounds
         if (currLatitude < LATITUDE_MAX * -1 || currLatitude > LATITUDE_MAX ||
@@ -258,10 +245,10 @@ public class AnomalyDetector {
         }
 
         // Check z-axis velocity
-        float prevAltitude = myPrevTelemetry.altitude();
-        double displacement = Math.sqrt(Math.pow(myPrevTelemetry.longitude() - myCurrTelemetry.longitude(), 2)
-                + Math.pow(myPrevTelemetry.latitude() - myCurrTelemetry.latitude(), 2)
-                + Math.pow(myPrevTelemetry.altitude() - myCurrTelemetry.altitude(), 2));
+        float prevAltitude = thePrevTelemetry.altitude();
+        double displacement = Math.sqrt(Math.pow(thePrevTelemetry.longitude() - theCurrentTelemetry.longitude(), 2)
+                + Math.pow(thePrevTelemetry.latitude() - theCurrentTelemetry.latitude(), 2)
+                + Math.pow(thePrevTelemetry.altitude() - theCurrentTelemetry.altitude(), 2));
 
         if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX) {
             return AnomalyEnum.ALTITUDE;
@@ -277,8 +264,8 @@ public class AnomalyDetector {
      *
      * @return Returns an AnomalyEnum representing whether the battery level is 0.
      */
-    private AnomalyEnum powerAnomaly() {
-        float currBatteryLevel = myCurrTelemetry.batteryLevel();
+    private AnomalyEnum powerAnomaly(TelemetryRecord theCurrentTelemetry) {
+        float currBatteryLevel = theCurrentTelemetry.batteryLevel();
         if (currBatteryLevel <= 0.0F) {
             return AnomalyEnum.BATTERY_FAIL;
         } else if (currBatteryLevel <= 15){
@@ -293,17 +280,18 @@ public class AnomalyDetector {
      * @param theAnomalyType A string classification of the anomaly to be reported on.
      * @return Returns an anomaly report with the relevant information.
      */
-    private AnomalyReport createAnomalyReport(String theAnomalyType) {
-        String simpleReport = ReportFormatter.createDescSimple(theAnomalyType, myCurrTelemetry);
-        String detailedReport = ReportFormatter.createDescDetailed(theAnomalyType, myCurrTelemetry, myPrevTelemetry);
+    private AnomalyReport createAnomalyReport(String theAnomalyType, TelemetryRecord theCurrTelemetry, TelemetryRecord thePrevTelemetry) {
+
+        String simpleReport = ReportFormatter.createDescSimple(theAnomalyType, theCurrTelemetry);
+        String detailedReport = ReportFormatter.createDescDetailed(theAnomalyType, theCurrTelemetry, thePrevTelemetry);
 
         UUID myAnomalyID = UUID.randomUUID();
 
         return new AnomalyReport(
                 myAnomalyID,
-                myCurrTelemetry.timeStamp(),
+                theCurrTelemetry.timeStamp(),
                 theAnomalyType,
-                myCurrTelemetry.id(),
+                theCurrTelemetry.id(),
                 simpleReport,
                 detailedReport);
     }
