@@ -129,7 +129,7 @@ public class TelemetryGenerator {
             TelemetryRecord prev = drone.getPreviousTelemetryRecord();
             boolean spoofed = false;
 
-            if (myRandom.nextInt(100) < RANDOM_PERCENT) {
+            if (myRandom.nextFloat() < (RANDOM_PERCENT / 100.0f)) {
                 getRandomMove(drone, deltaTime);
                 if (drone.getMyLastAnomaly() == AnomalyEnum.SPOOFING) {
                     spoofed = true;

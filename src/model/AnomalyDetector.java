@@ -191,7 +191,7 @@ public class AnomalyDetector {
         double accelerationZScore = (currAcceleration - ACCELERATION_MEAN_BASELINE)
                 / effectiveStandardDev;
 
-        boolean isAccel = currAcceleration > ACCELERATION_THRESHOLD;
+        boolean isAccel = Math.abs(currAcceleration) > ACCELERATION_THRESHOLD;
 
         double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE) / VELOCITY_STANDARD_DEV_BASELINE;
         boolean velFlag = Math.abs(velocityZScore) > MAX_Z_SCORE;

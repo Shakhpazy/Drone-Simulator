@@ -60,16 +60,11 @@ public class DroneMonitorApp {
     * MY_DELTA_TIME = MY_UPDATE_TIME in seconds due to implementation.
     */
    private static final double MY_DELTA_TIME = MY_UPDATE_TIME / 1000.0;
-    /**
-     * The anomaly percentage that Telemetry Generator should use
-     * to determine frequency of anomalous movement.
-     */
-   private static final float MY_ANOMALY_PERCENT = 1.0F;
 
     /**
      * A constant to define the drone count for the simulation.
      */
-   private static final float MY_DRONE_COUNT = 10;
+    private static final float MY_DRONE_COUNT = 10;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -81,6 +76,12 @@ public class DroneMonitorApp {
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
         MonitorDashboard view = MonitorDashboard.getInstance(); //Initialize the UI.
+
+        /**
+         * The anomaly percentage that Telemetry Generator should use
+         * to determine frequency of anomalous movement.
+         */
+        float MY_ANOMALY_PERCENT = 10.0f / (3.0f * MY_DRONE_COUNT);
 
         //Initialize telemetry generator
         TelemetryGenerator gen = TelemetryGenerator.getInstance(MY_ANOMALY_PERCENT);
