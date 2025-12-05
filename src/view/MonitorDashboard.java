@@ -37,9 +37,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
     /** the number of milliseconds in one second for the clock timer. */
     private static final int MILLI_IN_SEC = 1000;
 
-    /**
-     * Clock for displaying the current time.
-     */
+    /** Clock for displaying the current time. */
     private static JMenuItem myClock;
 
     /** Constructor to initialize the window. */

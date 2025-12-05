@@ -78,8 +78,7 @@ class TelemetryPanel extends JPanel {
             int insertIndex = 0;
             Component[] components = SCROLL_VIEW.getComponents();
             for (Component comp : components) {
-                if (comp instanceof TelemetryEntry) {
-                    TelemetryEntry entry = (TelemetryEntry) comp;
+                if (comp instanceof TelemetryEntry entry) {
                     if (entry.myID < theID) {
                         insertIndex++;
                     } else {
@@ -94,9 +93,7 @@ class TelemetryPanel extends JPanel {
         
         // Restore scroll position
         if (scrollPane != null) {
-            SwingUtilities.invokeLater(() -> {
-                scrollPane.getHorizontalScrollBar().setValue(scrollPosition);
-            });
+            SwingUtilities.invokeLater(() -> scrollPane.getHorizontalScrollBar().setValue(scrollPosition));
         }
     }
 
@@ -110,7 +107,7 @@ class TelemetryPanel extends JPanel {
             SCROLL_VIEW.remove(e);
         }
         List<TelemetryEntry> entries = new ArrayList<>(List.copyOf(ID_ENTRY_MAP.values()));
-        entries.sort((a, b) -> {return a.myID - b.myID;});
+        entries.sort(Comparator.comparingInt(a -> a.myID));
         for (TelemetryEntry e : entries) {
             SCROLL_VIEW.add(e);
         }
