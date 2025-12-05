@@ -6,7 +6,7 @@ import java.util.*;
 /**
  * A class to parse and calculate drone data from a CSV log of activity.
  * @author nlevin11
- * @version 12-2
+ * @version 12-5
  */
 public class BaselineCalculator {
     /**
@@ -18,6 +18,11 @@ public class BaselineCalculator {
      * A double to hold the threshold for drone acceleration.
      */
     private static final double ACCELERATION_THRESHOLD = 0.01;
+
+    /**
+     * A double to hold the minimum velocity observed in steady flight.
+     */
+    private double myMinVelObs = Double.MAX_VALUE;
 
     /**
      * A list to hold all velocity data.
@@ -175,6 +180,10 @@ public class BaselineCalculator {
                     float currOrientation = Float.parseFloat(values[orientationIndex].trim());
                     double currTimestamp = Double.parseDouble(values[timestampIndex].trim());
 
+                    if (currVelocity > 0.001 && currVelocity < myMinVelObs) {
+                        myMinVelObs = currVelocity;
+                    }
+
                     if (!firstTimestampReadings.containsKey(droneID)) {
                         firstTimestampReadings.put(droneID, currTimestamp);
                     }
@@ -244,6 +253,7 @@ public class BaselineCalculator {
 
         props.setProperty("velocity.mean", String.valueOf(vMean));
         props.setProperty("velocity.standardDev", String.valueOf(vStandardDev));
+        props.setProperty("velocity.min", String.valueOf(myMinVelObs));
         props.setProperty("batteryDrain.mean", String.valueOf(bMean));
         props.setProperty("batteryDrain.standardDev", String.valueOf(bStandardDev));
         props.setProperty("orientationSteady.max", String.valueOf(oSteadyMax));

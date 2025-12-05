@@ -57,6 +57,11 @@ public class AnomalyDetector {
     private static double VELOCITY_STANDARD_DEV_BASELINE;
 
     /**
+     * A double to represent the minimum observed velocity of drones.
+     */
+    private static double VELOCITY_MIN_OBSERVED;
+
+    /**
      * A double to represent the mean expected battery drain of a drone.
      */
     private static double BATTERY_DRAIN_MEAN_BASELINE;
@@ -105,6 +110,7 @@ public class AnomalyDetector {
 
             VELOCITY_MEAN_BASELINE = Double.parseDouble(props.getProperty("velocity.mean"));
             VELOCITY_STANDARD_DEV_BASELINE = Double.parseDouble(props.getProperty("velocity.standardDev"));
+            VELOCITY_MIN_OBSERVED = Double.parseDouble(props.getProperty("velocity.min"));
 
             BATTERY_DRAIN_MEAN_BASELINE = Double.parseDouble(props.getProperty("batteryDrain.mean"));
             BATTERY_DRAIN_STANDARD_DEV_BASELINE = Double.parseDouble(props.getProperty("batteryDrain.standardDev"));
@@ -194,7 +200,8 @@ public class AnomalyDetector {
         boolean isAccel = Math.abs(currAcceleration) > ACCELERATION_THRESHOLD;
 
         double velocityZScore = (currVelocity - VELOCITY_MEAN_BASELINE) / VELOCITY_STANDARD_DEV_BASELINE;
-        boolean velFlag = Math.abs(velocityZScore) > MAX_Z_SCORE;
+        boolean approachFlag = currVelocity >= 0.5 && currVelocity <= VELOCITY_MIN_OBSERVED;
+        boolean velFlag = Math.abs(velocityZScore) > MAX_Z_SCORE && !approachFlag;
 
         if (currTime > firstTimestamp + 1000) {
             if (velFlag && !isAccel) {
@@ -241,7 +248,7 @@ public class AnomalyDetector {
                 currLongitude < LONGITUDE_MAX * -1 || currLongitude > LONGITUDE_MAX || currAltitude > ALTITUDE_MAX) {
             return AnomalyEnum.OUT_OF_BOUNDS;
         }
-        if (currAltitude < 0 ) {
+        if (currAltitude <= 0.0) {
             return AnomalyEnum.HIT_GROUND;
         }
 
@@ -251,10 +258,10 @@ public class AnomalyDetector {
                 + Math.pow(thePrevTelemetry.latitude() - theCurrentTelemetry.latitude(), 2)
                 + Math.pow(thePrevTelemetry.altitude() - theCurrentTelemetry.altitude(), 2));
 
-        if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX) {
-            return AnomalyEnum.ALTITUDE;
-        } else if (displacement > ORTHOGONAL_VELOCITY_MAX) {
+        if (displacement > ORTHOGONAL_VELOCITY_MAX) {
             return AnomalyEnum.SPOOFING;
+        } else if (Math.abs(currAltitude - prevAltitude) > ORTHOGONAL_VELOCITY_MAX) {
+            return AnomalyEnum.ALTITUDE;
         }
 
         return null;

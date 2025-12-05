@@ -142,22 +142,21 @@ public class DroneMonitorApp {
                     //If anomaly is not null.
                     if (anomaly != null) {
                         String anomalyString = anomaly.anomalyType();
-                        if (anomalyString.contains("Out of Bounds")) { //OUT_OF_BOUNDS and ALTITUDE anomalies (1/9)
+                        if (anomalyString.contains("Failure") || anomalyString.contains("Ground")) { //BATTERY_FAIL OR HIT_GROUND (2/9)
+                            AlertPlayer.INSTANCE.addSoundToQueue("crash");
+                            view.markDroneDead(drone.getId());
+                            gen.removeDrone(drone);
+                            removeDrone = true;
+                        } else if (anomalyString.contains("Out of Bounds")) { //OUT_OF_BOUNDS (1/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("out-of-bounds");
-                        } else if (anomalyString.contains("Battery") &&
-                                !anomalyString.contains("Failure")) { //BATTERY_DRAIN  and BATTERY anomalies (2/9)
+                        } else if (anomalyString.contains("Battery")) { //BATTERY_DRAIN  and BATTERY_WARNING anomalies (2/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("battery");
                         } else if (anomalyString.contains("Acceleration")
                                 || anomalyString.contains("Speed")
                                 || anomalyString.contains("Altitude")) { //ACCELERATION and SPEED anomalies (3/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("acceleration");
-                        } else if (anomalyString.contains("Spoof")) { //SPOOFING anomaly (1/9)
+                        } else  { //SPOOFING and OFF_COURSE anomalies (1/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("spoof");
-                        } else { //BATTERY_FAIL OR HIT_GROUND (2/9)
-                            AlertPlayer.INSTANCE.addSoundToQueue("crash");
-                            view.markDroneDead(drone.getId());
-                            gen.removeDrone(drone);
-                            removeDrone = true;
                         }
 
                         //Add anomaly to database.
@@ -167,8 +166,6 @@ public class DroneMonitorApp {
                         javax.swing.SwingUtilities.invokeLater(() -> {
                                 view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
                         });
-//                        view.addLogEntry(anomaly.simpleReport(), anomaly.detailedReport());
-
                     }
 
                     // Check if drone died naturally (battery = 0)
