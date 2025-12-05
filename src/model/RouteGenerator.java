@@ -28,12 +28,6 @@ public class RouteGenerator {
     /** Maximum altitude */
     public static final float MAX_ALT = 1000.0f;
 
-    /**
-     * Minimum required lat/lon difference between two corners when generating
-     * predictable test rectangles. Used only in validation routines.
-     */
-    private static final float MIN_SIDE_LENGTH = 80.0f;
-
     /** Random generator used for producing route point coordinates. */
     private static final Random random = new Random();
 
@@ -99,45 +93,6 @@ public class RouteGenerator {
     }
 
 
-
-    /**
-     * Generates a circular route consisting of 8 equally spaced points centered
-     * around a random location. The circle radius is chosen such that all points
-     * stay within global geographic bounds.
-     *
-     * @return a circular route containing 8 points
-     */
-    private ArrayList<RoutePoint> generateCircle() {
-
-        // Pick a safe center anywhere
-        float centerLat = getRandom(MIN_LAT + 20, MAX_LAT - 20);
-        float centerLon = getRandom(MIN_LON + 20, MAX_LON - 20);
-
-        // Compute max radius allowed by boundaries
-        float maxLatRadius = Math.min(centerLat - MIN_LAT, MAX_LAT - centerLat);
-        float maxLonRadius = Math.min(centerLon - MIN_LON, MAX_LON - centerLon);
-
-        // Overall max radius (stay in bounds on both axes)
-        float maxRadius = Math.min(maxLatRadius, maxLonRadius);
-
-        // Make the circle big: 30%–90% of the max possible radius
-        float radius = maxRadius * (0.30f + random.nextFloat() * 0.60f);
-
-        ArrayList<RoutePoint> route = new ArrayList<>();
-
-        for (int i = 0; i < 8; i++) {
-            double angle = Math.toRadians(i * 45);
-
-            float lat = centerLat + radius * (float) Math.cos(angle);
-            float lon = centerLon + radius * (float) Math.sin(angle);
-            float alt = getRandom(MIN_ALT, MAX_ALT);
-
-            route.add(new RoutePoint(lon, lat, alt));
-        }
-
-        return route;
-    }
-
     /**
      * Generates a random {@link RoutePoint} with latitude, longitude, and altitude
      * values within the allowed global boundaries.
@@ -167,46 +122,6 @@ public class RouteGenerator {
      */
     private float getRandom(float min, float max) {
         return min + random.nextFloat() * (max - min);
-    }
-
-    /**
-     * Generates a predictable rectangular route used primarily for unit testing.
-     * The method ensures that the rectangle has a minimum required side length
-     * to prevent degenerate or trivial shapes.
-     *
-     * @return a valid rectangular test route
-     */
-    private ArrayList<RoutePoint> generatePredictableRect() {
-        float lon1, lat1, lon2, lat2;
-
-        do {
-            lon1 = getRandom(MIN_LON, MAX_LON);
-            lat1 = getRandom(MIN_LAT, MAX_LAT);
-            lon2 = getRandom(MIN_LON, MAX_LON);
-            lat2 = getRandom(MIN_LAT, MAX_LAT);
-        } while (!validRectangle(lon1, lat1, lon2, lat2));
-
-        ArrayList<RoutePoint> route = new ArrayList<>();
-        route.add(new RoutePoint(lon1, lat1, getRandom(MIN_ALT, MAX_ALT))); // A
-        route.add(new RoutePoint(lon2, lat1, getRandom(MIN_ALT, MAX_ALT))); // B
-        route.add(new RoutePoint(lon2, lat2, getRandom(MIN_ALT, MAX_ALT))); // C
-        route.add(new RoutePoint(lon1, lat2, getRandom(MIN_ALT, MAX_ALT))); // D
-
-        return route;
-    }
-
-    /**
-     * Determines whether a rectangular route is valid based on differences in
-     * latitude and longitude. Ensures the rectangle is not too small.
-     *
-     * @param lon1 first longitude
-     * @param lat1 first latitude
-     * @param lon2 second longitude
-     * @param lat2 second latitude
-     * @return true if the rectangle meets minimum side-length requirements
-     */    private boolean validRectangle(final float lon1, final float lat1, final float lon2, final float lat2) {
-        return Math.abs(lon1 - lon2) >= MIN_SIDE_LENGTH &&
-                Math.abs(lat1 - lat2) >= MIN_SIDE_LENGTH;
     }
 
 }

@@ -78,9 +78,6 @@ public interface DroneInterface {
     /** @return the acceleration step used when adjusting velocity */
     float getAccelerationStep();
 
-    /** @return the maximum altitude this drone can reach */
-    float getMaxAltitude();
-
     /** @return the minimum altitude this drone can maintain (> 0) */
     float getMinAltitude();
 

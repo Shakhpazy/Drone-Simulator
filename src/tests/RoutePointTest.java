@@ -2,9 +2,13 @@ package tests;
 
 import model.RoutePoint;
 import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.junit.jupiter.api.Assertions.*;
-
+/**
+ * A class to test RoutePoint.
+ * @author Yusuf
+ * @version 12-01
+ */
 class RoutePointTest {
 
     @Test
