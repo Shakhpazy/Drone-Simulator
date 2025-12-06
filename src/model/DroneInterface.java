@@ -69,17 +69,8 @@ public interface DroneInterface {
     void collided();
 
 
-    /** @return the maximum allowed velocity for this drone */
-    float getMaxVelocity();
-
-    /** @return the minimum allowed velocity for this drone */
-    float getMinVelocity();
-
     /** @return the acceleration step used when adjusting velocity */
     float getAccelerationStep();
-
-    /** @return the minimum altitude this drone can maintain (> 0) */
-    float getMinAltitude();
 
     /**
      * Returns whether the drone is alive.
