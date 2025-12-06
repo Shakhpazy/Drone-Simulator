@@ -151,9 +151,6 @@ public class TelemetryGenerator {
         // Second pass: Generate telemetry for all drones (including ones that just collided)
         Map<DroneInterface, TelemetryRecord[]> map = new HashMap<>();
         for (DroneInterface drone : myDrones) {
-            if (!drone.isAlive()) {
-                continue;
-            }
 
             TelemetryRecord prev = drone.getPreviousTelemetryRecord();
             boolean spoofed = spoofedMap.getOrDefault(drone, false);

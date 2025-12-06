@@ -280,7 +280,7 @@ public class AnomalyDetector {
         float currBatteryLevel = theCurrTelemetry.batteryLevel();
         if (currBatteryLevel <= 0.0F) {
             return AnomalyEnum.BATTERY_FAIL;
-        } else if (currBatteryLevel <= 15){
+        } else if (currBatteryLevel <= 15 && currBatteryLevel > 14){
             return AnomalyEnum.BATTERY_WARNING;
         }
         return null;
