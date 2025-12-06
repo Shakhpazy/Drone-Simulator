@@ -65,7 +65,6 @@ public class DroneTest {
         assertEquals(route.get(0), d.getNextPoint());
     }
 
-
     @Test
     void setVelocityRejectsOutOfBounds() {
         ArrayList<RoutePoint> route = buildSimpleRoute();
@@ -162,6 +161,25 @@ public class DroneTest {
         assertNotNull(d.getMyLastAnomaly());
     }
 
+    @Test
+    void collidedSetsDroneToDeadState() {
+        ArrayList<RoutePoint> route = buildSimpleRoute();
+        Drone d = new Drone(5f, 100, route);
 
+        d.collided();
 
+        assertEquals(0f, d.getAltitude(), 0.0001);
+        assertEquals(0f, d.getVelocity(), 0.0001);
+        assertFalse(d.isAlive());
+    }
+
+    @Test
+    void batteryLevelZeroMarksDroneAsDead() {
+        ArrayList<RoutePoint> route = buildSimpleRoute();
+        Drone d = new Drone(5f, 100, route);
+
+        d.setBatteryLevel(0f);
+
+        assertFalse(d.isAlive());
+    }
 }
