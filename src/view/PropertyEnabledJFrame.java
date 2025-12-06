@@ -23,11 +23,6 @@ class PropertyEnabledJFrame extends JFrame implements PropertyChangeListener {
     public static final String PROPERTY_SAVE_AS = "save database file";
 
     /**
-     * Property change event for debug tick speed change.
-     */
-    public static final String PROPERTY_TICK_SPEED = "tick speed change";
-
-    /**
      * Property change event for opening the database window.
      */
     public static final String PROPERTY_DATABASE_OPENED = "database window opened";
