@@ -24,15 +24,6 @@ import java.util.*;
  */
 public class TelemetryGenerator {
 
-    /** Singleton instance of the TelemetryGenerator. */
-    public static TelemetryGenerator instance;
-
-    /** List of all drones being simulated. */
-    ArrayList<DroneInterface> myDrones;
-
-    /** Random generator used for determining anomaly occurrence and spoof offsets. */
-    private final Random myRandom = new Random();
-
     /** Maximum spoofing offset applied to lat/lon/alt when SPOOFING is triggered. */
     private final float SPOOFING_CHANGE = 50;
 
@@ -47,6 +38,15 @@ public class TelemetryGenerator {
      * ~0.5% chance (5/1000) of anomaly.
      */
     private final float RANDOM_PERCENT;
+
+    /** Singleton instance of the TelemetryGenerator. */
+    public static TelemetryGenerator instance;
+
+    /** List of all drones being simulated. */
+    ArrayList<DroneInterface> myDrones;
+
+    /** Random generator used for determining anomaly occurrence and spoof offsets. */
+    private final Random myRandom = new Random();
 
 
     /**
@@ -107,11 +107,14 @@ public class TelemetryGenerator {
      * <ul>
      *     <li>If the drone is dead, it is skipped.</li>
      *     <li>Randomly chooses normal or anomalous movement.</li>
+     *     <li>Checks for collisions between drones after all movements.</li>
      *     <li>Generates spoofed telemetry if the anomaly was SPOOFING.</li>
      *     <li>Produces a mapping of the drone to its previous and current
      *         telemetry records.</li>
      * </ul>
-     * After all drones are updated, collision detection is performed.
+     * Collision detection is performed after all drones move but before telemetry
+     * generation, ensuring that collided drones send their dead state (0 altitude,
+     * 0 battery) to the UI.
      *
      * @param deltaTime elapsed simulation time since the last update step.
      * @return a map associating each drone with its previous and current
@@ -119,16 +122,16 @@ public class TelemetryGenerator {
      */
     public Map<DroneInterface, TelemetryRecord[]> processAllDrones(final float deltaTime) {
 
-        Map<DroneInterface, TelemetryRecord[]> map = new HashMap<>();
+        // Track which drones were spoofed during movement
+        Map<DroneInterface, Boolean> spoofedMap = new HashMap<>();
+        
+        // First pass: Move all drones
         for (DroneInterface drone : myDrones) {
-
             if (!drone.isAlive()) {
                 continue;
             }
 
-            TelemetryRecord prev = drone.getPreviousTelemetryRecord();
             boolean spoofed = false;
-
             if (myRandom.nextFloat() < (RANDOM_PERCENT / 100.0f)) {
                 getRandomMove(drone, deltaTime);
                 if (drone.getMyLastAnomaly() == AnomalyEnum.SPOOFING) {
@@ -137,6 +140,23 @@ public class TelemetryGenerator {
             } else {
                 getMove(drone, deltaTime);
             }
+            
+            spoofedMap.put(drone, spoofed);
+        }
+
+        // Check collisions after all drones have moved, but before generating telemetry
+        // This ensures collided drones send their dead state (0 altitude, 0 battery) to the UI
+        checkCollisions();
+
+        // Second pass: Generate telemetry for all drones (including ones that just collided)
+        Map<DroneInterface, TelemetryRecord[]> map = new HashMap<>();
+        for (DroneInterface drone : myDrones) {
+            if (!drone.isAlive()) {
+                continue;
+            }
+
+            TelemetryRecord prev = drone.getPreviousTelemetryRecord();
+            boolean spoofed = spoofedMap.getOrDefault(drone, false);
 
             TelemetryRecord curr;
             if (spoofed) {
@@ -162,7 +182,6 @@ public class TelemetryGenerator {
             drone.setPrevTelemetryRecord(curr);
         }
 
-        checkCollisions();
         return map;
     }
 
