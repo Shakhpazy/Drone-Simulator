@@ -3,7 +3,7 @@ package model;
 /**
  * A class to encompass drone anomaly enumerations and their string representations.
  * @author nlevin11
- * @version 12-2
+ * @version 12-5
  */
 public enum AnomalyEnum {
     BATTERY_DRAIN("Abnormal Battery Drain Rate"),

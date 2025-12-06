@@ -7,7 +7,7 @@ import java.util.UUID;
 /**
  * A class to detect anomalies with drone behavior.
  * @author nlevin11
- * @version 12-2
+ * @version 12-5
  */
 public class AnomalyDetector {
 
@@ -136,9 +136,9 @@ public class AnomalyDetector {
     /**
      * A method to detect anomalies between two telemetry objects.
      *
-     * @param theCurrTelemetry A telemetry representing the current drone state.
-     * @param thePrevTelemetry A telemetry representing the previous drone state.
-     * @return Returns the AnomalyReport object when created, null if not created.
+     * @param theCurrTelemetry      A telemetry record representing the current drone state.
+     * @param thePrevTelemetry      A telemetry record representing the previous drone state.
+     * @return                      Returns the AnomalyReport object when created, null if not created.
      */
     public AnomalyReport detect(TelemetryRecord thePrevTelemetry, TelemetryRecord theCurrTelemetry) {
         StringBuilder sb = new StringBuilder();
@@ -173,8 +173,9 @@ public class AnomalyDetector {
 
     /**
      * A method to detect anomalous drone behavior via statistical analysis.
-     * @param theCurrTelemetry      The current telemetry data.
-     * @param thePrevTelemetry      The previous telemetry data.
+     *
+     * @param theCurrTelemetry      A telemetry record representing the current drone state.
+     * @param thePrevTelemetry      A telemetry record representing the previous drone state.
      * @return                      Returns an AnomalyEnum representing the anomaly found.
      */
     private AnomalyEnum statisticalDetect(TelemetryRecord theCurrTelemetry, TelemetryRecord thePrevTelemetry) {
@@ -236,12 +237,14 @@ public class AnomalyDetector {
     /**
      * A private method to hold positional anomaly detection logic.
      *
-     * @return Returns an AnomalyEnum representing the anomaly found.
+     * @param theCurrTelemetry      A telemetry record representing the current drone state.
+     * @param thePrevTelemetry      A telemetry record representing the previous drone state.
+     * @return                      Returns an AnomalyEnum representing the anomaly found.
      */
-    private AnomalyEnum positionAnomaly(TelemetryRecord theCurrentTelemetry, TelemetryRecord thePrevTelemetry) {
-        float currLatitude = theCurrentTelemetry.latitude();
-        float currLongitude = theCurrentTelemetry.longitude();
-        float currAltitude = theCurrentTelemetry.altitude();
+    private AnomalyEnum positionAnomaly(TelemetryRecord theCurrTelemetry, TelemetryRecord thePrevTelemetry) {
+        float currLatitude = theCurrTelemetry.latitude();
+        float currLongitude = theCurrTelemetry.longitude();
+        float currAltitude = theCurrTelemetry.altitude();
 
         // Check in bounds
         if (currLatitude < LATITUDE_MAX * -1 || currLatitude > LATITUDE_MAX ||
@@ -254,9 +257,9 @@ public class AnomalyDetector {
 
         // Check z-axis velocity
         float prevAltitude = thePrevTelemetry.altitude();
-        double displacement = Math.sqrt(Math.pow(thePrevTelemetry.longitude() - theCurrentTelemetry.longitude(), 2)
-                + Math.pow(thePrevTelemetry.latitude() - theCurrentTelemetry.latitude(), 2)
-                + Math.pow(thePrevTelemetry.altitude() - theCurrentTelemetry.altitude(), 2));
+        double displacement = Math.sqrt(Math.pow(thePrevTelemetry.longitude() - theCurrTelemetry.longitude(), 2)
+                + Math.pow(thePrevTelemetry.latitude() - theCurrTelemetry.latitude(), 2)
+                + Math.pow(thePrevTelemetry.altitude() - theCurrTelemetry.altitude(), 2));
 
         if (displacement > ORTHOGONAL_VELOCITY_MAX) {
             return AnomalyEnum.SPOOFING;
@@ -270,10 +273,11 @@ public class AnomalyDetector {
     /**
      * A private method to hold the power anomaly detection logic.
      *
-     * @return Returns an AnomalyEnum representing whether the battery level is 0.
+     * @param theCurrTelemetry      A telemetry record representing the current drone state.
+     * @return                      Returns an AnomalyEnum representing whether the battery level is low or 0.
      */
-    private AnomalyEnum powerAnomaly(TelemetryRecord theCurrentTelemetry) {
-        float currBatteryLevel = theCurrentTelemetry.batteryLevel();
+    private AnomalyEnum powerAnomaly(TelemetryRecord theCurrTelemetry) {
+        float currBatteryLevel = theCurrTelemetry.batteryLevel();
         if (currBatteryLevel <= 0.0F) {
             return AnomalyEnum.BATTERY_FAIL;
         } else if (currBatteryLevel <= 15){
@@ -285,8 +289,8 @@ public class AnomalyDetector {
     /**
      * A private method to create an AnomalyReport object
      *
-     * @param theAnomalyType A string classification of the anomaly to be reported on.
-     * @return Returns an anomaly report with the relevant information.
+     * @param theAnomalyType        A string classification of the anomaly to be reported on.
+     * @return                      Returns an anomaly report with the relevant information.
      */
     private AnomalyReport createAnomalyReport(String theAnomalyType, TelemetryRecord theCurrTelemetry, TelemetryRecord thePrevTelemetry) {
 

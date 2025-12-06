@@ -238,12 +238,19 @@ public class BaselineCalculator {
     }
 
     /**
-     * A method to save the calculated statistical data to a file.
+     * A method to save the calculated statistical baselines to a properties file.
+     *
      * @param filepath          The string representation for the output filepath.
+     * @param lineCount         The total number of data points used to generate these statistics.
      * @param vMean             The calculated mean velocity of drone behavior.
      * @param vStandardDev      The calculated standard deviation of drone velocity behavior.
      * @param bMean             The calculated mean battery drain rate.
      * @param bStandardDev      The calculated standard deviation of drone battery behavior.
+     * @param oSteadyMax        The maximum calculated value for steady drone orientation changes.
+     * @param oTurnMin          The minimum calculated value for turning drone orientation changes.
+     * @param aMean             The calculated mean acceleration of the drone.
+     * @param aStandardDev      The calculated standard deviation of drone acceleration behavior.
+     *
      * @throws IOException      Throws an exception when data cannot be written to the file.
      */
     private void saveStatsToProperties(String filepath, int lineCount, double vMean, double vStandardDev, double bMean,
