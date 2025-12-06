@@ -147,7 +147,6 @@ public enum AlertPlayer {
             theAlert.stop(); //Stop Alert if playing
             theAlert.setFramePosition(0); // Restart to 0
             theAlert.start(); // PLay Alert
-            System.out.println(theSoundName + " started playing");
 
             try {
                 lock.wait(); //Wait until current clip stops before processing next sound.
@@ -157,7 +156,6 @@ public enum AlertPlayer {
             }
 
             theAlert.removeLineListener(listener); //Clean up Alert when done
-            System.out.println(theSoundName + " finished playing");
         }
     }
 
@@ -181,7 +179,6 @@ public enum AlertPlayer {
 
             //Add clip to myAlerts
             myAlerts.put(theName, alert);
-            System.out.println("Successfully loaded sound: " +  theName);
         }
         catch(UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
@@ -204,15 +201,10 @@ public enum AlertPlayer {
                 try {
                     myPlaybackQueue.put(theSoundName);
                     myLastQueued.put(theSoundName, now);
-                    System.out.println("Added " + theSoundName + " to the queue");
                 }
                 catch(InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    System.out.println("Failed to add " + theSoundName + " to the queue");
                 }
-            }
-            else {
-                System.out.println("Skipped " + theSoundName + " due to cooldown");
             }
         }
     }

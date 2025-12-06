@@ -138,7 +138,9 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         // File
         JMenu fileMenu = new JMenu("File");
         fileMenu.setForeground(ColorScheme.TEXT_PRIMARY);
+        fileMenu.setBackground(ColorScheme.BACKGROUND_MAIN);
         JMenuItem saveAs = new JMenuItem("Save current selection as...");
+        saveAs.setBackground(ColorScheme.BACKGROUND_MAIN);
         saveAs.setForeground(ColorScheme.TEXT_PRIMARY);
         saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
         fileMenu.add(saveAs);
@@ -147,8 +149,10 @@ public class DatabaseWindow extends PropertyEnabledJFrame {
         // Help
         JMenu helpMenu = new JMenu("Help");
         helpMenu.setForeground(ColorScheme.TEXT_PRIMARY);
+        helpMenu.setBackground(ColorScheme.BACKGROUND_MAIN);
         JMenuItem inst = new JMenuItem("Instructions...");
         inst.setForeground(ColorScheme.TEXT_PRIMARY);
+        inst.setBackground(ColorScheme.BACKGROUND_MAIN);
         inst.addActionListener(_ -> openInstructions());
         helpMenu.add(inst);
         bar.add(helpMenu);
