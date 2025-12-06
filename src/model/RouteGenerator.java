@@ -120,7 +120,7 @@ public class RouteGenerator {
      * @param max the maximum value (exclusive)
      * @return a random float in the range [min, max)
      */
-    private float getRandom(float min, float max) {
+    private float getRandom(final float min, final float max) {
         return min + random.nextFloat() * (max - min);
     }
 

@@ -24,15 +24,6 @@ import java.util.*;
  */
 public class TelemetryGenerator {
 
-    /** Singleton instance of the TelemetryGenerator. */
-    public static TelemetryGenerator instance;
-
-    /** List of all drones being simulated. */
-    ArrayList<DroneInterface> myDrones;
-
-    /** Random generator used for determining anomaly occurrence and spoof offsets. */
-    private final Random myRandom = new Random();
-
     /** Maximum spoofing offset applied to lat/lon/alt when SPOOFING is triggered. */
     private final float SPOOFING_CHANGE = 50;
 
@@ -47,6 +38,15 @@ public class TelemetryGenerator {
      * ~0.5% chance (5/1000) of anomaly.
      */
     private final float RANDOM_PERCENT;
+
+    /** Singleton instance of the TelemetryGenerator. */
+    public static TelemetryGenerator instance;
+
+    /** List of all drones being simulated. */
+    ArrayList<DroneInterface> myDrones;
+
+    /** Random generator used for determining anomaly occurrence and spoof offsets. */
+    private final Random myRandom = new Random();
 
 
     /**

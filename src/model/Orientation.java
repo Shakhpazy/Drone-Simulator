@@ -12,7 +12,7 @@ package model;
 public class Orientation {
 
     /** Current heading of the drone, stored in degrees (0–359). */
-    float myDegree;
+    private float myDegree;
 
     /**
      * Constructs an Orientation object with the given initial degree.
