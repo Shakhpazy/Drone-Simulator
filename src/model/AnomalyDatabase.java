@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * A class to hold all methods for interacting with the drone_anomalies database.
  * @author nlevin11
- * @version 11-30
+ * @version 12-5
  */
 public class AnomalyDatabase {
     /**
@@ -81,30 +81,6 @@ public class AnomalyDatabase {
             System.out.println(e.getMessage());
         }
 
-    }
-
-    /**
-     * A method to find reports based on their Anomaly ID.
-     * @param theAnomalyID  The ID number needed to find the AnomalyReport.
-     * @return              Returns the necessary AnomalyReport.
-     */
-    public AnomalyReport findReportByAnomalyID(String theAnomalyID){
-        String sql = "SELECT * FROM anomaly_reports WHERE id = ?";
-        AnomalyReport report = null;
-
-        try {
-            PreparedStatement preparedStatement = myConnection.prepareStatement(sql);
-
-            preparedStatement.setString(1, theAnomalyID);
-            ResultSet rs = preparedStatement.executeQuery();
-
-            if (rs.next()) {
-                report = buildFromSet(rs);
-            }
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-        return report;
     }
 
     /**

@@ -215,6 +215,9 @@ public class DroneMonitorApp {
                 scheduler.shutdownNow();
                 Thread.currentThread().interrupt();
             }
+
+            System.out.println("Closing database connection...");
+            anomalyDTBS.close();
         };
         Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
 
