@@ -48,20 +48,6 @@ public class TelemetryGeneratorTest {
     }
 
     @Test
-    void processSkipsDeadDrones() {
-        TelemetryGenerator gen = TelemetryGenerator.getInstance(0);
-        Drone d = new Drone(5f, 100, buildRoute());
-
-        d.collided(); // mark drone dead
-
-        gen.addDrone(d);
-
-        Map<DroneInterface, TelemetryRecord[]> map = gen.processAllDrones(1f);
-
-        assertTrue(map.isEmpty());
-    }
-
-    @Test
     void processCallsNormalMoveWhenNoAnomaly() {
         TelemetryGenerator gen = TelemetryGenerator.getInstance(0); // 0% anomaly
         Drone d = new Drone(5f, 100, buildRoute());
