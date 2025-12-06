@@ -19,6 +19,16 @@ public class RunBaseline {
      */
     private static final String MY_Z_SCORE_LOG_PATH = "dataLogs/BaselineLog.properties";
 
+    /**
+     * Main entry point for executing the baseline processing tool.
+     * <p>
+     * This method constructs a {@link BaselineCalculator} instance and instructs
+     * it to load telemetry data from the input log and export computed baseline
+     * metrics to the designated output file.
+     * </p>
+     *
+     * @param arg command-line arguments (unused).
+     */
     public static void main(String[] arg) {
         BaselineCalculator calc = new BaselineCalculator();
 
