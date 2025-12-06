@@ -2,6 +2,7 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -160,13 +161,7 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
         bar.setForeground(ColorScheme.TEXT_SECONDARY);
 
         // File
-        JMenu fileMenu = new JMenu("File");
-        fileMenu.setForeground(ColorScheme.TEXT_PRIMARY);
-        JMenuItem saveAs = new JMenuItem("Save all reports as...");
-        saveAs.setBackground(ColorScheme.BACKGROUND_SECONDARY);
-        saveAs.setForeground(ColorScheme.TEXT_PRIMARY);
-        saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
-        fileMenu.add(saveAs);
+        JMenu fileMenu = buildFileMenu();
         bar.add(fileMenu);
 
         // Data
@@ -196,6 +191,22 @@ public class MonitorDashboard extends PropertyEnabledJFrame {
 
         setJMenuBar(bar);
         bar.setVisible(true);
+    }
+
+    private JMenu buildFileMenu() {
+        JMenu fileMenu = new JMenu("File");
+        fileMenu.setForeground(ColorScheme.TEXT_PRIMARY);
+        JMenuItem saveAs = new JMenuItem("Save all reports as...");
+        saveAs.setBackground(ColorScheme.BACKGROUND_SECONDARY);
+        saveAs.setForeground(ColorScheme.TEXT_PRIMARY);
+        saveAs.addActionListener(_ -> myPCS.firePropertyChange(PROPERTY_SAVE_AS, null, null));
+        fileMenu.add(saveAs);
+        JMenuItem exit = new JMenuItem("Exit");
+        exit.setBackground(ColorScheme.BACKGROUND_SECONDARY);
+        exit.setForeground(ColorScheme.TEXT_PRIMARY);
+        exit.addActionListener(_ -> dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING)));
+        fileMenu.add(exit);
+        return fileMenu;
     }
 
     /**
