@@ -138,41 +138,75 @@ public class Drone implements DroneInterface {
     public RoutePoint getNextPoint() {
         return myNavigationSystem.getNextPoint();
     }
-    
+
+    /**
+     * sets the altitude of the Drone and cannot go below 0
+     * @param theAltitude {float} of the altitude
+     */
     public void setAltitude(final float theAltitude) {
         myAltitude = Math.max(0, theAltitude);
     }
-    
+
+    /**
+     * sets the longitude of the Drone
+     * @param theLongitude {float} of the longitude
+     */
     public void setLongitude(final float theLongitude) {
         myLongitude = theLongitude;
     }
-    
+
+    /**
+     * sets the latitude of the Drone
+     * @param theLatitude {float} of the latitude
+     */
     public void setLatitude(final float theLatitude) {
         myLatitude = theLatitude;
     }
-    
+
+    /**
+     * sets the battery level of the drone, and if
+     * the battery is = 0, the kill it
+     *
+     * @param theBatteryLevel {float} the battery level
+     */
     public void setBatteryLevel(final float theBatteryLevel) {
         myBatterySystem.setBatteryLevel(theBatteryLevel);
         if (myBatterySystem.getBatteryLevel() == 0) {
             setIsAlive(false);
         }
     }
-    
+
+    /**
+     * updates to the next route of the drone
+     */
     public void setNextRoute() {
         myNavigationSystem.advanceToNextPoint();
     }
-    
+
+    /**
+     * Sets the velocity of the drone, and the velocity input
+     * must be valid. throws illegalArgException if not bound
+     * @param theVelocity {float} the velocity of drone
+     */
     public void setVelocity(final float theVelocity) {
         if (theVelocity < MIN_VELOCITY || theVelocity > MAX_VELOCITY) {
             throw new IllegalArgumentException("The velocity must stay in bound");
         }
         myVelocity = theVelocity;
     }
-    
+
+    /**
+     * sets the orientation of the drone
+     * @param theDegree {float} the degree of the drone
+     */
     public void setOrientation(final float theDegree) {
         myOrientation.setDegrees(theDegree);
     }
-    
+
+    /**
+     * sets the drones health
+     * @param theHealth {boolean}
+     */
     public void setIsAlive(final boolean theHealth) {
         myDroneIsAlive = theHealth;
     }
