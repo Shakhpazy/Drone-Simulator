@@ -52,21 +52,19 @@ public class DroneMonitorApp {
     /** The drone generator used to instantiate drone objects. */
     private static final DroneGenerator myDroneGenerator = new DroneGenerator();
 
-    /*
-     * How long the program waits between updates (in milliseconds)
-     */
+    /** Number of milliseconds between simulation updates. */
     private static final long MY_UPDATE_TIME = 500;
 
-   /**
-    * Time delta for smooth updates in TelemetryGenerator
-    * MY_DELTA_TIME = MY_UPDATE_TIME in seconds due to implementation.
-    */
+    /**
+     * Time delta (in seconds) used by the telemetry generator.
+     * <p>
+     * Computed as {@code MY_UPDATE_TIME / 1000.0}.
+     * </p>
+     */
    private static final double MY_DELTA_TIME = MY_UPDATE_TIME / 1000.0;
 
-    /**
-     * Maximum amount of supported drones.
-     */
-   private static final int MAX_DRONE_COUNT = 200;
+    /** Maximum number of drones allowed in the simulation. */
+    private static final int MAX_DRONE_COUNT = 200;
 
     /**
      * The main entry point for the program. Initializes the UI and creates drones. Initializes the TelemetryGenerator
@@ -74,7 +72,7 @@ public class DroneMonitorApp {
      *
      * @param theArgs - The command line arguments passed into the program.
      */
-    public static void main(String[] theArgs) {
+    static void main(String[] theArgs) {
         String input = JOptionPane.showInputDialog("Enter the number of drones for the simulation.");
 
         int myDroneCount = validateInput(input);
@@ -110,13 +108,17 @@ public class DroneMonitorApp {
         anomalyDTBS.initialize();
         new DatabaseController(anomalyDTBS); //Initialize Database controllers
 
-        /**
-         * Runnable task executed periodically to update all drones:
+        /*
+         * Periodic simulation task executed by the scheduler.
+         * <p>
+         * Responsibilities:
+         * </p>
          * <ul>
-         * <li>Processes telemetry changes.</li>
-         * <li>Detects anomalies.</li>
-         * <li>Logs reports and triggers UI updates.</li>
-         * <li>Removes drones in the event of critical anomalies.</li>
+         *   <li>Processes telemetry updates for all active drones.</li>
+         *   <li>Detects anomalies and logs anomaly reports.</li>
+         *   <li>Triggers visual updates on the monitoring dashboard.</li>
+         *   <li>Plays alert sound effects based on anomaly type.</li>
+         *   <li>Removes drones from the simulation when they suffer critical failures.</li>
          * </ul>
          */
         Runnable simulateNextStep = () -> {
@@ -195,7 +197,14 @@ public class DroneMonitorApp {
 
         scheduler.scheduleWithFixedDelay(simulateNextStep, 0, MY_UPDATE_TIME, TimeUnit.MILLISECONDS);
 
-        //Create a runnable task that will shut down the scheduler on program exit
+        /*
+         * Shuts down the scheduled executor service when the program terminates.
+         * <p>
+         * This method attempts a graceful shutdown and falls back to forcibly
+         * terminating the scheduler if the timeout elapses. It is attached to
+         * the JVM shutdown hook so cleanup occurs even during unexpected exits.
+         * </p>
+         */
         Runnable shutdownScheduler = () -> {
             scheduler.shutdown();
             try {
@@ -216,6 +225,22 @@ public class DroneMonitorApp {
         }
     }
 
+    /**
+     * Validates user input for the drone count.
+     * <p>
+     * This method ensures:
+     * </p>
+     * <ul>
+     *   <li>The input string is not {@code null}.</li>
+     *   <li>The string can be parsed as an integer.</li>
+     *   <li>The value is at least 1.</li>
+     *   <li>The value does not exceed {@link #MAX_DRONE_COUNT}.</li>
+     * </ul>
+     *
+     * @param theInput the raw input string entered by the user.
+     * @return a valid drone count clamped to the allowed range.
+     * @throws IllegalArgumentException if the input is null or less than 1.
+     */
     private static int validateInput(final String theInput) {
         if (theInput == null) {
             throw new IllegalArgumentException("Input cannot be null.");
