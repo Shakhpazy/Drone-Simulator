@@ -1,0 +1,56 @@
+package view;
+
+import javax.swing.*;
+import java.awt.*;
+
+/**
+ * This class creates a simple window with text to display the instructions
+ * for how to use each aspect of the app.
+ *
+ * @author Evin Roen
+ * @version 11/30/25
+ */
+class InstructionWindow extends JFrame {
+
+    /**
+     * Constructor to initialize window.
+     *
+     * @param theTitle the title of the window.
+     * @param theLines the text of the window where each index is a new line.
+     * @param theSize the size of the window.
+     */
+    InstructionWindow(final String theTitle, final String[] theLines, final Dimension theSize) {
+        super();
+        setLayout(new GridLayout(1, 1));
+        setPreferredSize(theSize);
+        getContentPane().setBackground(ColorScheme.BACKGROUND_MAIN);
+        setVisible(true);
+        setDefaultCloseOperation(HIDE_ON_CLOSE);
+        setTitle(theTitle);
+        initText(theLines);
+        setLocationRelativeTo(null);
+    }
+
+    /**
+     * Initializes the text area inside the window.
+     *
+     * @param theLines a String array where each index is a new line.
+     */
+    private void initText(final String[] theLines) {
+        JTextArea txt = new JTextArea();
+        txt.setEditable(false);
+        txt.setBackground(ColorScheme.BACKGROUND_PANEL);
+        txt.setForeground(ColorScheme.TEXT_PRIMARY);
+        txt.setCaretColor(ColorScheme.CARET_INVISIBLE);
+        txt.setLineWrap(true);
+        txt.setWrapStyleWord(true);
+        txt.setOpaque(true);
+
+        for (String line : theLines) {
+            txt.append(line + "\n");
+        }
+        add(txt);
+        pack();
+    }
+
+}

@@ -11,7 +11,6 @@
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear
@@ -25,3 +24,10 @@ replay_pid*
 
 .DS_Store
 out
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+Drone-Simulator.iml
+misc.xml
