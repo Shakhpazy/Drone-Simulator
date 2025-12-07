@@ -146,6 +146,8 @@ public class DroneMonitorApp {
                         String anomalyString = anomaly.anomalyType();
                         if (anomalyString.contains("Failure") || anomalyString.contains("Ground")) { //BATTERY_FAIL OR HIT_GROUND (2/9)
                             AlertPlayer.INSTANCE.addSoundToQueue("crash");
+                            float[] loc = {myCurrentTelemetryRecord.longitude(), myCurrentTelemetryRecord.latitude()};
+                            view. drawDrone(drone.getId(), loc, telemetryToString(myCurrentTelemetryRecord));
                             view.markDroneDead(drone.getId());
                             gen.removeDrone(drone);
                             removeDrone = true;
