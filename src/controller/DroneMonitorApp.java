@@ -220,6 +220,8 @@ public class DroneMonitorApp {
 
             System.out.println("Closing database connection...");
             anomalyDTBS.close();
+
+            AlertPlayer.INSTANCE.closeAllAlerts();
         };
         Runtime.getRuntime().addShutdownHook(new Thread(shutdownScheduler));
 

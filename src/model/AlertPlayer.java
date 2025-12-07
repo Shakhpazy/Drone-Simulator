@@ -191,7 +191,8 @@ public enum AlertPlayer {
      *
      * @param theSoundName the name of the sound to queue
      */
-    public void addSoundToQueue(String theSoundName) {
+    public boolean addSoundToQueue(String theSoundName) {
+        boolean result = false;
         if(myAlerts.containsKey(theSoundName)) {
             long now = System.currentTimeMillis();
             Long cooldown =  myCooldowns.getOrDefault(theSoundName, 2000L);
@@ -201,19 +202,21 @@ public enum AlertPlayer {
                 try {
                     myPlaybackQueue.put(theSoundName);
                     myLastQueued.put(theSoundName, now);
+                    result = true;
                 }
                 catch(InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
             }
         }
+        return result;
     }
 
     /**
      * Stops the playback thread and releases all audio resources.
      * Ensures all {@link Clip} instances are closed.
      */
-    public void closeAllAlerts() {
+    public String closeAllAlerts() {
         isRunning = false; //Stop Running queue
         myPlaybackThread.interrupt(); //Interrupt thread if it gets stuck waiting for queue (even though we're done).
 
@@ -225,7 +228,7 @@ public enum AlertPlayer {
             }
         }
         myAlerts.clear();
-        System.out.println("All alerts closed");
+        return "All alerts closed";
     }
 
     /**
